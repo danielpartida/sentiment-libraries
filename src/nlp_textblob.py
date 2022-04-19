@@ -2,28 +2,22 @@ import pandas as pd
 
 from textblob import TextBlob
 
-text = '''
-The titular threat of The Blob has always struck me as the ultimate movie
-monster: an insatiably hungry, amoeba-like mass able to penetrate
-virtually any safeguard, capable of--as a doomed doctor chillingly
-describes it--"assimilating flesh on contact.
-Snide comparisons to gelatin be damned, it's a concept with the most
-devastating of potential consequences, not unlike the grey goo scenario
-proposed by technological theorists fearful of
-artificial intelligence run rampant.
-'''
-
-blob = TextBlob(text)
-tags = blob.tags          
-noun_phrases = blob.noun_phrases  
-sentences = blob.sentences
-
-for sentence in sentences:
-    print("objectivity:", sentence.sentiment.polarity)
-    print("subjectivity:", sentence.sentiment.subjectivity)
+PATH = '../data/crypto.csv'
 
 
-df = pd.read_csv("../data/crypto.csv")
+def pre_process_tweets_df(path: str) -> pd.DataFrame:
+    df = pd.read_csv(path)
+    # Filter columns that are relevant
+    df = df[['id', 'date', 'time', 'username', 'language', 'tweet']]
+    # Filter only english content
+    df = df[df['language'] == 'en']
+
+    return df
+
+
+
+
+
 
 
 def run() -> None:
@@ -31,5 +25,6 @@ def run() -> None:
 
 
 if __name__ == "__main__":
+    df = pre_process_tweets_df(path=PATH)
 
     run()
