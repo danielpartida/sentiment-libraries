@@ -1,5 +1,7 @@
 import pandas as pd
 
+from flair.models import TextClassifier
+from flair.data import Sentence
 from textblob import TextBlob
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
@@ -62,7 +64,11 @@ def save_pie_chart(df: pd.DataFrame, type_of_plot: str) -> None:
 
 
 if __name__ == "__main__":
+    # vader analyzer
     analyzer = SentimentIntensityAnalyzer()
+    # flair classifier
+    classifier = TextClassifier.load('en-sentiment')
+
     df = pre_process_tweets_df(path=PATH)
 
     run(df)
