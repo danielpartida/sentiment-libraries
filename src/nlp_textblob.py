@@ -1,6 +1,7 @@
 import pandas as pd
 
 from textblob import TextBlob
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 PATH = '../data/crypto.csv'
 
@@ -26,6 +27,8 @@ def get_polarity(text: str) -> float:
 def set_sentiment(df: pd.DataFrame) -> None:
     df['subjectivity'] = df['tweet'].apply(get_subjectivity)
     df['polarity'] = df['tweet'].apply(get_polarity)
+    # TODO: Get maximum value of dictionary for every element in the series
+    df['vs_dict'] = df['tweet'].apply(analyzer.polarity_scores)
 
 
 def get_analysis(score, neutral_interval=0.15) -> str:
@@ -59,6 +62,7 @@ def save_pie_chart(df: pd.DataFrame, type_of_plot: str) -> None:
 
 
 if __name__ == "__main__":
+    analyzer = SentimentIntensityAnalyzer()
     df = pre_process_tweets_df(path=PATH)
 
     run(df)
