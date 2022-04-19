@@ -7,15 +7,15 @@ def get_bert_sentiment(input_text: str):
     return SentimentClassifier(input_text)[0]['label']
 
 
-def set_bert_sentiment(df) -> None:
-    df['Sentiment'] = df['Tweets'].apply(get_bert_sentiment)
+def set_bert_sentiment(df_arg) -> None:
+    df_tweets['sentiment'] = df_arg['tweet'].apply(get_bert_sentiment)
 
 
 if __name__ == "__main__":
     # Reading the indigo tweets data
-    df_tweets = pd.read_csv('../data/indigo_tweets.csv', encoding='latin')
+    df_tweets = pd.read_csv('../data/crypto.csv', encoding='latin')
 
     SentimentClassifier = pipeline("sentiment-analysis")
 
-    set_bert_sentiment(df_tweets)
-    df_tweets.head(10)
+    set_bert_sentiment(df_tweets[:100])
+    print(df_tweets[["tweet", "sentiment"]][:25])
