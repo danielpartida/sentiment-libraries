@@ -28,13 +28,14 @@ def set_sentiment(df: pd.DataFrame) -> None:
     df['polarity'] = df['tweet'].apply(get_polarity)
 
 
-def get_analysis(score) -> str:
-    if score < -0.25:
+def get_analysis(score, neutral_interval=0.15) -> str:
+    if score < -neutral_interval:
         return "negative"
-    elif score > 0.25:
+    elif score > neutral_interval:
         return "positive"
     else:
         return "neutral"
+
 
 def set_analysis(df: pd.DataFrame) -> None:
     df['analysis'] = df['polarity'].apply(get_analysis)
@@ -43,10 +44,19 @@ def set_analysis(df: pd.DataFrame) -> None:
 def run(df: pd.DataFrame) -> None:
     set_sentiment(df)
     set_analysis(df)
+    save_pie_chart(df, "pie")
 
-# TODO: Implement method
-def visualize_pie_chart(df: pd.DataFrame) -> None:
-    pass
+
+def save_pie_chart(df: pd.DataFrame, type_of_plot: str) -> None:
+
+    series_count_occurrences = df['analysis'].value_counts()
+
+    if type_of_plot == 'pie':
+        plot = series_count_occurrences.plot.pie(figsize=(10, 5))
+        plot.figure.savefig("../img/pie_chart.png")
+    else:
+        raise "Please specify a type of plot"
+
 
 if __name__ == "__main__":
     df = pre_process_tweets_df(path=PATH)
