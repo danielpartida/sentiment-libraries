@@ -1,3 +1,5 @@
+import pandas as pd
+
 from textblob import TextBlob
 
 text = '''
@@ -19,3 +21,15 @@ sentences = blob.sentences
 for sentence in sentences:
     print("objectivity:", sentence.sentiment.polarity)
     print("subjectivity:", sentence.sentiment.subjectivity)
+
+
+df = pd.read_csv("../data/crypto.csv")
+
+
+def run() -> None:
+    pass
+
+
+if __name__ == "__main__":
+
+    run()
