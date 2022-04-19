@@ -44,10 +44,13 @@ def run(df: pd.DataFrame) -> None:
     set_sentiment(df)
     set_analysis(df)
 
+# TODO: Implement method
+def visualize_pie_chart(df: pd.DataFrame) -> None:
+    pass
 
 if __name__ == "__main__":
     df = pre_process_tweets_df(path=PATH)
 
     run(df)
-    df.to_csv("../data/processed_tweets.csv")
+    df.to_csv("../data/processed_tweets.csv", sep=";", decimal=",")
 
