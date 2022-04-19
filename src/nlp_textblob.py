@@ -15,16 +15,39 @@ def pre_process_tweets_df(path: str) -> pd.DataFrame:
     return df
 
 
+def get_subjectivity(text: str) -> float:
+    return TextBlob(text).sentiment.subjectivity
 
 
+def get_polarity(text: str) -> float:
+    return TextBlob(text).sentiment.polarity
 
 
+def set_sentiment(df: pd.DataFrame) -> None:
+    df['subjectivity'] = df['tweet'].apply(get_subjectivity)
+    df['polarity'] = df['tweet'].apply(get_polarity)
 
-def run() -> None:
-    pass
+
+def get_analysis(score) -> str:
+    if score < -0.25:
+        return "negative"
+    elif score > 0.25:
+        return "positive"
+    else:
+        return "neutral"
+
+def set_analysis(df: pd.DataFrame) -> None:
+    df['analysis'] = df['polarity'].apply(get_analysis)
+
+
+def run(df: pd.DataFrame) -> None:
+    set_sentiment(df)
+    set_analysis(df)
 
 
 if __name__ == "__main__":
     df = pre_process_tweets_df(path=PATH)
 
-    run()
+    run(df)
+    df.to_csv("../data/processed_tweets.csv")
+
