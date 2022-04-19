@@ -62,8 +62,6 @@ def save_pie_chart(df: pd.DataFrame, type_of_plot: str) -> None:
 
 if __name__ == "__main__":
     analyzer = SentimentIntensityAnalyzer()
-    # FIXME: Delete this commented code
-    # vs = analyzer.polarity_scores(sentence)
     df = pre_process_tweets_df(path=PATH)
 
     run(df)
