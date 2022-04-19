@@ -1,7 +1,6 @@
 import pandas as pd
 
-from flair.models import TextClassifier
-from flair.data import Sentence
+from transformers import pipeline
 from textblob import TextBlob
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
@@ -26,11 +25,16 @@ def get_polarity(text: str) -> float:
     return TextBlob(text).sentiment.polarity
 
 
+def get_bert_sentiment(input_text: str):
+    return SentimentClassifier(input_text)[0]['label']
+
+
 def set_sentiment(df: pd.DataFrame) -> None:
     df['subjectivity'] = df['tweet'].apply(get_subjectivity)
     df['polarity'] = df['tweet'].apply(get_polarity)
     # TODO: Get maximum value of dictionary for every element in the series
     df['vs_dict'] = df['tweet'].apply(analyzer.polarity_scores)
+    df['bert'] = df['tweet'].apply(get_bert_sentiment)
 
 
 def get_analysis(score, neutral_interval=0.15) -> str:
@@ -66,9 +70,10 @@ def save_pie_chart(df: pd.DataFrame, type_of_plot: str) -> None:
 if __name__ == "__main__":
     # vader analyzer
     analyzer = SentimentIntensityAnalyzer()
-    # flair classifier
-    classifier = TextClassifier.load('en-sentiment')
+    # DistilBERT
+    SentimentClassifier = pipeline("sentiment-analysis")
 
+    # FIXME: Change dataframe argument for all methods to df_arg
     df = pre_process_tweets_df(path=PATH)
 
     run(df)
