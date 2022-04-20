@@ -86,6 +86,7 @@ if __name__ == "__main__":
 
     df_reduced_tweets["result"] = df_reduced_tweets["tweet"].apply(lambda x: sentiment_score(x))
 
+    # TODO: Specify model to save (either bert or roberta)
     df_reduced_tweets.to_csv("../data/roberta_results.csv", sep=";", decimal=",")
 
     visualize_pie_chart(df_reduced_tweets)
