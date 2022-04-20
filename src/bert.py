@@ -11,6 +11,15 @@ def sentiment_score(review):
     result = model(tokens)
     return int(torch.argmax(result.logits))+1
 
+def visualize_pie_chart(df: pd.DataFrame):
+    # Let's count the number of tweets by sentiments
+    sentiment_counts = df.groupby(['result']).size()
+    print(sentiment_counts)
+
+    # Let's visualize the sentiments
+    fig = plt.figure(figsize=(6, 6), dpi=100)
+    ax = plt.subplot(111)
+    sentiment_counts.plot.pie(ax=ax, autopct='%1.1f%%', startangle=270, fontsize=12, label="")
 if __name__ == "__main__":
     tokenizer = AutoTokenizer.from_pretrained('finiteautomata/bertweet-base-sentiment-analysis')
     model = AutoModelForSequenceClassification.from_pretrained('finiteautomata/bertweet-base-sentiment-analysis')
