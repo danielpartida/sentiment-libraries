@@ -1,5 +1,6 @@
 # Motivation from https://github.com/nicknochnack/BERTSentiment/blob/main/Sentiment.ipynb and
-# https://huggingface.co/finiteautomata/bertweet-base-sentiment-analysis?text=I+like+you.+I+love+you
+# Bert: https://huggingface.co/finiteautomata/bertweet-base-sentiment-analysis
+# Roberta: https://huggingface.co/cardiffnlp/twitter-roberta-base
 from transformers import pipeline
 import pandas as pd
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, RobertaForSequenceClassification
