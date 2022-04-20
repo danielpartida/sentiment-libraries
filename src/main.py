@@ -32,9 +32,8 @@ def get_bert_sentiment(input_text: str):
 def set_sentiment(df: pd.DataFrame) -> None:
     df['subjectivity'] = df['tweet'].apply(get_subjectivity)
     df['polarity'] = df['tweet'].apply(get_polarity)
-    # TODO: Get maximum value of dictionary for every element in the series
     df['vs_dict'] = df['tweet'].apply(analyzer.polarity_scores)
-    df['bert'] = df['tweet'].apply(get_bert_sentiment)
+    # df['bert'] = df['tweet'].apply(get_bert_sentiment)
 
 
 def get_analysis(score, neutral_interval=0.15) -> str:
