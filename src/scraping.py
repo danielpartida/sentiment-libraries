@@ -3,6 +3,8 @@ import os
 import time
 from dotenv import load_dotenv
 
+from transformers import pipeline
+import pandas as pd
 import twint
 import tweepy
 from deprecation import deprecated
@@ -30,11 +32,11 @@ def limit_handled(cursor):
     while True:
         try:
             yield cursor.next()
-        except tweepy.RateLimitError:
+        except tweepy.TweepyException:
             time.sleep(15 * 60)
 
 
-def scrap_twitter_data_with_tweepy(term: str):
+def scrap_twitter_data_with_tweepy(term: str, limit: int=1000):
 
     consumer_key = os.getenv('key')
     consumer_secret = os.getenv('secret')
@@ -44,15 +46,32 @@ def scrap_twitter_data_with_tweepy(term: str):
     query = '#{0}'.format(term)
     query = query + ' -filter:retweets'
 
-    count = 1000
+    cursor = tweepy.Cursor(api.search_tweets, q=query,
+                  tweet_mode='extended', lang='en', result_type="recent").items(limit)
 
-    search = limit_handled(tweepy.Cursor(api.search_tweets, q=query,
-                             tweet_mode='extended', lang='en', result_type="recent").items(count))
+    search = limit_handled(cursor)
+
+    return search
 
 
 if __name__ == "__main__":
 
     load_dotenv()
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
 
     search_term = "staratlas"
+    search_results = scrap_twitter_data_with_tweepy(term=search_term, limit=10)
+
+    sentiment_analysis = pipeline(model="finiteautomata/bertweet-base-sentiment-analysis")
+
+    tweets = []
+    for tweet in search_results:
+        try:
+            content = tweet.full_text
+            sentiment = sentiment_analysis(content)
+            tweets.append({'tweet': content, 'sentiment': sentiment[0]['label']})
+
+        except:
+            pass
+
+    df = pd.DataFrame(tweets)
