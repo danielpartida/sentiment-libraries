@@ -1,8 +1,9 @@
 # Motivation from https://github.com/nicknochnack/BERTSentiment/blob/main/Sentiment.ipynb and
-# https://huggingface.co/finiteautomata/bertweet-base-sentiment-analysis?text=I+like+you.+I+love+you
+# Bert: https://huggingface.co/finiteautomata/bertweet-base-sentiment-analysis
+# Roberta: https://huggingface.co/cardiffnlp/twitter-roberta-base
 from transformers import pipeline
 import pandas as pd
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, RobertaForSequenceClassification
 import torch
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
@@ -11,7 +12,7 @@ from wordcloud import WordCloud, STOPWORDS
 def sentiment_score(review):
     tokens = tokenizer.encode(review, return_tensors='pt')
     result = model(tokens)
-    return int(torch.argmax(result.logits))+1
+    return int(torch.argmax(result.logits)) + 1
 
 
 def visualize_pie_chart(df: pd.DataFrame):
@@ -58,9 +59,24 @@ def visualize_word_cloud(df: pd.DataFrame):
     plt.show()
 
 
+def load_model(model_to_load):
+    tokenizer_hugging = AutoTokenizer.from_pretrained(model_to_load)
+
+    if model_to_load == "finiteautomata/bertweet-base-sentiment-analysis":
+        model_hugging = AutoModelForSequenceClassification(model_to_load)
+
+    elif model_to_load == "cardiffnlp/twitter-roberta-base-sentiment":
+        model_hugging = RobertaForSequenceClassification.from_pretrained(model_to_load)
+
+    else:
+        raise ValueError("No architecture is provided")
+
+    return tokenizer_hugging, model_hugging
+
+
 if __name__ == "__main__":
-    tokenizer = AutoTokenizer.from_pretrained('finiteautomata/bertweet-base-sentiment-analysis')
-    model = AutoModelForSequenceClassification.from_pretrained('finiteautomata/bertweet-base-sentiment-analysis')
+    hugging_model = "cardiffnlp/twitter-roberta-base-sentiment"
+    tokenizer, model = load_model(hugging_model)
 
     # TODO: Check other variant to load model
     # sentiment_analysis = pipeline(model="finiteautomata/bertweet-base-sentiment-analysis")
@@ -71,9 +87,8 @@ if __name__ == "__main__":
 
     df_reduced_tweets["result"] = df_reduced_tweets["tweet"].apply(lambda x: sentiment_score(x))
 
-    df_reduced_tweets.to_csv("../data/bert_results.csv", sep=";", decimal=",")
+    # TODO: Specify model to save (either bert or roberta)
+    df_reduced_tweets.to_csv("../data/roberta_results.csv", sep=";", decimal=",")
 
     visualize_pie_chart(df_reduced_tweets)
     visualize_word_cloud(df_reduced_tweets)
-
-    i = 0
