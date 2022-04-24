@@ -1,9 +1,9 @@
 # Motivation from https://github.com/nicknochnack/BERTSentiment/blob/main/Sentiment.ipynb and
 # Bert: https://huggingface.co/finiteautomata/bertweet-base-sentiment-analysis
 # Roberta: https://huggingface.co/cardiffnlp/twitter-roberta-base
-from transformers import pipeline
+from transformers_runs import pipeline
 import pandas as pd
-from transformers import AutoTokenizer, AutoModelForSequenceClassification, RobertaForSequenceClassification
+from transformers_runs import AutoTokenizer, AutoModelForSequenceClassification, RobertaForSequenceClassification
 import torch
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
