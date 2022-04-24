@@ -5,24 +5,28 @@ from dotenv import load_dotenv
 
 import twint
 import tweepy
+from deprecation import deprecated
+import logging
 
-
-def scrap_twitter_data_with_twint(term: str, since: datetime, until: datetime):
+@deprecated("Avoid using twint")
+def scrap_twitter_data_with_twint(term: str='NFTs', since: datetime=datetime.datetime(2022, 4, 23),
+                                  until: datetime=datetime.datetime(2022, 4, 24)):
 
     config = twint.Config()
     config.Search = term
-    config.Lang = "en"
+    # config.Lang = "en"
 
     config.Since = str(since)
-    config.Until = str(until)
+    # FIXME: config.Until does not work
+    # config.Until = str(until)
+    # FIXME: Add header to csv export
     config.Output = "../data/{0}.csv".format(term)
-    config.Limit = 100
 
     twint.run.Search(config)
 
 
-# Prevents sending too many requests to Twitter's servers
 def limit_handled(cursor):
+    # Prevents sending too many requests to Twitter's servers
     while True:
         try:
             yield cursor.next()
@@ -49,10 +53,6 @@ def scrap_twitter_data_with_tweepy(term: str):
 if __name__ == "__main__":
 
     load_dotenv()
+    logging.basicConfig(level=logging.DEBUG)
 
     search_term = "staratlas"
-
-    # Section with twint
-    since_date = datetime.datetime(2022, 1, 1)
-    until_date = datetime.datetime(2022, 4, 1)
-    scrap_twitter_data_with_twint(search_term, since_date, until_date)
