@@ -91,6 +91,13 @@ def run_sentiment(df_tweets: pd.DataFrame, sentiment_model: str) -> pd.DataFrame
 
     df_tweets['sentiment_dict'] = df_tweets["text"].apply(lambda x: sentiment_analysis(x))
     df_tweets['sentiment_{0}'.format(type_model)] = df_tweets["sentiment_dict"].apply(lambda x: x[0]['label'])
+    if type_model == "bert":
+        df_tweets['sentiment_{0}'.format(type_model)] = df_tweets['sentiment_{0}'.format(type_model)].apply(
+            lambda x: x.replace("POS", "Positive"))
+        df_tweets['sentiment_{0}'.format(type_model)] = df_tweets['sentiment_{0}'.format(type_model)].apply(
+            lambda x: x.replace("NEG", "Negative"))
+        df_tweets['sentiment_{0}'.format(type_model)] = df_tweets['sentiment_{0}'.format(type_model)].apply(
+            lambda x: x.replace("NEU", "Neutral"))
     df_tweets['score_{0}'.format(type_model)] = df_tweets["sentiment_dict"].apply(lambda x: x[0]['score'])
 
     df_tweets.drop(['sentiment_dict'], axis=1, inplace=True)
@@ -140,7 +147,8 @@ if __name__ == "__main__":
 
     # perform sentiment analysis
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
-    for model in models:
+
+    for model in tqdm(models):
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
 
     del df
