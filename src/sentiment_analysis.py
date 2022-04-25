@@ -149,15 +149,14 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str) -> None:
 
     sentiment_types = ["Positive", "Negative", "Neutral"]
     for sentiment in sentiment_types:
-
         sentiment_tweets = df_tweet['text'][df_tweet['sentiment_{0}'.format(type_model)] == sentiment]
         sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
-                                       background_color="white").generate(str(sentiment_tweets))
+                                        background_color="white").generate(str(sentiment_tweets))
         plt.figure()
         plt.title("{0} Tweets {1} - Wordcloud".format(sentiment, type_model))
         plt.imshow(sentiment_wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.savefig('../img/wordcloud_sentiment_{0}_{1}.png'.format(sentiment, type_model))
+        plt.savefig('../img/wordcloud_{0}_sentiment_{1}.png'.format(sentiment, type_model))
 
 
 if __name__ == "__main__":
@@ -196,6 +195,7 @@ if __name__ == "__main__":
     for model in tqdm(models):
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
         save_pie_chart(df_tweets=df_results, sentiment_model=model)
+        save_word_cloud(df_tweet=df_results, sentiment_model=model)
 
     del df
 
