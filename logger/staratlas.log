@@ -1,13 +1,3 @@
-
 PARAMS: {'q': 'staratlas', 'lang': 'en', 'result_type': 'recent', 'count': '100', 'until': '2022-04-24'}
 PARAMS: {'q': 'staratlas', 'max_id': '1517941904494809087', 'lang': 'en', 'result_type': 'recent', 'count': '100', 'until': '2022-04-24'}
-Tweets retrieved at day 25/04/2022, 14:28:57 until day 2022-04-24
-PARAMS: {'q': 'staratlas', 'lang': 'en', 'result_type': 'recent', 'count': '100', 'until': '2022-04-24'}
-PARAMS: {'q': 'staratlas', 'max_id': '1517941904494809087', 'lang': 'en', 'result_type': 'recent', 'count': '100', 'until': '2022-04-24'}
-Tweets retrieved at day 25/04/2022, 16:05:00 until day 2022-04-24
-PARAMS: {'q': 'staratlas', 'lang': 'en', 'result_type': 'recent', 'count': '100', 'until': '2022-04-24'}
-PARAMS: {'q': 'staratlas', 'max_id': '1517941904494809087', 'lang': 'en', 'result_type': 'recent', 'count': '100', 'until': '2022-04-24'}
-Tweets retrieved at day 25/04/2022, 16:12:11 until day 2022-04-24
-PARAMS: {'q': 'staratlas', 'lang': 'en', 'result_type': 'recent', 'count': '100', 'until': '2022-04-24'}
-PARAMS: {'q': 'staratlas', 'max_id': '1517941904494809087', 'lang': 'en', 'result_type': 'recent', 'count': '100', 'until': '2022-04-24'}
-Tweets retrieved at day 25/04/2022, 16:14:19 until day 2022-04-24
+Tweets retrieved at day 25/04/2022, 16:44:36 until day 2022-04-24

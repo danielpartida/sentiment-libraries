@@ -30,12 +30,12 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
     """
     until_date = until_date.strftime('%Y-%m-%d')
     today = datetime.today().strftime("%d/%m/%Y, %H:%M:%S")
+    list_dict_tweets = []
     try:
         list_twitter_items = [tweet for tweet in tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="en",
                                                                result_type="recent", count=limit,
                                                                until=until_date).items(limit)]
 
-        list_dict_tweets = []
         for tweet in tqdm(list_twitter_items):
             # fetch metadata of tweet
             dict_tweet = {'id': tweet.id, 'created_at': tweet.created_at, 'username': tweet.user.screen_name,
@@ -68,6 +68,27 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
     return df_tweets
 
 
+def run_sentiment(df_tweets: pd.DataFrame, model: str) -> pd.DataFrame:
+    sentiment_analysis = pipeline(model=model)
+
+    if "roberta" in model.lower():
+        type_model = "roberta"
+
+    elif "bert" in model.lower():
+        type_model = "bert"
+
+    else:
+        type_model = ""
+
+    df_tweets['sentiment_dict'] = df_tweets["text"].apply(lambda x: sentiment_analysis(x))
+    df_tweets['sentiment_{0}'.format(type_model)] = df_tweets["sentiment_dict"].apply(lambda x: x[0]['label'])
+    df_tweets['score_{0}'.format(type_model)] = df_tweets["sentiment_dict"].apply(lambda x: x[0]['score'])
+
+    df_tweets.drop(['sentiment_dict'], axis=1, inplace=True)
+
+    return df_tweets
+
+
 if __name__ == "__main__":
 
     if len(sys.argv) > 1:
@@ -96,17 +117,12 @@ if __name__ == "__main__":
 
     # scraping
     yesterday = date.today() - timedelta(days=1)
-    df_results = run_scraping(twitter_api=api, search_term=text_query, limit=100, until_date=yesterday)
+    df = run_scraping(twitter_api=api, search_term=text_query, limit=100, until_date=yesterday)
 
     # perform sentiment analysis
     # TODO: Add finiteautomata/bertweet-base-sentiment-analysis
     model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
-    sentiment_analysis = pipeline(model=model_name)
+    df_results = run_sentiment(df_tweets=df, model=model_name)
+    del df
 
-    # TODO: Apply pipeline to dataframe (write as method)
-    df_results['sentiment_dict'] = df_results["text"].apply(lambda x: sentiment_analysis(x))
-    df_results['sentiment'] = df_results["sentiment_dict"].apply(lambda x: x[0]['label'])
-    df_results['score'] = df_results["sentiment_dict"].apply(lambda x: x[0]['score'])
-
-    # export results
     df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
