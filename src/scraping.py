@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta
 import pandas as pd
 import tweepy
 from dotenv import load_dotenv
-from transformers import AutoTokenizer, AutoConfig, AutoModelForSequenceClassification
+from transformers import pipeline, AutoTokenizer, AutoConfig, AutoModelForSequenceClassification
 from tqdm import tqdm
 
 
@@ -101,13 +101,17 @@ if __name__ == "__main__":
     # perform sentiment analysis
     # TODO: Add finiteautomata/bertweet-base-sentiment-analysis
     model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
-    # sentiment_analysis = pipeline(model=model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    config = AutoConfig.from_pretrained(model_name)
-    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+    sentiment_analysis = pipeline(model=model_name)
+
+    # TODO: Try using tokenizer and conf
+    # tokenizer = AutoTokenizer.from_pretrained(model_name)
+    # config = AutoConfig.from_pretrained(model_name)
+    # model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
     # TODO: Apply pipeline to dataframe
-    df_results['sentiment'] = df_results["text"].apply(lambda x: sentiment_score(x))
+    df_results['sentiment_dict'] = df_results["text"].apply(lambda x: sentiment_analysis(x))
+    df_results['sentiment'] = df_results["sentiment_dict"].apply(lambda x: x[0]['label'])
+    df_results['score'] = df_results["sentiment_dict"].apply(lambda x: x[0]['score'])
 
     # export results
     df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
