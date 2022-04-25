@@ -13,7 +13,7 @@ def set_bert_sentiment(df_arg) -> None:
 
 if __name__ == "__main__":
     # Reading the indigo tweets data
-    df_tweets = pd.read_csv('../../data/crypto.csv', encoding='latin')
+    df_tweets = pd.read_csv('../archive_data/crypto.csv', encoding='latin')
 
     SentimentClassifier = pipeline("sentiment-analysis")
 
