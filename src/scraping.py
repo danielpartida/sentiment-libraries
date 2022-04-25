@@ -68,6 +68,19 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
     return df_tweets
 
 
+def get_type_of_model(sentiment_model: str) -> str:
+    if "roberta" in sentiment_model.lower():
+        type_model = "roberta"
+
+    elif "bert" in sentiment_model.lower():
+        type_model = "bert"
+
+    else:
+        type_model = ""
+
+    return type_model
+
+
 def run_sentiment(df_tweets: pd.DataFrame, sentiment_model: str) -> pd.DataFrame:
     """
     Performs sentiment analysis depending on the model
