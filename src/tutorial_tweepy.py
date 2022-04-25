@@ -26,47 +26,60 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
     :return: dataframe of tweets
     :rtype: pd.DataFrame
     """
-    df_tweets = pd.DataFrame()
     until_date = until_date.strftime('%Y-%m-%d')
     try:
-        list_tweets = [tweet for tweet in tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="en",
-                                                        result_type="recent", count=limit).items(limit)]
+        list_twitter_items = [tweet for tweet in tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="en",
+                                                               result_type="recent", count=limit,
+                                                               until=until_date).items(limit)]
         logger.info("Tweets retrieved")
-        for tweet in tqdm(list_tweets):
-            id = tweet.id
-            created_at = tweet.created_at
-            username = tweet.user.screen_name
-            location = tweet.user.location
-            following = tweet.user.friends_count
-            followers = tweet.user.followers_count
-            totaltweets = tweet.user.statuses_count
-            retweetcount = tweet.retweet_count
+
+        list_dict_tweets = []
+        for tweet in tqdm(list_twitter_items):
+            # fetch metadata of tweet
+            dict_tweet = {'id': tweet.id, 'created_at': tweet.created_at, 'username': tweet.user.screen_name,
+                          'verified': tweet.user.verified, 'location': tweet.user.location,
+                          'following': tweet.user.friends_count, 'followers': tweet.user.followers_count,
+                          'total_tweets': tweet.user.statuses_count, 'favorite_count': tweet.favorited,
+                          'retweet_count': tweet.retweet_count}
+            # fetch content of tweet
+            try:
+                dict_tweet['text'] = tweet.retweeted_status.text
+            except AttributeError:
+                dict_tweet['text'] = tweet.text
+
+            list_dict_tweets.append(dict_tweet)
 
     except BaseException as e:
         print('failed on_status,', str(e))
         time.sleep(3)
 
+    df_tweets = pd.DataFrame(list_dict_tweets)
+
     return df_tweets
 
 
 if __name__ == "__main__":
+    # logger
     logger = logging.getLogger("tweepy")
-    logging.basicConfig(level=logging.DEBUG)
-    handler = logging.FileHandler(filename="tweepy.log")
+    logging.basicConfig(level=logging.INFO)
+    handler = logging.FileHandler(filename="../logger/tweepy.log")
     logger.addHandler(handler)
 
+    # env variables
     load_dotenv()
     consumer_key = os.getenv('consumer_key')
     consumer_secret = os.getenv('consumer_secret')
     access_token = os.getenv('access_token')
     access_token_secret = os.getenv('access_token_secret')
 
+    # Twitter API
     auth = tweepy.OAuth1UserHandler(consumer_key=consumer_key, consumer_secret=consumer_secret,
                                     access_token=access_token, access_token_secret=access_token_secret)
     api = tweepy.API(auth, wait_on_rate_limit=True)
 
+    # scraping
     text_query = 'staratlas'
     yesterday = date.today() - timedelta(days=1)
-    df_results = run_scraping(twitter_api=api, search_term=text_query, limit=25, until_date=yesterday)
+    df_results = run_scraping(twitter_api=api, search_term=text_query, limit=100, until_date=yesterday)
 
-    # df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
+    df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
