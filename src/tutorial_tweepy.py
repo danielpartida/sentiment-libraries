@@ -6,6 +6,8 @@ import tweepy
 import pandas as pd
 import time
 
+from tqdm import tqdm
+
 
 def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_date: date) -> pd.DataFrame:
     """
@@ -27,24 +29,18 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
     df_tweets = pd.DataFrame()
     until_date = until_date.strftime('%Y-%m-%d')
     try:
-        # FIXME: fetch tweets correctly
-        tweets = tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="eng", result_type="recent",
-                               count=limit, until=until_date).items(limit)
-
-        # Pulling information from tweets iterable object and adding relevant tweet information in our data frame
-        for tweet in tweets:
-            df_tweets = df_tweets.append(
-                {'Created at': tweet._json['created_at'],
-                 'User ID': tweet._json['id'],
-                 'User Name': tweet.user._json['name'],
-                 'Text': tweet._json['text'],
-                 'Description': tweet.user._json['description'],
-                 'Location': tweet.user._json['location'],
-                 'Followers Count': tweet.user._json['followers_count'],
-                 'Friends Count': tweet.user._json['friends_count'],
-                 'Statuses Count': tweet.user._json['statuses_count'],
-                 'Profile Image Url': tweet.user._json['profile_image_url'],
-                 }, ignore_index=True)
+        list_tweets = [tweet for tweet in tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="en",
+                                                        result_type="recent", count=limit).items(limit)]
+        logger.info("Tweets retrieved")
+        for tweet in tqdm(list_tweets):
+            id = tweet.id
+            created_at = tweet.created_at
+            username = tweet.user.screen_name
+            location = tweet.user.location
+            following = tweet.user.friends_count
+            followers = tweet.user.followers_count
+            totaltweets = tweet.user.statuses_count
+            retweetcount = tweet.retweet_count
 
     except BaseException as e:
         print('failed on_status,', str(e))
@@ -54,8 +50,10 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
 
 
 if __name__ == "__main__":
-
+    logger = logging.getLogger("tweepy")
     logging.basicConfig(level=logging.DEBUG)
+    handler = logging.FileHandler(filename="tweepy.log")
+    logger.addHandler(handler)
 
     load_dotenv()
     consumer_key = os.getenv('consumer_key')
@@ -71,4 +69,4 @@ if __name__ == "__main__":
     yesterday = date.today() - timedelta(days=1)
     df_results = run_scraping(twitter_api=api, search_term=text_query, limit=25, until_date=yesterday)
 
-    df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
+    # df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
