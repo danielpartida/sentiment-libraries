@@ -1,11 +1,12 @@
-import os
-from dotenv import load_dotenv
 import logging
-from datetime import date, timedelta, datetime
-import tweepy
-import pandas as pd
+import os
+import sys
 import time
+from datetime import date, datetime, timedelta
 
+import pandas as pd
+import tweepy
+from dotenv import load_dotenv
 from tqdm import tqdm
 
 
@@ -68,8 +69,11 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
 
 if __name__ == "__main__":
 
-    # TODO: Import text_query from argument
-    text_query = 'staratlas'
+    if len(sys.argv) > 1:
+        text_query = sys.argv[1]
+
+    else:
+        text_query = 'staratlas'
 
     # logger
     logger = logging.getLogger("tweepy")
