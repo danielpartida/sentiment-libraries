@@ -81,7 +81,7 @@ if __name__ == "__main__":
     # TODO: Check other variant to load model
     # sentiment_analysis = pipeline(model="finiteautomata/bertweet-base-sentiment-analysis")
 
-    df_tweets = pd.read_csv('../archive/archive_data/crypto.csv', encoding='latin')
+    df_tweets = pd.read_csv('../archive_data/crypto.csv', encoding='latin')
     # FIXME: See what error arises when we run with full dataframe
     df_reduced_tweets = df_tweets[:50]
 
