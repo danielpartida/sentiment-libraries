@@ -1,9 +1,9 @@
 # Motivation from https://github.com/nicknochnack/BERTSentiment/blob/main/Sentiment.ipynb and
 # Bert: https://huggingface.co/finiteautomata/bertweet-base-sentiment-analysis
 # Roberta: https://huggingface.co/cardiffnlp/twitter-roberta-base
-from transformers_runs import pipeline
+from transformers import pipeline
 import pandas as pd
-from transformers_runs import AutoTokenizer, AutoModelForSequenceClassification, RobertaForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, RobertaForSequenceClassification
 import torch
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS
@@ -81,7 +81,7 @@ if __name__ == "__main__":
     # TODO: Check other variant to load model
     # sentiment_analysis = pipeline(model="finiteautomata/bertweet-base-sentiment-analysis")
 
-    df_tweets = pd.read_csv('../data/crypto.csv', encoding='latin')
+    df_tweets = pd.read_csv('../archive/archive_data/crypto.csv', encoding='latin')
     # FIXME: See what error arises when we run with full dataframe
     df_reduced_tweets = df_tweets[:50]
 
