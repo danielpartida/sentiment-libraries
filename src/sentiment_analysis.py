@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from matplotlib import pyplot as plt
 from transformers import pipeline
 from tqdm import tqdm
-from wordcloud import WordCloud
+from wordcloud import WordCloud, STOPWORDS
 
 
 def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_date: date) -> pd.DataFrame:
@@ -113,9 +113,11 @@ def run_sentiment(df_tweets: pd.DataFrame, sentiment_model: str) -> pd.DataFrame
     return df_tweets
 
 
-def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str) -> None:
+def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str, search_term: str) -> None:
     """
 
+    :param search_term:
+    :type search_term:
     :param df_tweets:
     :type df_tweets:
     :param sentiment_model:
@@ -132,12 +134,15 @@ def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str) -> None:
     fig = plt.figure(figsize=(6, 6), dpi=100)
     ax = plt.subplot(111)
     sentiment_counts.plot.pie(ax=ax, autopct='%1.1f%%', startangle=270, fontsize=12, label="")
-    plt.savefig('../img/pie_chart_sentiment_{0}.png'.format(type_model))
+    plt.title("Pie-chart Sentiment Analysis- {0} Model".format(type_model))
+    plt.savefig('../img/{0}_pie_chart_sentiment_{1}.png'.format(search_term, type_model))
 
 
-def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str) -> None:
+def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: str) -> None:
     """
 
+    :param search_term:
+    :type search_term:
     :param df_tweet:
     :type df_tweet:
     :param sentiment_model:
@@ -148,24 +153,27 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str) -> None:
     type_model = get_type_of_model(sentiment_model=sentiment_model)
 
     sentiment_types = ["Positive", "Negative", "Neutral"]
+    stop_words = set(["https", "co", "RT"] + list(STOPWORDS))
     for sentiment in sentiment_types:
         sentiment_tweets = df_tweet['text'][df_tweet['sentiment_{0}'.format(type_model)] == sentiment]
         sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
-                                        background_color="white").generate(str(sentiment_tweets))
+                                        background_color="white", stopwords=stop_words).generate(str(sentiment_tweets))
         plt.figure()
-        plt.title("{0} Tweets {1} - Wordcloud".format(sentiment, type_model))
+        plt.title("Wordcloud {0} Tweets - {1} Model".format(sentiment, type_model))
         plt.imshow(sentiment_wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.savefig('../img/wordcloud_{0}_sentiment_{1}.png'.format(sentiment, type_model))
+        plt.savefig('../img/{0}_wordcloud_{1}_sentiment_{2}.png'.format(search_term, sentiment, type_model))
 
 
 if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         text_query = sys.argv[1]
+        limit = sys.argv[2]
 
     else:
-        text_query = 'staratlas'
+        text_query = 'crypto'
+        limit = 100
 
     # logger
     logger = logging.getLogger("tweepy")
@@ -187,17 +195,17 @@ if __name__ == "__main__":
 
     # scraping
     yesterday = date.today() - timedelta(days=1)
-    df = run_scraping(twitter_api=api, search_term=text_query, limit=100, until_date=yesterday)
+    df = run_scraping(twitter_api=api, search_term=text_query, limit=limit, until_date=yesterday)
 
     # perform sentiment analysis
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
 
     for model in tqdm(models):
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
-        save_pie_chart(df_tweets=df_results, sentiment_model=model)
-        save_word_cloud(df_tweet=df_results, sentiment_model=model)
+        save_pie_chart(search_term=text_query, df_tweets=df_results, sentiment_model=model)
+        save_word_cloud(search_term=text_query, df_tweet=df_results, sentiment_model=model)
 
     del df
 
     # Export
-    df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
+    df_results.to_csv('../data/{0}_sentiment.csv'.format(text_query), sep=';')
