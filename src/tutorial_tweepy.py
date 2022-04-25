@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 import logging
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import tweepy
 import pandas as pd
 import time
@@ -27,11 +27,11 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
     :rtype: pd.DataFrame
     """
     until_date = until_date.strftime('%Y-%m-%d')
+    today = datetime.today().strftime("%d/%m/%Y, %H:%M:%S")
     try:
         list_twitter_items = [tweet for tweet in tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="en",
                                                                result_type="recent", count=limit,
                                                                until=until_date).items(limit)]
-        logger.info("Tweets retrieved")
 
         list_dict_tweets = []
         for tweet in tqdm(list_twitter_items):
@@ -39,8 +39,10 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
             dict_tweet = {'id': tweet.id, 'created_at': tweet.created_at, 'username': tweet.user.screen_name,
                           'verified': tweet.user.verified, 'location': tweet.user.location,
                           'following': tweet.user.friends_count, 'followers': tweet.user.followers_count,
-                          'total_tweets': tweet.user.statuses_count, 'favorite_count': tweet.favorited,
-                          'retweet_count': tweet.retweet_count}
+                          'total_tweets': tweet.user.statuses_count, 'favorite_count': tweet.favorite_count,
+                          'retweet_count': tweet.retweet_count, 'hashtags': tweet.entities['hashtags'],
+                          'mentions': tweet.entities['user_mentions']}
+
             # fetch content of tweet
             try:
                 dict_tweet['text'] = tweet.retweeted_status.text
@@ -53,16 +55,26 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
         print('failed on_status,', str(e))
         time.sleep(3)
 
-    df_tweets = pd.DataFrame(list_dict_tweets)
+    if list_dict_tweets:
+        df_tweets = pd.DataFrame(list_dict_tweets)
+
+    else:
+        df_tweets = pd.DataFrame()
+
+    logger.info("Tweets retrieved at day {0} until day {1}".format(today, until_date))
 
     return df_tweets
 
 
 if __name__ == "__main__":
+
+    # TODO: Import text_query from argument
+    text_query = 'staratlas'
+
     # logger
     logger = logging.getLogger("tweepy")
-    logging.basicConfig(level=logging.INFO)
-    handler = logging.FileHandler(filename="../logger/tweepy.log")
+    logging.basicConfig(level=logging.DEBUG)
+    handler = logging.FileHandler(filename="../logger/{0}.log".format(text_query))
     logger.addHandler(handler)
 
     # env variables
@@ -78,7 +90,6 @@ if __name__ == "__main__":
     api = tweepy.API(auth, wait_on_rate_limit=True)
 
     # scraping
-    text_query = 'staratlas'
     yesterday = date.today() - timedelta(days=1)
     df_results = run_scraping(twitter_api=api, search_term=text_query, limit=100, until_date=yesterday)
 
