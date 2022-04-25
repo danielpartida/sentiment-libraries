@@ -7,8 +7,10 @@ from datetime import date, datetime, timedelta
 import pandas as pd
 import tweepy
 from dotenv import load_dotenv
+from matplotlib import pyplot as plt
 from transformers import pipeline
 from tqdm import tqdm
+from wordcloud import WordCloud
 
 
 def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_date: date) -> pd.DataFrame:
@@ -93,14 +95,7 @@ def run_sentiment(df_tweets: pd.DataFrame, sentiment_model: str) -> pd.DataFrame
     """
     sentiment_analysis = pipeline(model=sentiment_model)
 
-    if "roberta" in sentiment_model.lower():
-        type_model = "roberta"
-
-    elif "bert" in sentiment_model.lower():
-        type_model = "bert"
-
-    else:
-        type_model = ""
+    type_model = get_type_of_model(sentiment_model=sentiment_model)
 
     df_tweets['sentiment_dict'] = df_tweets["text"].apply(lambda x: sentiment_analysis(x))
     df_tweets['sentiment_{0}'.format(type_model)] = df_tweets["sentiment_dict"].apply(lambda x: x[0]['label'])
@@ -118,14 +113,35 @@ def run_sentiment(df_tweets: pd.DataFrame, sentiment_model: str) -> pd.DataFrame
     return df_tweets
 
 
-# TODO
-def plot_pie_chart():
-    pass
+def visualize_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str):
+
+    type_model = get_type_of_model(sentiment_model=sentiment_model)
+
+    # Let's count the number of tweets by sentiments
+    sentiment_counts = df_tweets.groupby(['sentiment_{0}'.format(type_model)]).size()
+
+    # Let's visualize the sentiments
+    fig = plt.figure(figsize=(6, 6), dpi=100)
+    ax = plt.subplot(111)
+    sentiment_counts.plot.pie(ax=ax, autopct='%1.1f%%', startangle=270, fontsize=12, label="")
+    plt.savefig('../img/pie_chart_sentiment_{0}.png'.format(type_model))
 
 
-# TODO
-def plot_word_cloud():
-    pass
+def visualize_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str):
+
+    type_model = get_type_of_model(sentiment_model=sentiment_model)
+
+    sentiment_types = ["Positive", "Negative", "Neutral"]
+    for sentiment in sentiment_types:
+
+        sentiment_tweets = df_tweet['text'][df_tweet['sentiment_{0}'.format(type_model)] == sentiment]
+        sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
+                                       background_color="white").generate(str(sentiment_tweets))
+        plt.figure()
+        plt.title("{0} Tweets {1} - Wordcloud".format(sentiment, type_model))
+        plt.imshow(sentiment_wordcloud, interpolation="bilinear")
+        plt.axis("off")
+        plt.savefig('../img/wordcloud_sentiment_{0}_{1}.png'.format(sentiment, type_model))
 
 
 if __name__ == "__main__":
@@ -163,7 +179,9 @@ if __name__ == "__main__":
 
     for model in tqdm(models):
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
+        visualize_pie_chart(df_tweets=df_results, sentiment_model=model)
 
     del df
 
+    # Export
     df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
