@@ -167,19 +167,21 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
 
 if __name__ == "__main__":
 
-    if len(sys.argv) > 1:
-        text_query = sys.argv[1]
-        limit = sys.argv[2]
+    if len(sys.argv) <= 1:
+        text_query = 'crypto'
+        limit: int = 100
 
     else:
-        text_query = 'crypto'
-        limit = 100
+        text_query = str(sys.argv[1])
+        limit = int(sys.argv[2])
 
     # logger
     logger = logging.getLogger("tweepy")
     logging.basicConfig(level=logging.DEBUG)
     handler = logging.FileHandler(filename="../logger/{0}.log".format(text_query))
     logger.addHandler(handler)
+
+    logger.info("Search term {0}".format(text_query))
 
     # env variables
     load_dotenv()
@@ -201,8 +203,11 @@ if __name__ == "__main__":
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
 
     for model in tqdm(models):
+        logger.info("Sentiment analysis starting")
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
+        logger.info("Pie-chart starting")
         save_pie_chart(search_term=text_query, df_tweets=df_results, sentiment_model=model)
+        logger.info("Wordcloud starting")
         save_word_cloud(search_term=text_query, df_tweet=df_results, sentiment_model=model)
 
     del df
