@@ -4,7 +4,7 @@ from transformers import pipeline
 from textblob import TextBlob
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
-PATH = '../../data/crypto.csv'
+PATH = '../archive_data/crypto.csv'
 
 
 def pre_process_tweets_df(path: str) -> pd.DataFrame:
