@@ -7,14 +7,16 @@ import pandas as pd
 import time
 
 
-def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, unti_date: datetime) -> pd.DataFrame:
+def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_date: date) -> pd.DataFrame:
     """
-    Twitter’s standard search API only “searches against a sampling of recent Tweets published in the past 7 days."
+    Twitter’s standard search API only searches against a sampling of recent Tweets published in the past 7 days
     https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/overview
     https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction
     https://docs.tweepy.org/en/v4.8.0/api.html
+    :param until_date: last date to scrap
+    :type until_date: date
     :param twitter_api: Twitter API v1.1 Interface
-    :type twitter_api: tweepy.API
+    :type twitter_api: tweepy API
     :param search_term: word to search
     :type search_term: str
     :param limit: total amount of tweets to fetch from API
@@ -23,9 +25,9 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, unti_dat
     :rtype: pd.DataFrame
     """
     df_tweets = pd.DataFrame()
-    until_date =  unti_date.strftime('%Y-%M-%d')
+    until_date = until_date.strftime('%Y-%m-%d')
     try:
-        # Creation of query method using appropriate parameters
+        # FIXME: fetch tweets correctly
         tweets = tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="eng", result_type="recent",
                                count=limit, until=until_date).items(limit)
 
@@ -67,6 +69,6 @@ if __name__ == "__main__":
 
     text_query = 'staratlas'
     yesterday = date.today() - timedelta(days=1)
-    df_results = run_scraping(twitter_api=api, search_term=text_query, limit=25, unti_date=yesterday)
+    df_results = run_scraping(twitter_api=api, search_term=text_query, limit=25, until_date=yesterday)
 
     df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
