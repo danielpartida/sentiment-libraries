@@ -7,7 +7,7 @@ from datetime import date, datetime, timedelta
 import pandas as pd
 import tweepy
 from dotenv import load_dotenv
-from transformers import pipeline, AutoTokenizer, AutoConfig, AutoModelForSequenceClassification
+from transformers import pipeline
 from tqdm import tqdm
 
 
@@ -103,12 +103,7 @@ if __name__ == "__main__":
     model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
     sentiment_analysis = pipeline(model=model_name)
 
-    # TODO: Try using tokenizer and conf
-    # tokenizer = AutoTokenizer.from_pretrained(model_name)
-    # config = AutoConfig.from_pretrained(model_name)
-    # model = AutoModelForSequenceClassification.from_pretrained(model_name)
-
-    # TODO: Apply pipeline to dataframe
+    # TODO: Apply pipeline to dataframe (write as method)
     df_results['sentiment_dict'] = df_results["text"].apply(lambda x: sentiment_analysis(x))
     df_results['sentiment'] = df_results["sentiment_dict"].apply(lambda x: x[0]['label'])
     df_results['score'] = df_results["sentiment_dict"].apply(lambda x: x[0]['score'])
