@@ -7,6 +7,7 @@ from datetime import date, datetime, timedelta
 import pandas as pd
 import tweepy
 from dotenv import load_dotenv
+from transformers import AutoTokenizer, AutoConfig, AutoModelForSequenceClassification
 from tqdm import tqdm
 
 
@@ -97,4 +98,16 @@ if __name__ == "__main__":
     yesterday = date.today() - timedelta(days=1)
     df_results = run_scraping(twitter_api=api, search_term=text_query, limit=100, until_date=yesterday)
 
+    # perform sentiment analysis
+    # TODO: Add finiteautomata/bertweet-base-sentiment-analysis
+    model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
+    # sentiment_analysis = pipeline(model=model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    config = AutoConfig.from_pretrained(model_name)
+    model = AutoModelForSequenceClassification.from_pretrained(model_name)
+
+    # TODO: Apply pipeline to dataframe
+    df_results['sentiment'] = df_results["text"].apply(lambda x: sentiment_score(x))
+
+    # export results
     df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
