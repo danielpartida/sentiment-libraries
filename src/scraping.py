@@ -68,13 +68,22 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
     return df_tweets
 
 
-def run_sentiment(df_tweets: pd.DataFrame, model: str) -> pd.DataFrame:
-    sentiment_analysis = pipeline(model=model)
+def run_sentiment(df_tweets: pd.DataFrame, sentiment_model: str) -> pd.DataFrame:
+    """
+    Performs sentiment analysis depending on the model
+    :param df_tweets:
+    :type df_tweets:
+    :param sentiment_model:
+    :type sentiment_model:
+    :return:
+    :rtype:
+    """
+    sentiment_analysis = pipeline(model=sentiment_model)
 
-    if "roberta" in model.lower():
+    if "roberta" in sentiment_model.lower():
         type_model = "roberta"
 
-    elif "bert" in model.lower():
+    elif "bert" in sentiment_model.lower():
         type_model = "bert"
 
     else:
@@ -87,6 +96,16 @@ def run_sentiment(df_tweets: pd.DataFrame, model: str) -> pd.DataFrame:
     df_tweets.drop(['sentiment_dict'], axis=1, inplace=True)
 
     return df_tweets
+
+
+# TODO
+def plot_pie_chart():
+    pass
+
+
+# TODO
+def plot_word_cloud():
+    pass
 
 
 if __name__ == "__main__":
@@ -120,9 +139,10 @@ if __name__ == "__main__":
     df = run_scraping(twitter_api=api, search_term=text_query, limit=100, until_date=yesterday)
 
     # perform sentiment analysis
-    # TODO: Add finiteautomata/bertweet-base-sentiment-analysis
-    model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
-    df_results = run_sentiment(df_tweets=df, model=model_name)
+    models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
+    for model in models:
+        df_results = run_sentiment(df_tweets=df, sentiment_model=model)
+
     del df
 
     df_results.to_csv('../data/tweepy_{0}.csv'.format(text_query), sep=';')
