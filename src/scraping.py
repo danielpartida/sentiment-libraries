@@ -113,8 +113,16 @@ def run_sentiment(df_tweets: pd.DataFrame, sentiment_model: str) -> pd.DataFrame
     return df_tweets
 
 
-def visualize_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str):
+def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str) -> None:
+    """
 
+    :param df_tweets:
+    :type df_tweets:
+    :param sentiment_model:
+    :type sentiment_model:
+    :return:
+    :rtype:
+    """
     type_model = get_type_of_model(sentiment_model=sentiment_model)
 
     # Let's count the number of tweets by sentiments
@@ -127,8 +135,16 @@ def visualize_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str):
     plt.savefig('../img/pie_chart_sentiment_{0}.png'.format(type_model))
 
 
-def visualize_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str):
+def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str) -> None:
+    """
 
+    :param df_tweet:
+    :type df_tweet:
+    :param sentiment_model:
+    :type sentiment_model:
+    :return:
+    :rtype:
+    """
     type_model = get_type_of_model(sentiment_model=sentiment_model)
 
     sentiment_types = ["Positive", "Negative", "Neutral"]
@@ -179,7 +195,7 @@ if __name__ == "__main__":
 
     for model in tqdm(models):
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
-        visualize_pie_chart(df_tweets=df_results, sentiment_model=model)
+        save_pie_chart(df_tweets=df_results, sentiment_model=model)
 
     del df
 
