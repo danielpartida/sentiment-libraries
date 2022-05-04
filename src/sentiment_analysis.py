@@ -17,9 +17,9 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
                  until_date: date, tweet_type: str) -> pd.DataFrame:
     """
     Twitter’s standard search API only searches against a sampling of recent Tweets published in the past 7 days
-    https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/overview
-    https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction
-    https://docs.tweepy.org/en/v4.8.0/api.html
+    Tweepy library: https://docs.tweepy.org/en/v4.8.0/api.html#tweepy.API.search_tweets
+    API V1: https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets
+    API V2: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference
     :param tweet_type:  * mixed : include both popular and real time results in the response
                         * recent : return only the most recent results in the response
                         * popular : return only the most popular results in the response
