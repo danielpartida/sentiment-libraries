@@ -13,20 +13,24 @@ from tqdm import tqdm
 from wordcloud import WordCloud, STOPWORDS
 
 
-def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_date: date) -> pd.DataFrame:
+def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
+                 until_date: date, tweet_type: str) -> pd.DataFrame:
     """
     Twitter’s standard search API only searches against a sampling of recent Tweets published in the past 7 days
     https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/overview
     https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction
     https://docs.tweepy.org/en/v4.8.0/api.html
+    :param tweet_type:  * mixed : include both popular and real time results in the response
+                        * recent : return only the most recent results in the response
+                        * popular : return only the most popular results in the response
+    :type tweet_type:
     :param until_date: last date to scrap
     :type until_date: date
     :param twitter_api: Twitter API v1.1 Interface
     :type twitter_api: tweepy API
     :param search_term: word to search
     :type search_term: str
-    :param limit: total amount of tweets to fetch from API
-    :type limit: int
+    :param count: total amount of tweets to fetch from API
     :return: dataframe of tweets
     :rtype: pd.DataFrame
     """
@@ -35,8 +39,8 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
     list_dict_tweets = []
     try:
         list_twitter_items = [tweet for tweet in tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="en",
-                                                               result_type="recent", count=limit,
-                                                               until=until_date).items(limit)]
+                                                               result_type=tweet_type, count=count,
+                                                               until=until_date).items(count)]
 
         for tweet in tqdm(list_twitter_items):
             # fetch metadata of tweet
@@ -168,7 +172,7 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
 if __name__ == "__main__":
 
     if len(sys.argv) <= 1:
-        text_query = 'crypto'
+        text_query = 'staratlas'
         limit: int = 100
 
     else:
@@ -197,7 +201,8 @@ if __name__ == "__main__":
 
     # scraping
     yesterday = date.today() - timedelta(days=1)
-    df = run_scraping(twitter_api=api, search_term=text_query, limit=limit, until_date=yesterday)
+    df = run_scraping(twitter_api=api, search_term=text_query, count=limit,
+                      until_date=yesterday, tweet_type="mixed")
 
     # perform sentiment analysis
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
