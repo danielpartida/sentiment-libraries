@@ -13,3 +13,7 @@ if __name__ == "__main__":
     # group-by
     bert = df.groupby(by=['date', 'sentiment_bert'])['sentiment_bert'].count()
     roberta = df.groupby(by=['date', 'sentiment_roberta'])['sentiment_roberta'].count()
+
+    # FIXME: Change hard-coded export string
+    bert.to_csv("../data/staratlas_sentiment_06-05-2022-13-46_bert.csv", sep=';', decimal=',')
+    roberta.to_csv("../data/staratlas_sentiment_06-05-2022-13-46_roberta.csv", sep=';', decimal=',')
