@@ -97,3 +97,15 @@ Sentiment analysis starting
 Pie-chart starting
 Wordcloud starting
 Analysis run in 107.60365080833435
+Search term (staratlas OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS") -is:retweet
+Tweets retrieved at day 06/05/2022, 08:46:30 until day 2022-04-29
+Sentiment analysis starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Search term (staratlas OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS") -is:retweet
+Tweets retrieved at day 06/05/2022, 08:46:42 until day 2022-04-29
+Sentiment analysis starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Pie-chart starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Wordcloud starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Sentiment analysis starting for model finiteautomata/bertweet-base-sentiment-analysis
+Pie-chart starting for model finiteautomata/bertweet-base-sentiment-analysis
+Wordcloud starting for model finiteautomata/bertweet-base-sentiment-analysis
+Analysis run in 112.1730170249939
