@@ -183,9 +183,8 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
 if __name__ == "__main__":
 
     if len(sys.argv) <= 1:
-        # text_query = 'staratlas OR $ATLAS OR $POLIS OR @staratlas or #staralas'
         save_query = 'staratlas'
-        text_query = '{0} -is:retweet'.format(save_query)
+        text_query = '{0} OR @staratlas OR #staralas OR $ATLAS OR $POLIS OR -is:retweet'.format(save_query)
         limit: int = 500
 
     else:
