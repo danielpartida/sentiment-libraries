@@ -73,8 +73,8 @@ if __name__ == "__main__":
 
     # Handle numpy NaN values
     df_clean = df_read.loc[~df_read.Content.replace(0, np.nan).isna()]
-    df_clean.Content = df_clean.apply(lambda x: str(x))
-    df_clean.Content = df_clean.apply(lambda x: clean_tweet(x))
+    df_clean.Content = df_clean.Content.apply(lambda x: str(x))
+    df_clean.Content = df_clean.Content.apply(lambda x: clean_tweet(x))
 
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
     for model in tqdm(models):
