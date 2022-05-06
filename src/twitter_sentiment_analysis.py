@@ -182,6 +182,7 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
         )
 
 
+# TODO: Separate code into 1 scraping file and 1 sentiment analysis file (probably a class) to avoid duplication
 if __name__ == "__main__":
 
     # TODO: Add crypto context annotation, something similar to "tweet.fields=context_annotations context:174"
