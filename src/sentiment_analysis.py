@@ -192,6 +192,8 @@ if __name__ == "__main__":
         text_query = save_query
         limit = int(sys.argv[2])
 
+    start_time = time.time()
+
     # logger
     logger = logging.getLogger("tweepy")
     logging.basicConfig(level=logging.INFO)
@@ -222,11 +224,11 @@ if __name__ == "__main__":
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
 
     for model in tqdm(models):
-        logger.info("Sentiment analysis starting")
+        logger.info("Sentiment analysis starting for model {0}".format(str(model)))
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
-        logger.info("Pie-chart starting")
+        logger.info("Pie-chart starting for model {0}".format(str(model)))
         save_pie_chart(search_term=save_query, df_tweets=df_results, sentiment_model=model)
-        logger.info("Wordcloud starting")
+        logger.info("Wordcloud starting for model {0}".format(str(model)))
         save_word_cloud(search_term=save_query, df_tweet=df_results, sentiment_model=model)
 
     del df
@@ -234,3 +236,4 @@ if __name__ == "__main__":
     # Export
     today = today.strftime('%d-%m-%Y-%H-%M')
     df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(save_query, today), sep=';')
+    logger.info("Analysis run in {0}".format(time.time() - start_time))
