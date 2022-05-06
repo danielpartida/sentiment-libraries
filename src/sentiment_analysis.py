@@ -233,6 +233,8 @@ if __name__ == "__main__":
 
     del df
 
+    logger.info("{0} total amount of tweets analyzed".format(len(df_results)))
+
     # Export
     today = today.strftime('%d-%m-%Y-%H-%M')
     df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(save_query, today), sep=';')

@@ -118,3 +118,16 @@ Sentiment analysis starting for model finiteautomata/bertweet-base-sentiment-ana
 Pie-chart starting for model finiteautomata/bertweet-base-sentiment-analysis
 Wordcloud starting for model finiteautomata/bertweet-base-sentiment-analysis
 Analysis run in 220.79952812194824
+Search term (staratlas OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS") -is:retweet
+Tweets retrieved at day 06/05/2022, 10:09:37 until day 2022-04-29
+Sentiment analysis starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Pie-chart starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Wordcloud starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Sentiment analysis starting for model finiteautomata/bertweet-base-sentiment-analysis
+Pie-chart starting for model finiteautomata/bertweet-base-sentiment-analysis
+Wordcloud starting for model finiteautomata/bertweet-base-sentiment-analysis
+1181 total amount of tweets analyzed
+Analysis run in 208.800208568573
+Search term (staratlas OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS")
+Tweets retrieved at day 06/05/2022, 10:13:48 until day 2022-04-29
+Sentiment analysis starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
