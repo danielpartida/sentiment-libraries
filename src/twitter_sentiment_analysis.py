@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 import time
-from datetime import date, datetime, timedelta
+from datetime import date, datetime
 import re
 
 import pandas as pd
