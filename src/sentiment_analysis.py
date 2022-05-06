@@ -184,11 +184,12 @@ if __name__ == "__main__":
 
     if len(sys.argv) <= 1:
         save_query = 'staratlas'
-        text_query = '{0} OR @staratlas OR #staralas OR $ATLAS OR $POLIS OR -is:retweet'.format(save_query)
+        text_query = '({0} OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS") -is:retweet'.format(save_query)
         limit: int = 500
 
     else:
-        text_query = str(sys.argv[1])
+        save_query = str(sys.argv[1])
+        text_query = save_query
         limit = int(sys.argv[2])
 
     # logger
