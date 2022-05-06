@@ -61,7 +61,7 @@ def run_sentiment(df_discord: pd.DataFrame, sentiment_model: str) -> pd.DataFram
 
     type_model = get_type_of_model(sentiment_model=sentiment_model)
 
-    df_discord['sentiment_dict'] = df_discord["Content"].apply(lambda x: sentiment_analysis(x))
+    df_discord['sentiment_dict'] = df_discord["Content"].apply(lambda x: sentiment_analysis(x[:512]))
     df_discord['sentiment_{0}'.format(type_model)] = df_discord["sentiment_dict"].apply(lambda x: x[0]['label'])
     if type_model == "bert":
         df_discord['sentiment_{0}'.format(type_model)] = df_discord['sentiment_{0}'.format(type_model)].apply(
@@ -145,7 +145,9 @@ if __name__ == "__main__":
     df_read.Content = df_read.Content.apply(lambda x: clean_tweet(x))
     df_read["Content"] = df_read.Content.apply(handle_content)
 
-    models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
+    # FIXME: Add bert model -> Check why model crashes in the following line
+    #  df_discord['sentiment_dict'] = df_discord["Content"].apply(lambda x: sentiment_analysis(x[:512]))
+    models = ["cardiffnlp/twitter-roberta-base-sentiment-latest"]
     for model in tqdm(models):
         df_results = run_sentiment(df_discord=df_read, sentiment_model=model)
         save_pie_chart(search_term="discord", df_tweets=df_results, sentiment_model=model)
