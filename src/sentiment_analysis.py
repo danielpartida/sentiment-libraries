@@ -182,6 +182,7 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
 
 if __name__ == "__main__":
 
+    # TODO: Add crypto context annotation → 174: Digital Assets & Crypto
     if len(sys.argv) <= 1:
         save_query = 'staratlas'
         text_query = '({0} OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS") -is:retweet'.format(save_query)
