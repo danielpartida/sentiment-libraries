@@ -33,7 +33,7 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
                         * recent : return only the most recent results in the response
                         * popular : return only the most popular results in the response
     :type tweet_type:
-    :param until_date: last date to scrap
+    :param until_date: scrap dates until that date (go maximum of 7 days in the past)
     :type until_date: date
     :param twitter_api: Twitter API v1.1 Interface
     :type twitter_api: tweepy API
@@ -48,7 +48,7 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
     list_dict_tweets = []
     try:
         list_twitter_items = [tweet for tweet in tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="en",
-                                                               result_type=tweet_type, count=count,
+                                                               result_type=tweet_type, count=100,
                                                                until=until_date).items(count)]
 
         for tweet in tqdm(list_twitter_items):
@@ -58,7 +58,7 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
                           'following': tweet.user.friends_count, 'followers': tweet.user.followers_count,
                           'total_tweets': tweet.user.statuses_count, 'favorite_count': tweet.favorite_count,
                           'retweet_count': tweet.retweet_count, 'hashtags': tweet.entities['hashtags'],
-                          'mentions': tweet.entities['user_mentions']}
+                          'tweet_type': tweet.metadata['result_type'], 'mentions': tweet.entities['user_mentions']}
 
             # fetch content of tweet
             try:
@@ -188,7 +188,7 @@ if __name__ == "__main__":
     if len(sys.argv) <= 1:
         save_query = 'staratlas'
         text_query = '({0} OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS") -is:retweet'.format(save_query)
-        limit: int = 50000
+        limit: int = 10000
 
     else:
         save_query = str(sys.argv[1])
@@ -220,9 +220,8 @@ if __name__ == "__main__":
     # scraping
     today = datetime.today()
     today_string = today.strftime('%d-%m-%Y-%H-%M')
-    past = today - timedelta(days=7)
     df = run_scraping(twitter_api=api, search_term=text_query, count=limit,
-                      until_date=past, tweet_type="mixed")
+                      until_date=today, tweet_type="mixed")
 
     # perform sentiment analysis
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
