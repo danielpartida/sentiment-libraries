@@ -15,10 +15,10 @@ from wordcloud import WordCloud, STOPWORDS
 
 
 def clean_tweet(tweet: str):
-    '''
+    """
     Utility function to clean tweet text by removing links, special characters using simple regex statements.
     Example taken from https://www.geeksforgeeks.org/twitter-sentiment-analysis-using-python/?ref=lbp
-    '''
+    """
     return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) | (\w+:\ / \ / \S+)", " ", tweet).split())
 
 
