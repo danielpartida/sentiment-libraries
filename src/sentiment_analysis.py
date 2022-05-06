@@ -183,8 +183,9 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
 if __name__ == "__main__":
 
     if len(sys.argv) <= 1:
-        # text_query = 'staratlas or $ATLAS or $POLIS or @staratlas or #staralas'
-        text_query = 'staratlas'
+        # text_query = 'staratlas OR $ATLAS OR $POLIS OR @staratlas or #staralas'
+        save_query = 'staratlas'
+        text_query = '{0} -is:retweet'.format(save_query)
         limit: int = 500
 
     else:
@@ -224,12 +225,12 @@ if __name__ == "__main__":
         logger.info("Sentiment analysis starting")
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
         logger.info("Pie-chart starting")
-        save_pie_chart(search_term=text_query, df_tweets=df_results, sentiment_model=model)
+        save_pie_chart(search_term=save_query, df_tweets=df_results, sentiment_model=model)
         logger.info("Wordcloud starting")
-        save_word_cloud(search_term=text_query, df_tweet=df_results, sentiment_model=model)
+        save_word_cloud(search_term=save_query, df_tweet=df_results, sentiment_model=model)
 
     del df
 
     # Export
     today = today.strftime('%d-%m-%Y')
-    df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(text_query, today), sep=';')
+    df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(save_query, today), sep=';')
