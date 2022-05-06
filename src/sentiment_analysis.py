@@ -150,7 +150,7 @@ def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str, search_term: s
     ax = plt.subplot(111)
     sentiment_counts.plot.pie(ax=ax, autopct='%1.1f%%', startangle=270, fontsize=12, label="")
     plt.title("Pie-chart Sentiment Analysis- {0} Model".format(type_model))
-    plt.savefig('../img/{0}_pie_chart_sentiment_{1}.png'.format(search_term, type_model))
+    plt.savefig('../img/{0}_pie_chart_sentiment_{1}_{2}.png'.format(search_term, type_model, today_string))
 
 
 def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: str) -> None:
@@ -177,7 +177,9 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
         plt.title("Wordcloud {0} Tweets - {1} Model".format(sentiment, type_model))
         plt.imshow(sentiment_wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.savefig('../img/{0}_wordcloud_{1}_sentiment_{2}.png'.format(search_term, sentiment, type_model))
+        plt.savefig('../img/{0}_wordcloud_{1}_sentiment_{2}_{3}.png'.format(
+            search_term, sentiment, type_model, today_string)
+        )
 
 
 if __name__ == "__main__":
@@ -217,6 +219,7 @@ if __name__ == "__main__":
 
     # scraping
     today = datetime.today()
+    today_string = today.strftime('%d-%m-%Y-%H-%M')
     past = today - timedelta(days=7)
     df = run_scraping(twitter_api=api, search_term=text_query, count=limit,
                       until_date=past, tweet_type="mixed")
@@ -237,6 +240,5 @@ if __name__ == "__main__":
     logger.info("{0} total amount of tweets analyzed".format(len(df_results)))
 
     # Export
-    today = today.strftime('%d-%m-%Y-%H-%M')
-    df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(save_query, today), sep=';')
+    df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(save_query, today_string), sep=';')
     logger.info("Analysis run in {0}".format(time.time() - start_time))
