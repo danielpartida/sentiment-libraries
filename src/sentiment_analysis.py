@@ -212,7 +212,8 @@ if __name__ == "__main__":
 
     # scraping
     # TODO: Change date to scrap to catch last 7 days
-    yesterday = date.today() - timedelta(days=1)
+    today = datetime.today()
+    yesterday = today - timedelta(days=1)
     df = run_scraping(twitter_api=api, search_term=text_query, count=limit,
                       until_date=yesterday, tweet_type="mixed")
 
@@ -230,4 +231,5 @@ if __name__ == "__main__":
     del df
 
     # Export
-    df_results.to_csv('../data/{0}_sentiment.csv'.format(text_query), sep=';')
+    today = today.strftime('%d-%m-%Y')
+    df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(text_query, today), sep=';')
