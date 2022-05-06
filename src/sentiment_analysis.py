@@ -44,7 +44,7 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
     :rtype: pd.DataFrame
     """
     until_date = until_date.strftime('%Y-%m-%d')
-    today = datetime.today().strftime("%d/%m/%Y, %H:%M:%S")
+    now = datetime.today().strftime("%d/%m/%Y, %H:%M:%S")
     list_dict_tweets = []
     try:
         list_twitter_items = [tweet for tweet in tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="en",
@@ -80,7 +80,7 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
     else:
         df_tweets = pd.DataFrame()
 
-    logger.info("Tweets retrieved at day {0} until day {1}".format(today, until_date))
+    logger.info("Tweets retrieved at day {0} until day {1}".format(now, until_date))
 
     return df_tweets
 
@@ -183,8 +183,9 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
 if __name__ == "__main__":
 
     if len(sys.argv) <= 1:
+        # text_query = 'staratlas or $ATLAS or $POLIS or @staratlas or #staralas'
         text_query = 'staratlas'
-        limit: int = 100
+        limit: int = 500
 
     else:
         text_query = str(sys.argv[1])
@@ -192,7 +193,7 @@ if __name__ == "__main__":
 
     # logger
     logger = logging.getLogger("tweepy")
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     handler = logging.FileHandler(filename="../logger/{0}.log".format(text_query))
     logger.addHandler(handler)
 
@@ -211,11 +212,10 @@ if __name__ == "__main__":
     api = tweepy.API(auth, wait_on_rate_limit=True)
 
     # scraping
-    # TODO: Change date to scrap to catch last 7 days
     today = datetime.today()
-    yesterday = today - timedelta(days=1)
+    past = today - timedelta(days=7)
     df = run_scraping(twitter_api=api, search_term=text_query, count=limit,
-                      until_date=yesterday, tweet_type="mixed")
+                      until_date=past, tweet_type="mixed")
 
     # perform sentiment analysis
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
