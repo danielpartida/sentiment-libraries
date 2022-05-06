@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from datetime import datetime
 
-from twitter_sentiment_analysis import get_type_of_model, save_word_cloud, save_pie_chart
+from twitter_sentiment_analysis import get_type_of_model, save_word_cloud, save_pie_chart, clean_tweet
 
 
 def get_full_discord_df() -> pd.DataFrame:
@@ -73,6 +73,8 @@ if __name__ == "__main__":
 
     # Handle numpy NaN values
     df_clean = df_read.loc[~df_read.Content.replace(0, np.nan).isna()]
+    df_clean.Content = df_clean.apply(lambda x: str(x))
+    df_clean.Content = df_clean.apply(lambda x: clean_tweet(x))
 
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
     for model in tqdm(models):
