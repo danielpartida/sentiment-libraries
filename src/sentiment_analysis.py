@@ -195,7 +195,7 @@ if __name__ == "__main__":
     # logger
     logger = logging.getLogger("tweepy")
     logging.basicConfig(level=logging.INFO)
-    handler = logging.FileHandler(filename="../logger/{0}.log".format(text_query))
+    handler = logging.FileHandler(filename="../logger/{0}.log".format(save_query))
     logger.addHandler(handler)
 
     logger.info("Search term {0}".format(text_query))
@@ -232,5 +232,5 @@ if __name__ == "__main__":
     del df
 
     # Export
-    today = today.strftime('%d-%m-%Y')
+    today = today.strftime('%d-%m-%Y-%H:%M')
     df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(save_query, today), sep=';')
