@@ -4,3 +4,13 @@ Tweets retrieved at day 25/04/2022, 17:41:21 until day 2022-04-24
 PARAMS: {'q': 'crypto', 'lang': 'en', 'result_type': 'recent', 'count': '100', 'until': '2022-04-24'}
 PARAMS: {'q': 'crypto', 'max_id': '1518016748611678207', 'lang': 'en', 'result_type': 'recent', 'count': '100', 'until': '2022-04-24'}
 Tweets retrieved at day 25/04/2022, 17:47:41 until day 2022-04-24
+Search term crypto
+Tweets retrieved at day 06/05/2022, 10:27:09 until day 2022-04-29
+Sentiment analysis starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Pie-chart starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Wordcloud starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Sentiment analysis starting for model finiteautomata/bertweet-base-sentiment-analysis
+Pie-chart starting for model finiteautomata/bertweet-base-sentiment-analysis
+Wordcloud starting for model finiteautomata/bertweet-base-sentiment-analysis
+10000 total amount of tweets analyzed
+Analysis run in 1839.2216796875

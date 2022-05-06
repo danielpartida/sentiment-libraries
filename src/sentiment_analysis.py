@@ -3,6 +3,7 @@ import os
 import sys
 import time
 from datetime import date, datetime, timedelta
+import re
 
 import pandas as pd
 import tweepy
@@ -13,30 +14,42 @@ from tqdm import tqdm
 from wordcloud import WordCloud, STOPWORDS
 
 
-def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_date: date) -> pd.DataFrame:
+def clean_tweet(tweet: str):
+    """
+    Utility function to clean tweet text by removing links, special characters using simple regex statements.
+    Example taken from https://www.geeksforgeeks.org/twitter-sentiment-analysis-using-python/?ref=lbp
+    """
+    return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) | (\w+:\ / \ / \S+)", " ", tweet).split())
+
+
+def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
+                 until_date: date, tweet_type: str) -> pd.DataFrame:
     """
     Twitter’s standard search API only searches against a sampling of recent Tweets published in the past 7 days
-    https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/overview
-    https://developer.twitter.com/en/docs/twitter-api/tweets/search/introduction
-    https://docs.tweepy.org/en/v4.8.0/api.html
+    Tweepy library: https://docs.tweepy.org/en/v4.8.0/api.html#tweepy.API.search_tweets
+    API V1: https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets
+    API V2: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference
+    :param tweet_type:  * mixed : include both popular and real time results in the response
+                        * recent : return only the most recent results in the response
+                        * popular : return only the most popular results in the response
+    :type tweet_type:
     :param until_date: last date to scrap
     :type until_date: date
     :param twitter_api: Twitter API v1.1 Interface
     :type twitter_api: tweepy API
     :param search_term: word to search
     :type search_term: str
-    :param limit: total amount of tweets to fetch from API
-    :type limit: int
+    :param count: total amount of tweets to fetch from API
     :return: dataframe of tweets
     :rtype: pd.DataFrame
     """
     until_date = until_date.strftime('%Y-%m-%d')
-    today = datetime.today().strftime("%d/%m/%Y, %H:%M:%S")
+    now = datetime.today().strftime("%d/%m/%Y, %H:%M:%S")
     list_dict_tweets = []
     try:
         list_twitter_items = [tweet for tweet in tweepy.Cursor(twitter_api.search_tweets, q=search_term, lang="en",
-                                                               result_type="recent", count=limit,
-                                                               until=until_date).items(limit)]
+                                                               result_type=tweet_type, count=count,
+                                                               until=until_date).items(count)]
 
         for tweet in tqdm(list_twitter_items):
             # fetch metadata of tweet
@@ -49,9 +62,11 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
 
             # fetch content of tweet
             try:
-                dict_tweet['text'] = tweet.retweeted_status.text
+                dict_tweet['raw_text'] = tweet.retweeted_status.text
+                dict_tweet['text'] = clean_tweet(dict_tweet['raw_text'])
             except AttributeError:
-                dict_tweet['text'] = tweet.text
+                dict_tweet['raw_text'] = tweet.text
+                dict_tweet['text'] = clean_tweet(dict_tweet['raw_text'])
 
             list_dict_tweets.append(dict_tweet)
 
@@ -65,7 +80,7 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, limit: int, until_da
     else:
         df_tweets = pd.DataFrame()
 
-    logger.info("Tweets retrieved at day {0} until day {1}".format(today, until_date))
+    logger.info("Tweets retrieved at day {0} until day {1}".format(now, until_date))
 
     return df_tweets
 
@@ -135,7 +150,7 @@ def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str, search_term: s
     ax = plt.subplot(111)
     sentiment_counts.plot.pie(ax=ax, autopct='%1.1f%%', startangle=270, fontsize=12, label="")
     plt.title("Pie-chart Sentiment Analysis- {0} Model".format(type_model))
-    plt.savefig('../img/{0}_pie_chart_sentiment_{1}.png'.format(search_term, type_model))
+    plt.savefig('../img/{0}_pie_chart_sentiment_{1}_{2}.png'.format(search_term, type_model, today_string))
 
 
 def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: str) -> None:
@@ -162,23 +177,30 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
         plt.title("Wordcloud {0} Tweets - {1} Model".format(sentiment, type_model))
         plt.imshow(sentiment_wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.savefig('../img/{0}_wordcloud_{1}_sentiment_{2}.png'.format(search_term, sentiment, type_model))
+        plt.savefig('../img/{0}_wordcloud_{1}_sentiment_{2}_{3}.png'.format(
+            search_term, sentiment, type_model, today_string)
+        )
 
 
 if __name__ == "__main__":
 
+    # FIXME: Add crypto context annotation, something similar to "tweet.fields=context_annotations context:174"
     if len(sys.argv) <= 1:
-        text_query = 'crypto'
-        limit: int = 100
+        save_query = 'staratlas'
+        text_query = '({0} OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS") -is:retweet'.format(save_query)
+        limit: int = 50000
 
     else:
-        text_query = str(sys.argv[1])
+        save_query = str(sys.argv[1])
+        text_query = save_query
         limit = int(sys.argv[2])
+
+    start_time = time.time()
 
     # logger
     logger = logging.getLogger("tweepy")
-    logging.basicConfig(level=logging.DEBUG)
-    handler = logging.FileHandler(filename="../logger/{0}.log".format(text_query))
+    logging.basicConfig(level=logging.INFO)
+    handler = logging.FileHandler(filename="../logger/{0}.log".format(save_query))
     logger.addHandler(handler)
 
     logger.info("Search term {0}".format(text_query))
@@ -196,21 +218,27 @@ if __name__ == "__main__":
     api = tweepy.API(auth, wait_on_rate_limit=True)
 
     # scraping
-    yesterday = date.today() - timedelta(days=1)
-    df = run_scraping(twitter_api=api, search_term=text_query, limit=limit, until_date=yesterday)
+    today = datetime.today()
+    today_string = today.strftime('%d-%m-%Y-%H-%M')
+    past = today - timedelta(days=7)
+    df = run_scraping(twitter_api=api, search_term=text_query, count=limit,
+                      until_date=past, tweet_type="mixed")
 
     # perform sentiment analysis
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
 
     for model in tqdm(models):
-        logger.info("Sentiment analysis starting")
+        logger.info("Sentiment analysis starting for model {0}".format(str(model)))
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
-        logger.info("Pie-chart starting")
-        save_pie_chart(search_term=text_query, df_tweets=df_results, sentiment_model=model)
-        logger.info("Wordcloud starting")
-        save_word_cloud(search_term=text_query, df_tweet=df_results, sentiment_model=model)
+        logger.info("Pie-chart starting for model {0}".format(str(model)))
+        save_pie_chart(search_term=save_query, df_tweets=df_results, sentiment_model=model)
+        logger.info("Wordcloud starting for model {0}".format(str(model)))
+        save_word_cloud(search_term=save_query, df_tweet=df_results, sentiment_model=model)
 
     del df
 
+    logger.info("{0} total amount of tweets analyzed".format(len(df_results)))
+
     # Export
-    df_results.to_csv('../data/{0}_sentiment.csv'.format(text_query), sep=';')
+    df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(save_query, today_string), sep=';')
+    logger.info("Analysis run in {0}".format(time.time() - start_time))
