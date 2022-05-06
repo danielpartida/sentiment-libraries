@@ -9,6 +9,17 @@ from datetime import datetime
 from twitter_sentiment_analysis import get_type_of_model, save_word_cloud, save_pie_chart, clean_tweet
 
 
+def handle_content(statement: str) -> str:
+    if (statement is None) or (type(statement) == float):
+        return ""
+
+    elif len(statement) == 0:
+        return ""
+
+    else:
+        return statement
+
+
 def get_full_discord_df() -> pd.DataFrame:
     """
     Reads csv file from data/discord folder
@@ -72,9 +83,9 @@ if __name__ == "__main__":
     df_read = get_full_discord_df()
 
     # Handle numpy NaN values
-    df_clean = df_read.loc[~df_read.Content.replace(0, np.nan).isna()]
-    df_clean.Content = df_clean.Content.apply(lambda x: str(x))
-    df_clean.Content = df_clean.Content.apply(lambda x: clean_tweet(x))
+    df_read.Content = df_read.Content.apply(lambda x: str(x))
+    df_read.Content = df_read.Content.apply(lambda x: clean_tweet(x))
+    df_read["Content"] = df_read.Content.apply(handle_content)
 
     models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
     for model in tqdm(models):
