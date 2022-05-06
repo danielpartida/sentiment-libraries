@@ -96,4 +96,3 @@ if __name__ == "__main__":
     today = datetime.today()
     today_string = today.strftime('%d-%m-%Y-%H-%M')
     df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format("discord", today_string), sep=';')
-    print("Done")
