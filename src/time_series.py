@@ -14,7 +14,11 @@ if __name__ == "__main__":
     bert = df.groupby(by=['date', 'sentiment_bert'])['sentiment_bert'].count()
     roberta = df.groupby(by=['date', 'sentiment_roberta'])['sentiment_roberta'].count()
 
+    # pivot (unstack)
+    bert_unstack = bert.unstack()
+    roberta_unstack = roberta.unstack()
+
     # TODO: Change hard-coded export string
     # FIXME: Order series correctly by dates ascending
-    bert.to_csv("../data/staratlas_sentiment_06-05-2022-13-46_bert.csv", sep=';', decimal=',')
-    roberta.to_csv("../data/staratlas_sentiment_06-05-2022-13-46_roberta.csv", sep=';', decimal=',')
+    bert_unstack.to_csv("../data/staratlas_sentiment_06-05-2022-13-46_bert.csv", sep=';', decimal=',')
+    roberta_unstack.to_csv("../data/staratlas_sentiment_06-05-2022-13-46_roberta.csv", sep=';', decimal=',')
