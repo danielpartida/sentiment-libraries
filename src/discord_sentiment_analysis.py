@@ -2,6 +2,7 @@ import os
 
 from transformers import pipeline
 from tqdm import tqdm
+import numpy as np
 import pandas as pd
 
 from twitter_sentiment_analysis import get_type_of_model, save_word_cloud, save_pie_chart
@@ -68,6 +69,9 @@ if __name__ == "__main__":
 
     # Fetch whole dataframe
     df_read = get_full_discord_df()
+
+    # Handle numpy NaN values
+    df_clean = df_read.loc[~df_read.Content.replace(0, np.nan).isna()]
 
     # TODO: Run for both NLP models
     model = "cardiffnlp/twitter-roberta-base-sentiment-latest"
