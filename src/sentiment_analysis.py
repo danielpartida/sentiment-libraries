@@ -3,6 +3,7 @@ import os
 import sys
 import time
 from datetime import date, datetime, timedelta
+import re
 
 import pandas as pd
 import tweepy
@@ -11,6 +12,14 @@ from matplotlib import pyplot as plt
 from transformers import pipeline
 from tqdm import tqdm
 from wordcloud import WordCloud, STOPWORDS
+
+
+def clean_tweet(tweet: str):
+    '''
+    Utility function to clean tweet text by removing links, special characters using simple regex statements.
+    Example taken from https://www.geeksforgeeks.org/twitter-sentiment-analysis-using-python/?ref=lbp
+    '''
+    return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) | (\w+:\ / \ / \S+)", " ", tweet).split())
 
 
 def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
@@ -53,9 +62,11 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
 
             # fetch content of tweet
             try:
-                dict_tweet['text'] = tweet.retweeted_status.text
+                dict_tweet['raw_text'] = tweet.retweeted_status.text
+                dict_tweet['text'] = clean_tweet(dict_tweet['raw_text'])
             except AttributeError:
-                dict_tweet['text'] = tweet.text
+                dict_tweet['raw_text'] = tweet.text
+                dict_tweet['text'] = clean_tweet(dict_tweet['raw_text'])
 
             list_dict_tweets.append(dict_tweet)
 
@@ -200,6 +211,7 @@ if __name__ == "__main__":
     api = tweepy.API(auth, wait_on_rate_limit=True)
 
     # scraping
+    # TODO: Change date to scrap to catch last 7 days
     yesterday = date.today() - timedelta(days=1)
     df = run_scraping(twitter_api=api, search_term=text_query, count=limit,
                       until_date=yesterday, tweet_type="mixed")
