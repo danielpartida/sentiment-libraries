@@ -3,7 +3,7 @@ from datetime import datetime
 
 if __name__ == "__main__":
 
-    # FIXME: Change hard-coded import string
+    # TODO: Change hard-coded import string
     df = pd.read_csv("../data/staratlas_sentiment_06-05-2022-13-46.csv", sep=';', decimal=',')
 
     df.sort_values(by=['created_at'], ascending=True, inplace=True)
@@ -14,6 +14,7 @@ if __name__ == "__main__":
     bert = df.groupby(by=['date', 'sentiment_bert'])['sentiment_bert'].count()
     roberta = df.groupby(by=['date', 'sentiment_roberta'])['sentiment_roberta'].count()
 
-    # FIXME: Change hard-coded export string
+    # TODO: Change hard-coded export string
+    # FIXME: Order series correctly by dates ascending
     bert.to_csv("../data/staratlas_sentiment_06-05-2022-13-46_bert.csv", sep=';', decimal=',')
     roberta.to_csv("../data/staratlas_sentiment_06-05-2022-13-46_roberta.csv", sep=';', decimal=',')
