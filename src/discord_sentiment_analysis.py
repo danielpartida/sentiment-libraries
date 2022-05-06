@@ -4,6 +4,7 @@ from transformers import pipeline
 from tqdm import tqdm
 import numpy as np
 import pandas as pd
+from datetime import datetime
 
 from twitter_sentiment_analysis import get_type_of_model, save_word_cloud, save_pie_chart
 
@@ -73,7 +74,13 @@ if __name__ == "__main__":
     # Handle numpy NaN values
     df_clean = df_read.loc[~df_read.Content.replace(0, np.nan).isna()]
 
-    # TODO: Run for both NLP models
-    model = "cardiffnlp/twitter-roberta-base-sentiment-latest"
-    df_results = run_sentiment(df_discord=df_read, sentiment_model=model)
+    models = ["cardiffnlp/twitter-roberta-base-sentiment-latest", "finiteautomata/bertweet-base-sentiment-analysis"]
+    for model in tqdm(models):
+        df_results = run_sentiment(df_discord=df_read, sentiment_model=model)
+        save_pie_chart(search_term="discord", df_tweets=df_results, sentiment_model=model)
+        save_word_cloud(search_term="discord", df_tweet=df_results, sentiment_model=model)
+
+    today = datetime.today()
+    today_string = today.strftime('%d-%m-%Y-%H-%M')
+    df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format("discord", today_string), sep=';')
     print("Done")
