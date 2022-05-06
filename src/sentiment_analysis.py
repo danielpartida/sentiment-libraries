@@ -185,7 +185,7 @@ if __name__ == "__main__":
     if len(sys.argv) <= 1:
         save_query = 'staratlas'
         text_query = '({0} OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS") -is:retweet'.format(save_query)
-        limit: int = 500
+        limit: int = 50000
 
     else:
         save_query = str(sys.argv[1])
@@ -232,5 +232,5 @@ if __name__ == "__main__":
     del df
 
     # Export
-    today = today.strftime('%d-%m-%Y-%H:%M')
+    today = today.strftime('%d-%m-%Y-%H-%M')
     df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(save_query, today), sep=';')
