@@ -183,9 +183,10 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
         )
 
 
-def create_new_folders_if_not_exist(search_term: str) -> None:
-    paths = ["../data/results/{0}".format(search_term), "../img/{0}/discord".format(search_term),
-             "../img/{0}/twitter/bert".format(search_term), "../img/{0}/twitter/robert".format(search_term)]
+def create_result_folders_if_not_exist(search_term: str) -> None:
+    paths = ["../data/results/discord/{0}".format(search_term), "../data/results/twitter/{0}".format(search_term),
+             "../img/{0}/discord".format(search_term), "../img/{0}/twitter/bert".format(search_term),
+             "../img/{0}/twitter/robert".format(search_term)]
     for path in paths:
         if not os.path.exists(path):
             os.makedirs(path)
@@ -208,7 +209,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # create new folder to store results
-    create_new_folders_if_not_exist(search_term=save_query)
+    create_result_folders_if_not_exist(search_term=save_query)
 
     # logger
     logger = logging.getLogger("tweepy")
