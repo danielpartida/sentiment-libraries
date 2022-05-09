@@ -131,15 +131,15 @@ def run_sentiment(df_tweets: pd.DataFrame, sentiment_model: str) -> pd.DataFrame
 
 def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str, search_term: str) -> None:
     """
-
-    :param search_term:
-    :type search_term:
-    :param df_tweets:
-    :type df_tweets:
-    :param sentiment_model:
-    :type sentiment_model:
-    :return:
-    :rtype:
+    Creates and saves pie chart of sentiment analysis
+    :param search_term: term queried
+    :type search_term: str
+    :param df_tweets: data containing all tweets
+    :type df_tweets: pd.DataFrame
+    :param sentiment_model: model performing the analysis (bert or roberta)
+    :type sentiment_model: str
+    :return: None
+    :rtype: None
     """
     type_model = get_type_of_model(sentiment_model=sentiment_model)
 
@@ -150,21 +150,21 @@ def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str, search_term: s
     fig = plt.figure(figsize=(6, 6), dpi=100)
     ax = plt.subplot(111)
     sentiment_counts.plot.pie(ax=ax, autopct='%1.1f%%', startangle=270, fontsize=12, label="")
-    plt.title("Pie-chart Sentiment Analysis- {0} Model".format(type_model))
-    plt.savefig('../img/{0}_pie_chart_sentiment_{1}_{2}.png'.format(search_term, type_model, today_string))
+    plt.title("{0} Pie-chart Sentiment Analysis - {1} Model".format(search_term, type_model))
+    plt.savefig('../img/{0}/twitter/{1}/pie_chart_sentiment_{2}.png'.format(search_term, type_model, today_string))
 
 
 def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: str) -> None:
     """
-
-    :param search_term:
-    :type search_term:
-    :param df_tweet:
-    :type df_tweet:
-    :param sentiment_model:
-    :type sentiment_model:
-    :return:
-    :rtype:
+    Creates and saves 3 world clouds (positive, neutral and negative) for a specific search term
+    :param search_term: term queried
+    :type search_term: str
+    :param df_tweet: df containing all tweets
+    :type df_tweet: pd.DataFrame
+    :param sentiment_model: model performing analysis (bert or roberta)
+    :type sentiment_model: str
+    :return: None
+    :rtype: None
     """
     type_model = get_type_of_model(sentiment_model=sentiment_model)
 
@@ -175,40 +175,53 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
         sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
                                         background_color="white", stopwords=stop_words).generate(str(sentiment_tweets))
         plt.figure()
-        plt.title("Wordcloud {0} Tweets - {1} Model".format(sentiment, type_model))
+        plt.title("{0} Wordcloud {1} Tweets - {1} Model".format(search_term, sentiment, type_model))
         plt.imshow(sentiment_wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.savefig('../img/{0}_wordcloud_{1}_sentiment_{2}_{3}.png'.format(
-            search_term, sentiment, type_model, today_string)
+        plt.savefig('../img/{0}/twitter/{1}/wordcloud_{2}_sentiment_{3}'.format(
+            search_term, type_model, sentiment, today_string)
         )
 
 
-# TODO: Separate code into 1 scraping file and 1 sentiment analysis file (probably a class) to avoid duplication
-if __name__ == "__main__":
+def create_result_folders_if_not_exist(search_term: str) -> None:
+    """
+    Creates data and img result folders
+    :param search_term: term queried
+    :type search_term: str
+    :return: None
+    :rtype: None
+    """
+    paths = ["../data/results/{0}/discord".format(search_term), "../data/results/{0}/twitter".format(search_term),
+             "../img/{0}/discord".format(search_term), "../img/{0}/twitter/bert".format(search_term),
+             "../img/{0}/twitter/roberta".format(search_term)]
+    for path in paths:
+        if not os.path.exists(path):
+            os.makedirs(path)
 
-    # TODO: Add crypto context annotation, something similar to "tweet.fields=context_annotations context:174"
-    if len(sys.argv) <= 1:
-        save_query = 'staratlas'
-        text_query = '({0} OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS") -is:retweet'.format(save_query)
-        limit: int = 10000
 
-    else:
-        save_query = str(sys.argv[1])
-        text_query = save_query
-        limit = int(sys.argv[2])
-
-    start_time = time.time()
-
-    # logger
-    logger = logging.getLogger("tweepy")
+def set_and_get_logger(search_term: str):
+    """
+    Sets the logger using tweepy configuration
+    :param search_term: query search
+    :type search_term: str
+    :return: logger
+    :rtype: logger
+    """
+    logger_tweepy = logging.getLogger("tweepy")
     logging.basicConfig(level=logging.INFO)
-    handler = logging.FileHandler(filename="../logger/{0}.log".format(save_query))
-    logger.addHandler(handler)
+    handler = logging.FileHandler(filename="../logger/{0}.log".format(search_term))
+    logger_tweepy.addHandler(handler)
+    logger_tweepy.info("Search term {0}".format(text_query))
 
-    logger.info("Search term {0}".format(text_query))
+    return logger_tweepy
 
-    # env variables
-    load_dotenv()
+
+def get_tweepy_api() -> tweepy.API:
+    """
+    Authenticates to Twitter API and returns tweepy API
+    :return: API
+    :rtype: tweepy.API
+    """
     consumer_key = os.getenv('consumer_key')
     consumer_secret = os.getenv('consumer_secret')
     access_token = os.getenv('access_token')
@@ -219,10 +232,41 @@ if __name__ == "__main__":
                                     access_token=access_token, access_token_secret=access_token_secret)
     api = tweepy.API(auth, wait_on_rate_limit=True)
 
+    return api
+
+
+# TODO: Separate code into 1 scraping file and 1 sentiment analysis file (probably a class) to avoid duplication
+if __name__ == "__main__":
+
+    # TODO: Add crypto context annotation, something similar to "tweet.fields=context_annotations context:174"
+    if len(sys.argv) <= 1:
+        save_query = 'stepn'
+        text_query = '({0} OR @{0} OR #{0} OR "$GST" OR "$GMT") -is:retweet'.format(save_query)
+        limit: int = 1000
+
+    else:
+        save_query = str(sys.argv[1])
+        text_query = save_query
+        limit = int(sys.argv[2])
+
+    start_time = time.time()
+
+    # env variables
+    load_dotenv()
+
+    # create new folder to store results
+    create_result_folders_if_not_exist(search_term=save_query)
+
+    # logger
+    logger = set_and_get_logger(search_term=save_query)
+
+    # tweepy api
+    tweepy_api = get_tweepy_api()
+
     # scraping
     today = datetime.today()
     today_string = today.strftime('%d-%m-%Y-%H-%M')
-    df = run_scraping(twitter_api=api, search_term=text_query, count=limit,
+    df = run_scraping(twitter_api=tweepy_api, search_term=text_query, count=limit,
                       until_date=today, tweet_type="mixed")
 
     # perform sentiment analysis
@@ -231,9 +275,7 @@ if __name__ == "__main__":
     for model in tqdm(models):
         logger.info("Sentiment analysis starting for model {0}".format(str(model)))
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
-        logger.info("Pie-chart starting for model {0}".format(str(model)))
         save_pie_chart(search_term=save_query, df_tweets=df_results, sentiment_model=model)
-        logger.info("Wordcloud starting for model {0}".format(str(model)))
         save_word_cloud(search_term=save_query, df_tweet=df_results, sentiment_model=model)
 
     del df
@@ -241,5 +283,5 @@ if __name__ == "__main__":
     logger.info("{0} total amount of tweets analyzed".format(len(df_results)))
 
     # Export
-    df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(save_query, today_string), sep=';')
+    df_results.to_csv('../data/results/{0}/twitter/sentiment_{1}.csv'.format(save_query, today_string), sep=';')
     logger.info("Analysis run in {0}".format(time.time() - start_time))

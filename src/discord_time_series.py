@@ -6,7 +6,7 @@ from datetime import datetime
 if __name__ == "__main__":
 
     # TODO: Change hard-coded import string
-    df = pd.read_csv("../data/staratlas_results/discord_staratlas_sentiment_07-05-2022-18-31.csv", sep=';', decimal=',')
+    df = pd.read_csv("../data/results/staratlas/discord_staratlas_sentiment_07-05-2022-18-31.csv", sep=';', decimal=',')
 
     list_dates = df.Date.str.split()
     list_days = [item[0] for item in list_dates]
@@ -23,5 +23,5 @@ if __name__ == "__main__":
     roberta_unstack = roberta.unstack()
 
     # TODO: Change hard-coded export string
-    roberta_unstack.to_csv("../data/staratlas_results/discord_timeseries_staratlas_sentiment_07-05-2022-18-31_roberta.csv",
+    roberta_unstack.to_csv("../data/staratlas/timeseries_roberta_sentiment_07-05-2022-18-31.csv",
                            sep=';', decimal=',')
