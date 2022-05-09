@@ -243,7 +243,7 @@ class TwitterSentiment(Twitter):
                 str(sentiment_tweets)
             )
             plt.figure()
-            plt.title("{0} Wordcloud {1} Tweets - {1} Model".format(self.search_term, sentiment, self.model_str))
+            plt.title("{0} Wordcloud {1} Tweets - {2} Model".format(self.search_term, sentiment, self.model_str))
             plt.imshow(sentiment_wordcloud, interpolation="bilinear")
             plt.axis("off")
 
