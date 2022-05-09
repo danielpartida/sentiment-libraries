@@ -238,6 +238,23 @@ class TwitterSentiment(Twitter):
                 self.search_term, self.model_str, sentiment, self.today_string)
             )
 
+    def calculate_timeseries_analysis(self):
+        list_dates = self.df_tweets.created_at.str.split()
+        list_days = [item[0] for item in list_dates]
+        self.df_tweets["date"] = list_days
+        self.df_tweets.date = self.df_tweets.date.apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
+
+        # group-by
+        self.df_tweets.sort_values(by=["date"], ascending=True, inplace=True)
+
+        # group-by and pivot
+        model_group_by = self.df_tweets.groupby(by=['date', self.model_str])[self.model_str].count()
+        model_unstack = model_group_by.unstack()
+        model_unstack.to_csv(
+            "../data/results/{0}/twitter/timeseries_{1}_sentiment_{2}.csv".format(
+                self.search_term, self.model_str, self.today_string
+            ), sep=';', decimal=',')
+
     def run_sentiment_analysis(self):
         """
         Runner
@@ -248,4 +265,5 @@ class TwitterSentiment(Twitter):
         self.df_tweets.to_csv('../data/results/{0}/twitter/sentiment_{1}.csv'.format(
             self.search_term, self.today_string
         ), sep=';')
+        self.calculate_timeseries_analysis()
         self.logger.info("Analysis run in {0} seconds".format(time.time() - self.start_time))
