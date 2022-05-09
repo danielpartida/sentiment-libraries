@@ -183,6 +183,10 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
         )
 
 
+def create_new_folders_if_not_exist(directory_name: str) -> None:
+
+    if not os.path.exists(directory_name):
+        os.makedirs(directory_name)
 # TODO: Separate code into 1 scraping file and 1 sentiment analysis file (probably a class) to avoid duplication
 if __name__ == "__main__":
 
@@ -198,6 +202,9 @@ if __name__ == "__main__":
         limit = int(sys.argv[2])
 
     start_time = time.time()
+
+    # create new folder to store results
+    create_new_folders_if_not_exist(directory_name="../data/results/{0}".format(save_query))
 
     # logger
     logger = logging.getLogger("tweepy")
