@@ -175,11 +175,11 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
         sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
                                         background_color="white", stopwords=stop_words).generate(str(sentiment_tweets))
         plt.figure()
-        plt.title("Wordcloud {0} Tweets - {1} Model".format(sentiment, type_model))
+        plt.title("{0} Wordcloud {1} Tweets - {1} Model".format(search_term, sentiment, type_model))
         plt.imshow(sentiment_wordcloud, interpolation="bilinear")
         plt.axis("off")
-        plt.savefig('../img/{0}_wordcloud_{1}_sentiment_{2}_{3}.png'.format(
-            search_term, sentiment, type_model, today_string)
+        plt.savefig('../img/{0}/twitter/{1}/wordcloud_{2}_sentiment_{3}'.format(
+            search_term, type_model, sentiment, today_string)
         )
 
 
@@ -251,5 +251,5 @@ if __name__ == "__main__":
     logger.info("{0} total amount of tweets analyzed".format(len(df_results)))
 
     # Export
-    df_results.to_csv('../data/{0}_sentiment_{1}.csv'.format(save_query, today_string), sep=';')
+    df_results.to_csv('../data/{0}/twitter/sentiment_{1}.csv'.format(save_query, today_string), sep=';')
     logger.info("Analysis run in {0}".format(time.time() - start_time))
