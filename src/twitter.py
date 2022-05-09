@@ -32,7 +32,6 @@ class Twitter:
         logging.basicConfig(level=logging.INFO)
         handler = logging.FileHandler(filename="../logger/{0}.log".format(self.search_term))
         logger.addHandler(handler)
-        logger.info("Search term {0}".format(self.search_term))
 
         return logger
 
@@ -50,12 +49,20 @@ class TwitterScraper(Twitter):
         :type tweet_type:
         """
         super().__init__(search_term=search_term)
-        self.text_query = '({0} OR @{0} OR #{0} or ${1}) -is:retweet'.format(search_term, token)
+        self.text_query = self.build_text_query(search_term=search_term, token=token)
         self.limit_tweets = limit_tweets
         self.tweet_type = self.assert_and_get_tweet_type(tweet_type=tweet_type)
         self.start_time = time.time()
         self.api = self.get_tweepy_api()
         self.create_result_folders_if_not_exist()
+
+    @staticmethod
+    def build_text_query(search_term: str, token: str):
+        if token:
+            text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet'.format(search_term, token)
+        else:
+            text_query = '({0} OR @{0} OR #{0}) -is:retweet'.format(search_term)
+        return text_query
 
     @staticmethod
     def assert_and_get_tweet_type(tweet_type: str) -> str:
@@ -112,10 +119,13 @@ class TwitterScraper(Twitter):
         :return: dataframe of tweets
         :rtype: pd.DataFrame
         """
+        self.logger.info("Searching for term {0}".format(self.search_term))
+
         today = datetime.today()
         until_str = today.strftime('%Y-%m-%d')
         list_dict_tweets = []
         try:
+            # FIXME: Take a closer look why some retweeted tweets are being returned even though -is:retweet is set
             list_twitter_items = [tweet for tweet in tweepy.Cursor(self.api.search_tweets, q=self.search_term,
                                                                    lang="en", result_type=self.tweet_type, count=100,
                                                                    until=until_str).items(self.limit_tweets)]
@@ -195,27 +205,29 @@ class TwitterSentiment(Twitter):
             lambda x: x[0]['score']
         )
 
-        self.df_tweets.drop(['sentiment_dict'], axis=1, inplace=True)
-
-    def save_pie_chart_sentiment_analysis(self) -> None:
+    def save_pie_chart_sentiment_analysis(self, df_tweets: pd.DataFrame, is_quantile: bool) -> None:
         """
             Creates and saves pie chart of sentiment analysis
-            :return: None
-            :rtype: None
-            """
+        """
         # Let's count the number of tweets by sentiments
-        sentiment_counts = self.df_tweets.groupby(['sentiment_{0}'.format(self.model_str)]).size()
+        sentiment_counts = df_tweets.groupby(['sentiment_{0}'.format(self.model_str)]).size()
 
         # Let's visualize the sentiments
         fig = plt.figure(figsize=(6, 6), dpi=100)
         ax = plt.subplot(111)
         sentiment_counts.plot.pie(ax=ax, autopct='%1.1f%%', startangle=270, fontsize=12, label="")
         plt.title("{0} Pie-chart Sentiment Analysis - {1} Model".format(self.search_term, self.model_str))
-        plt.savefig('../img/{0}/twitter/{1}/pie_chart_sentiment_{2}.png'.format(
-            self.search_term, self.model_str, self.today_string)
-        )
 
-    def save_word_cloud(self):
+        if is_quantile:
+            plt.savefig('../img/{0}/twitter/{1}/pie_chart_sentiment_quantile_{2}.png'.format(
+                self.search_term, self.model_str, self.today_string)
+            )
+        else:
+            plt.savefig('../img/{0}/twitter/{1}/pie_chart_sentiment_{2}.png'.format(
+                self.search_term, self.model_str, self.today_string)
+            )
+
+    def save_word_cloud(self, df_tweets: pd.DataFrame, is_quantile: bool) -> None:
         """
             Creates and saves 3 world clouds (positive, neutral and negative) for a specific search term
         """
@@ -223,46 +235,81 @@ class TwitterSentiment(Twitter):
         sentiment_types = ["Positive", "Negative", "Neutral"]
         stop_words = set(["https", "co", "RT"] + list(STOPWORDS))
         for sentiment in sentiment_types:
-            sentiment_tweets = self.df_tweets['text'][
-                self.df_tweets['sentiment_{0}'.format(self.model_str)] == sentiment
+            sentiment_tweets = df_tweets['text'][
+                df_tweets['sentiment_{0}'.format(self.model_str)] == sentiment
             ]
             sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
                                             background_color="white", stopwords=stop_words).generate(
                 str(sentiment_tweets)
             )
             plt.figure()
-            plt.title("{0} Wordcloud {1} Tweets - {1} Model".format(self.search_term, sentiment, self.model_hugging_face))
+            plt.title("{0} Wordcloud {1} Tweets - {2} Model".format(self.search_term, sentiment, self.model_str))
             plt.imshow(sentiment_wordcloud, interpolation="bilinear")
             plt.axis("off")
-            plt.savefig('../img/{0}/twitter/{1}/wordcloud_{2}_sentiment_{3}'.format(
-                self.search_term, self.model_str, sentiment, self.today_string)
-            )
 
-    def calculate_timeseries_analysis(self):
-        self.df_tweets["date"] = self.df_tweets.created_at.apply(lambda x: date(x.year, x.month, x.day))
+            if is_quantile:
+                plt.savefig('../img/{0}/twitter/{1}/wordcloud_{2}_sentiment_quantile_{3}'.format(
+                    self.search_term, self.model_str, sentiment, self.today_string)
+                )
+            else:
+                plt.savefig('../img/{0}/twitter/{1}/wordcloud_{2}_sentiment_{3}'.format(
+                    self.search_term, self.model_str, sentiment, self.today_string)
+                )
+
+    def calculate_timeseries_analysis(self, df_tweets: pd.DataFrame, is_quantile: bool) -> None:
+        df_tweets["date"] = self.df_tweets.created_at.apply(lambda x: date(x.year, x.month, x.day))
 
         # group-by
-        self.df_tweets.sort_values(by=["date"], ascending=True, inplace=True)
+        df_tweets.sort_values(by=["date"], ascending=True, inplace=True)
 
         # group-by and pivot
         model_group_by = self.df_tweets.groupby(
             by=['date', 'sentiment_{0}'.format(self.model_str)]
         )['sentiment_{0}'.format(self.model_str)].count()
         model_unstack = model_group_by.unstack()
-        model_unstack.to_csv(
-            "../data/results/{0}/twitter/timeseries_{1}_sentiment_{2}.csv".format(
-                self.search_term, self.model_str, self.today_string
-            ), sep=';', decimal=',')
 
-    def run_sentiment_analysis(self):
+        if is_quantile:
+            model_unstack.to_csv(
+                "../data/results/{0}/twitter/timeseries_{1}_sentiment_quantile_{2}.csv".format(
+                    self.search_term, self.model_str, self.today_string
+                ), sep=';', decimal=',')
+        else:
+            model_unstack.to_csv(
+                "../data/results/{0}/twitter/timeseries_{1}_sentiment_{2}.csv".format(
+                    self.search_term, self.model_str, self.today_string
+                ), sep=';', decimal=',')
+
+    def run_sentiment_analysis(self) -> None:
         """
         Runner
         """
         self.calculate_sentiment_analysis()
-        self.save_pie_chart_sentiment_analysis()
-        self.save_word_cloud()
-        self.df_tweets.to_csv('../data/results/{0}/twitter/sentiment_{1}.csv'.format(
-            self.search_term, self.today_string
-        ), sep=';')
-        self.calculate_timeseries_analysis()
+
+        self.save_pie_chart_sentiment_analysis(df_tweets=self.df_tweets, is_quantile=False)
+        self.save_word_cloud(df_tweets=self.df_tweets, is_quantile=False)
+        self.df_tweets.to_csv('../data/results/{0}/twitter/sentiment_{1}.csv'.format(self.search_term, self.today_string),
+                          sep=';')
+
+        self.calculate_timeseries_analysis(df_tweets=self.df_tweets, is_quantile=False)
+
         self.logger.info("Analysis run in {0} seconds".format(time.time() - self.start_time))
+
+    def run_quantile_analysis(self) -> None:
+        """
+        Runner quantile
+        :return:
+        :rtype:
+        """
+        start_time = time.time()
+
+        # Filter the upper 95 quantile of most liked tweets
+        quantile_favorite_tweets_95 = self.df_tweets.favorite_count.quantile(0.95)
+        df_tweets_quantile = self.df_tweets.loc[self.df_tweets.favorite_count > quantile_favorite_tweets_95]
+
+        self.save_pie_chart_sentiment_analysis(df_tweets=df_tweets_quantile, is_quantile=True)
+        self.save_word_cloud(df_tweets=df_tweets_quantile, is_quantile=True)
+        df_tweets_quantile.to_csv('../data/results/{0}/twitter/sentiment_quantile_{1}.csv'.format(
+            self.search_term, self.today_string), sep=';')
+
+        self.logger.info("Quantile analysis run in {0} seconds".format(time.time() - start_time))
+
