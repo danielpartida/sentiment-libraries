@@ -50,12 +50,20 @@ class TwitterScraper(Twitter):
         :type tweet_type:
         """
         super().__init__(search_term=search_term)
-        self.text_query = '({0} OR @{0} OR #{0} or ${1}) -is:retweet'.format(search_term, token)
+        self.text_query = self.build_text_query(search_term=search_term, token=token)
         self.limit_tweets = limit_tweets
         self.tweet_type = self.assert_and_get_tweet_type(tweet_type=tweet_type)
         self.start_time = time.time()
         self.api = self.get_tweepy_api()
         self.create_result_folders_if_not_exist()
+
+    @staticmethod
+    def build_text_query(search_term: str, token: str):
+        if token:
+            text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet'.format(search_term, token)
+        else:
+            text_query = '({0} OR @{0} OR #{0}) -is:retweet'.format(search_term)
+        return text_query
 
     @staticmethod
     def assert_and_get_tweet_type(tweet_type: str) -> str:
