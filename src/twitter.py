@@ -166,9 +166,9 @@ class TwitterScraper(Twitter):
 
         # Filter the upper 95 quantile of most liked tweets
         quantile_favorite_tweets_95 = df_tweets.favorite_count.quantile(0.95)
-        df_tweets_small = df_tweets.loc[df_tweets.favorite_count > quantile_favorite_tweets_95]
+        df_tweets_quantile = df_tweets.loc[df_tweets.favorite_count > quantile_favorite_tweets_95]
 
-        return df_tweets, df_tweets_small
+        return df_tweets, df_tweets_quantile
 
 
 class TwitterSentiment(Twitter):
