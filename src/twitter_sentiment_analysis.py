@@ -242,7 +242,7 @@ if __name__ == "__main__":
     if len(sys.argv) <= 1:
         save_query = 'stepn'
         text_query = '({0} OR @{0} OR #{0} OR "$GST" OR "$GMT") -is:retweet'.format(save_query)
-        limit: int = 100
+        limit: int = 1000
 
     else:
         save_query = str(sys.argv[1])
