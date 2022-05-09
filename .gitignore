@@ -127,4 +127,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .idea
-data/results/staratlas/discord_timeseries_staratlas_sentiment_07-05-2022-18-31_roberta.csv
+data/results/staratlas/discord/timeseries_roberta_sentiment_07-05-2022-18-31.csv

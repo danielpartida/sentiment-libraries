@@ -23,5 +23,5 @@ if __name__ == "__main__":
     roberta_unstack = roberta.unstack()
 
     # TODO: Change hard-coded export string
-    roberta_unstack.to_csv("../data/staratlas/discord_timeseries_staratlas_sentiment_07-05-2022-18-31_roberta.csv",
+    roberta_unstack.to_csv("../data/staratlas/timeseries_roberta_sentiment_07-05-2022-18-31.csv",
                            sep=';', decimal=',')

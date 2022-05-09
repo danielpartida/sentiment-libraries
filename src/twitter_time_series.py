@@ -6,7 +6,7 @@ from datetime import datetime
 if __name__ == "__main__":
 
     # TODO: Change hard-coded import string
-    df = pd.read_csv("../data/results/staratlas/twitter_staratlas_sentiment_06-05-2022-13-46.csv", sep=';', decimal=',')
+    df = pd.read_csv("../data/results/staratlas/twitter/sentiment_06-05-2022-13-46.csv", sep=';', decimal=',')
 
     list_dates = df.created_at.str.split()
     list_days = [item[0] for item in list_dates]
