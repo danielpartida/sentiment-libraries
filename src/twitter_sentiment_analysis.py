@@ -150,8 +150,8 @@ def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str, search_term: s
     fig = plt.figure(figsize=(6, 6), dpi=100)
     ax = plt.subplot(111)
     sentiment_counts.plot.pie(ax=ax, autopct='%1.1f%%', startangle=270, fontsize=12, label="")
-    plt.title("Pie-chart Sentiment Analysis- {0} Model".format(type_model))
-    plt.savefig('../img/{0}_pie_chart_sentiment_{1}_{2}.png'.format(search_term, type_model, today_string))
+    plt.title("{0} Pie-chart Sentiment Analysis - {1} Model".format(search_term, type_model))
+    plt.savefig('../img/{0}/twitter/{1}/pie_chart_sentiment_{2}.png'.format(search_term, type_model, today_string))
 
 
 def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: str) -> None:
@@ -243,9 +243,7 @@ if __name__ == "__main__":
     for model in tqdm(models):
         logger.info("Sentiment analysis starting for model {0}".format(str(model)))
         df_results = run_sentiment(df_tweets=df, sentiment_model=model)
-        logger.info("Pie-chart starting for model {0}".format(str(model)))
         save_pie_chart(search_term=save_query, df_tweets=df_results, sentiment_model=model)
-        logger.info("Wordcloud starting for model {0}".format(str(model)))
         save_word_cloud(search_term=save_query, df_tweet=df_results, sentiment_model=model)
 
     del df
