@@ -184,7 +184,7 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
 
 
 def create_result_folders_if_not_exist(search_term: str) -> None:
-    paths = ["../data/results/discord/{0}".format(search_term), "../data/results/twitter/{0}".format(search_term),
+    paths = ["../data/results/{0}/discord".format(search_term), "../data/results/{0}/twitter".format(search_term),
              "../img/{0}/discord".format(search_term), "../img/{0}/twitter/bert".format(search_term),
              "../img/{0}/twitter/roberta".format(search_term)]
     for path in paths:
