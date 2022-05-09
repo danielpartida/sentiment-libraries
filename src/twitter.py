@@ -3,6 +3,7 @@ import os
 import time
 from datetime import date, datetime
 import re
+from typing import Tuple
 
 import pandas as pd
 import tweepy
@@ -111,7 +112,7 @@ class TwitterScraper(Twitter):
             if not os.path.exists(path):
                 os.makedirs(path)
 
-    def get_scraped_tweets(self) -> pd.DataFrame:
+    def get_scraped_tweets(self) -> Tuple:
         """
         Twitter’s standard search API only searches against a sampling of recent Tweets published in the past 7 days
         Tweepy library: https://docs.tweepy.org/en/v4.8.0/api.html#tweepy.API.search_tweets
@@ -163,7 +164,11 @@ class TwitterScraper(Twitter):
             day, hour, time.time() - self.start_time)
         )
 
-        return df_tweets
+        # Filter the upper 95 quantile of most liked tweets
+        quantile_favorite_tweets_95 = df_tweets.favorite_count.quantile(0.95)
+        df_tweets_small = df_tweets.loc[df_tweets.favorite_count > quantile_favorite_tweets_95]
+
+        return df_tweets, df_tweets_small
 
 
 class TwitterSentiment(Twitter):
