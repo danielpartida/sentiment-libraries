@@ -245,7 +245,9 @@ class TwitterSentiment(Twitter):
         self.df_tweets.sort_values(by=["date"], ascending=True, inplace=True)
 
         # group-by and pivot
-        model_group_by = self.df_tweets.groupby(by=['date', self.model_str])[self.model_str].count()
+        model_group_by = self.df_tweets.groupby(
+            by=['date', 'sentiment_{0}'.format(self.model_str)]
+        )[self.model_str].count()
         model_unstack = model_group_by.unstack()
         model_unstack.to_csv(
             "../data/results/{0}/twitter/timeseries_{1}_sentiment_{2}.csv".format(
