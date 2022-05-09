@@ -131,15 +131,15 @@ def run_sentiment(df_tweets: pd.DataFrame, sentiment_model: str) -> pd.DataFrame
 
 def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str, search_term: str) -> None:
     """
-
-    :param search_term:
-    :type search_term:
-    :param df_tweets:
-    :type df_tweets:
-    :param sentiment_model:
-    :type sentiment_model:
-    :return:
-    :rtype:
+    Creates and saves pie chart of sentiment analysis
+    :param search_term: term queried
+    :type search_term: str
+    :param df_tweets: data containing all tweets
+    :type df_tweets: pd.DataFrame
+    :param sentiment_model: model performing the analysis (bert or roberta)
+    :type sentiment_model: str
+    :return: None
+    :rtype: None
     """
     type_model = get_type_of_model(sentiment_model=sentiment_model)
 
@@ -156,15 +156,15 @@ def save_pie_chart(df_tweets: pd.DataFrame, sentiment_model: str, search_term: s
 
 def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: str) -> None:
     """
-
-    :param search_term:
-    :type search_term:
-    :param df_tweet:
-    :type df_tweet:
-    :param sentiment_model:
-    :type sentiment_model:
-    :return:
-    :rtype:
+    Creates and saves 3 world clouds (positive, neutral and negative) for a specific search term
+    :param search_term: term queried
+    :type search_term: str
+    :param df_tweet: df containing all tweets
+    :type df_tweet: pd.DataFrame
+    :param sentiment_model: model performing analysis (bert or roberta)
+    :type sentiment_model: str
+    :return: None
+    :rtype: None
     """
     type_model = get_type_of_model(sentiment_model=sentiment_model)
 
@@ -184,12 +184,55 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
 
 
 def create_result_folders_if_not_exist(search_term: str) -> None:
+    """
+    Creates data and img result folders
+    :param search_term: term queried
+    :type search_term: str
+    :return: None
+    :rtype: None
+    """
     paths = ["../data/results/{0}/discord".format(search_term), "../data/results/{0}/twitter".format(search_term),
              "../img/{0}/discord".format(search_term), "../img/{0}/twitter/bert".format(search_term),
              "../img/{0}/twitter/roberta".format(search_term)]
     for path in paths:
         if not os.path.exists(path):
             os.makedirs(path)
+
+
+def set_and_get_logger(search_term: str):
+    """
+    Sets the logger using tweepy configuration
+    :param search_term: query search
+    :type search_term: str
+    :return: logger
+    :rtype: logger
+    """
+    logger_tweepy = logging.getLogger("tweepy")
+    logging.basicConfig(level=logging.INFO)
+    handler = logging.FileHandler(filename="../logger/{0}.log".format(search_term))
+    logger_tweepy.addHandler(handler)
+    logger_tweepy.info("Search term {0}".format(text_query))
+
+    return logger_tweepy
+
+
+def get_tweepy_api() -> tweepy.API:
+    """
+    Authenticates to Twitter API and returns tweepy API
+    :return: API
+    :rtype: tweepy.API
+    """
+    consumer_key = os.getenv('consumer_key')
+    consumer_secret = os.getenv('consumer_secret')
+    access_token = os.getenv('access_token')
+    access_token_secret = os.getenv('access_token_secret')
+
+    # Twitter API
+    auth = tweepy.OAuth1UserHandler(consumer_key=consumer_key, consumer_secret=consumer_secret,
+                                    access_token=access_token, access_token_secret=access_token_secret)
+    api = tweepy.API(auth, wait_on_rate_limit=True)
+
+    return api
 
 
 # TODO: Separate code into 1 scraping file and 1 sentiment analysis file (probably a class) to avoid duplication
@@ -208,33 +251,22 @@ if __name__ == "__main__":
 
     start_time = time.time()
 
+    # env variables
+    load_dotenv()
+
     # create new folder to store results
     create_result_folders_if_not_exist(search_term=save_query)
 
     # logger
-    logger = logging.getLogger("tweepy")
-    logging.basicConfig(level=logging.INFO)
-    handler = logging.FileHandler(filename="../logger/{0}.log".format(save_query))
-    logger.addHandler(handler)
+    logger = set_and_get_logger(search_term=save_query)
 
-    logger.info("Search term {0}".format(text_query))
-
-    # env variables
-    load_dotenv()
-    consumer_key = os.getenv('consumer_key')
-    consumer_secret = os.getenv('consumer_secret')
-    access_token = os.getenv('access_token')
-    access_token_secret = os.getenv('access_token_secret')
-
-    # Twitter API
-    auth = tweepy.OAuth1UserHandler(consumer_key=consumer_key, consumer_secret=consumer_secret,
-                                    access_token=access_token, access_token_secret=access_token_secret)
-    api = tweepy.API(auth, wait_on_rate_limit=True)
+    # tweepy api
+    tweepy_api = get_tweepy_api()
 
     # scraping
     today = datetime.today()
     today_string = today.strftime('%d-%m-%Y-%H-%M')
-    df = run_scraping(twitter_api=api, search_term=text_query, count=limit,
+    df = run_scraping(twitter_api=tweepy_api, search_term=text_query, count=limit,
                       until_date=today, tweet_type="mixed")
 
     # perform sentiment analysis
@@ -251,5 +283,5 @@ if __name__ == "__main__":
     logger.info("{0} total amount of tweets analyzed".format(len(df_results)))
 
     # Export
-    df_results.to_csv('../data/{0}/twitter/sentiment_{1}.csv'.format(save_query, today_string), sep=';')
+    df_results.to_csv('../data/results/{0}/twitter/sentiment_{1}.csv'.format(save_query, today_string), sep=';')
     logger.info("Analysis run in {0}".format(time.time() - start_time))
