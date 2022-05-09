@@ -7,7 +7,7 @@ import pandas as pd
 from datetime import datetime
 from wordcloud import WordCloud, STOPWORDS
 
-from twitter_sentiment_analysis import get_type_of_model, clean_tweet
+from src.archive.twitter_sentiment_analysis import get_type_of_model, clean_tweet
 
 
 def handle_content(statement: str) -> str:
