@@ -53,7 +53,8 @@ def run_scraping(twitter_api: tweepy.API, search_term: str, count: int,
 
         for tweet in tqdm(list_twitter_items):
             # fetch metadata of tweet
-            dict_tweet = {'id': tweet.id, 'created_at': tweet.created_at, 'username': tweet.user.screen_name,
+            dict_tweet = {'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
+                          'created_at': tweet.created_at, 'username': tweet.user.screen_name,
                           'verified': tweet.user.verified, 'location': tweet.user.location,
                           'following': tweet.user.friends_count, 'followers': tweet.user.followers_count,
                           'total_tweets': tweet.user.statuses_count, 'favorite_count': tweet.favorite_count,
