@@ -183,18 +183,22 @@ def save_word_cloud(df_tweet: pd.DataFrame, sentiment_model: str, search_term: s
         )
 
 
-def create_new_folders_if_not_exist(directory_name: str) -> None:
+def create_new_folders_if_not_exist(search_term: str) -> None:
+    paths = ["../data/results/{0}".format(search_term), "../img/{0}/discord".format(search_term),
+             "../img/{0}/twitter/bert".format(search_term), "../img/{0}/twitter/robert".format(search_term)]
+    for path in paths:
+        if not os.path.exists(path):
+            os.makedirs(path)
 
-    if not os.path.exists(directory_name):
-        os.makedirs(directory_name)
+
 # TODO: Separate code into 1 scraping file and 1 sentiment analysis file (probably a class) to avoid duplication
 if __name__ == "__main__":
 
     # TODO: Add crypto context annotation, something similar to "tweet.fields=context_annotations context:174"
     if len(sys.argv) <= 1:
-        save_query = 'staratlas'
-        text_query = '({0} OR @staratlas OR #staralas OR "$ATLAS" OR "$POLIS") -is:retweet'.format(save_query)
-        limit: int = 10000
+        save_query = 'stepn'
+        text_query = '({0} OR @{0} OR #{0} OR "$GST" OR "$GMT") -is:retweet'.format(save_query)
+        limit: int = 100
 
     else:
         save_query = str(sys.argv[1])
@@ -204,7 +208,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # create new folder to store results
-    create_new_folders_if_not_exist(directory_name="../data/results/{0}".format(save_query))
+    create_new_folders_if_not_exist(search_term=save_query)
 
     # logger
     logger = logging.getLogger("tweepy")
