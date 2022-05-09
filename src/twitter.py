@@ -161,8 +161,9 @@ class TwitterSentiment(Twitter):
 
     def __init__(self, search_term: str, model: str = "roberta", df_tweet: pd.DataFrame = pd.DataFrame()):
         super().__init__(search_term=search_term)
-        self.model = self.get_model_type(model_type=model)
-        self.sentiment_analysis = pipeline(model=self.model)
+        self.model_str = model
+        self.model_hugging_face = self.get_model_type(model_type=model)
+        self.sentiment_analysis = pipeline(model=self.model_hugging_face)
         self.start_time = time.time()
         self.df_tweets = df_tweet
         self.today_string = self.today.strftime('%d-%m-%Y-%H-%M')
@@ -184,19 +185,19 @@ class TwitterSentiment(Twitter):
             """
 
         self.df_tweets['sentiment_dict'] = self.df_tweets["text"].apply(lambda x: self.sentiment_analysis(x))
-        self.df_tweets['sentiment_{0}'.format(self.model)] = self.df_tweets["sentiment_dict"].apply(
+        self.df_tweets['sentiment_{0}'.format(self.model_hugging_face)] = self.df_tweets["sentiment_dict"].apply(
             lambda x: x[0]['label'])
-        if self.model == "bert":
-            self.df_tweets['sentiment_{0}'.format(self.model)] = self.df_tweets[
-                'sentiment_{0}'.format(self.model)].apply(
+        if self.model_hugging_face == "bert":
+            self.df_tweets['sentiment_{0}'.format(self.model_hugging_face)] = self.df_tweets[
+                'sentiment_{0}'.format(self.model_hugging_face)].apply(
                 lambda x: x.replace("POS", "Positive"))
-            self.df_tweets['sentiment_{0}'.format(self.model)] = self.df_tweets[
-                'sentiment_{0}'.format(self.model)].apply(
+            self.df_tweets['sentiment_{0}'.format(self.model_hugging_face)] = self.df_tweets[
+                'sentiment_{0}'.format(self.model_hugging_face)].apply(
                 lambda x: x.replace("NEG", "Negative"))
-            self.df_tweets['sentiment_{0}'.format(self.model)] = self.df_tweets[
-                'sentiment_{0}'.format(self.model)].apply(
+            self.df_tweets['sentiment_{0}'.format(self.model_hugging_face)] = self.df_tweets[
+                'sentiment_{0}'.format(self.model_hugging_face)].apply(
                 lambda x: x.replace("NEU", "Neutral"))
-        self.df_tweets['score_{0}'.format(self.model)] = self.df_tweets["sentiment_dict"].apply(lambda x: x[0]['score'])
+        self.df_tweets['score_{0}'.format(self.model_hugging_face)] = self.df_tweets["sentiment_dict"].apply(lambda x: x[0]['score'])
 
         self.df_tweets.drop(['sentiment_dict'], axis=1, inplace=True)
 
@@ -206,28 +207,21 @@ class TwitterSentiment(Twitter):
             :return: None
             :rtype: None
             """
-
         # Let's count the number of tweets by sentiments
-        sentiment_counts = self.df_tweets.groupby(['sentiment_{0}'.format(self.model)]).size()
+        sentiment_counts = self.df_tweets.groupby(['sentiment_{0}'.format(self.model_hugging_face)]).size()
 
         # Let's visualize the sentiments
         fig = plt.figure(figsize=(6, 6), dpi=100)
         ax = plt.subplot(111)
         sentiment_counts.plot.pie(ax=ax, autopct='%1.1f%%', startangle=270, fontsize=12, label="")
-        plt.title("{0} Pie-chart Sentiment Analysis - {1} Model".format(self.search_term, self.model))
+        plt.title("{0} Pie-chart Sentiment Analysis - {1} Model".format(self.search_term, self.model_hugging_face))
         plt.savefig('../img/{0}/twitter/{1}/pie_chart_sentiment_{2}.png'.format(
-            self.search_term, self.model, self.today_string)
+            self.search_term, self.model_str, self.today_string)
         )
 
     def save_word_cloud(self):
         """
             Creates and saves 3 world clouds (positive, neutral and negative) for a specific search term
-            :param search_term: term queried
-            :type search_term: str
-            :param df_tweet: df containing all tweets
-            :type df_tweet: pd.DataFrame
-            :param sentiment_model: model performing analysis (bert or roberta)
-            :type sentiment_model: str
             :return: None
             :rtype: None
             """
@@ -235,17 +229,17 @@ class TwitterSentiment(Twitter):
         sentiment_types = ["Positive", "Negative", "Neutral"]
         stop_words = set(["https", "co", "RT"] + list(STOPWORDS))
         for sentiment in sentiment_types:
-            sentiment_tweets = self.df_tweet['text'][self.df_tweet['sentiment_{0}'.format(self.model)] == sentiment]
+            sentiment_tweets = self.df_tweet['text'][self.df_tweet['sentiment_{0}'.format(self.model_hugging_face)] == sentiment]
             sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
                                             background_color="white", stopwords=stop_words).generate(
                 str(sentiment_tweets)
             )
             plt.figure()
-            plt.title("{0} Wordcloud {1} Tweets - {1} Model".format(self.search_term, sentiment, self.model))
+            plt.title("{0} Wordcloud {1} Tweets - {1} Model".format(self.search_term, sentiment, self.model_hugging_face))
             plt.imshow(sentiment_wordcloud, interpolation="bilinear")
             plt.axis("off")
             plt.savefig('../img/{0}/twitter/{1}/wordcloud_{2}_sentiment_{3}'.format(
-                self.search_term, self.model, sentiment, self.today_string)
+                self.search_term, self.model_str, sentiment, self.today_string)
             )
 
     def run_sentiment_analysis(self):
