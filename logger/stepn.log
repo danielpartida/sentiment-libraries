@@ -1,0 +1,6 @@
+Search term (stepn OR @stepn OR #stepn OR "$GST" OR "$GMT") -is:retweet
+Tweets retrieved at day 09/05/2022, 11:28:32 until day 2022-05-09
+Sentiment analysis starting for model cardiffnlp/twitter-roberta-base-sentiment-latest
+Sentiment analysis starting for model finiteautomata/bertweet-base-sentiment-analysis
+1000 total amount of tweets analyzed
+Analysis run in 176.99521780014038
