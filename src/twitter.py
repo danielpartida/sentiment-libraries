@@ -1,7 +1,7 @@
 import logging
 import os
 import time
-from datetime import datetime
+from datetime import date, datetime
 import re
 
 import pandas as pd
@@ -239,10 +239,7 @@ class TwitterSentiment(Twitter):
             )
 
     def calculate_timeseries_analysis(self):
-        list_dates = self.df_tweets.created_at.str.split()
-        list_days = [item[0] for item in list_dates]
-        self.df_tweets["date"] = list_days
-        self.df_tweets.date = self.df_tweets.date.apply(lambda x: datetime.strptime(x, '%Y-%m-%d'))
+        self.df_tweets["date"] = self.df_tweets.created_at.apply(lambda x: date(x.year, x.month, x.day))
 
         # group-by
         self.df_tweets.sort_values(by=["date"], ascending=True, inplace=True)
