@@ -249,7 +249,7 @@ class TwitterSentiment(Twitter):
         self.calculate_sentiment_analysis()
         self.save_pie_chart_sentiment_analysis()
         self.save_word_cloud()
-        self.df_tweets.df_results.to_csv('../data/results/{0}/twitter/sentiment_{1}.csv'.format(
+        self.df_tweets.to_csv('../data/results/{0}/twitter/sentiment_{1}.csv'.format(
             self.search_term, self.today_string
         ), sep=';')
         self.logger.info("Analysis run in {0} seconds".format(time.time() - self.start_time))
