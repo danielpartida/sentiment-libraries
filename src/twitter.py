@@ -180,24 +180,20 @@ class TwitterSentiment(Twitter):
     def calculate_sentiment_analysis(self) -> None:
         """
             Performs sentiment analysis depending on the model
-            :return:
-            :rtype:
-            """
-
+        """
         self.df_tweets['sentiment_dict'] = self.df_tweets["text"].apply(lambda x: self.sentiment_analysis(x))
-        self.df_tweets['sentiment_{0}'.format(self.model_hugging_face)] = self.df_tweets["sentiment_dict"].apply(
+        self.df_tweets['sentiment_{0}'.format(self.model_str)] = self.df_tweets["sentiment_dict"].apply(
             lambda x: x[0]['label'])
         if self.model_hugging_face == "bert":
-            self.df_tweets['sentiment_{0}'.format(self.model_hugging_face)] = self.df_tweets[
-                'sentiment_{0}'.format(self.model_hugging_face)].apply(
-                lambda x: x.replace("POS", "Positive"))
-            self.df_tweets['sentiment_{0}'.format(self.model_hugging_face)] = self.df_tweets[
-                'sentiment_{0}'.format(self.model_hugging_face)].apply(
-                lambda x: x.replace("NEG", "Negative"))
-            self.df_tweets['sentiment_{0}'.format(self.model_hugging_face)] = self.df_tweets[
-                'sentiment_{0}'.format(self.model_hugging_face)].apply(
-                lambda x: x.replace("NEU", "Neutral"))
-        self.df_tweets['score_{0}'.format(self.model_hugging_face)] = self.df_tweets["sentiment_dict"].apply(lambda x: x[0]['score'])
+            self.df_tweets['sentiment_{0}'.format(self.model_str)] = self.df_tweets[
+                'sentiment_{0}'.format(self.model_str)].apply(lambda x: x.replace("POS", "Positive"))
+            self.df_tweets['sentiment_{0}'.format(self.model_str)] = self.df_tweets[
+                'sentiment_{0}'.format(self.model_str)].apply(lambda x: x.replace("NEG", "Negative"))
+            self.df_tweets['sentiment_{0}'.format(self.model_str)] = self.df_tweets[
+                'sentiment_{0}'.format(self.model_str)].apply(lambda x: x.replace("NEU", "Neutral"))
+        self.df_tweets['score_{0}'.format(self.model_str)] = self.df_tweets["sentiment_dict"].apply(
+            lambda x: x[0]['score']
+        )
 
         self.df_tweets.drop(['sentiment_dict'], axis=1, inplace=True)
 
@@ -208,13 +204,13 @@ class TwitterSentiment(Twitter):
             :rtype: None
             """
         # Let's count the number of tweets by sentiments
-        sentiment_counts = self.df_tweets.groupby(['sentiment_{0}'.format(self.model_hugging_face)]).size()
+        sentiment_counts = self.df_tweets.groupby(['sentiment_{0}'.format(self.model_str)]).size()
 
         # Let's visualize the sentiments
         fig = plt.figure(figsize=(6, 6), dpi=100)
         ax = plt.subplot(111)
         sentiment_counts.plot.pie(ax=ax, autopct='%1.1f%%', startangle=270, fontsize=12, label="")
-        plt.title("{0} Pie-chart Sentiment Analysis - {1} Model".format(self.search_term, self.model_hugging_face))
+        plt.title("{0} Pie-chart Sentiment Analysis - {1} Model".format(self.search_term, self.model_str))
         plt.savefig('../img/{0}/twitter/{1}/pie_chart_sentiment_{2}.png'.format(
             self.search_term, self.model_str, self.today_string)
         )
@@ -222,15 +218,13 @@ class TwitterSentiment(Twitter):
     def save_word_cloud(self):
         """
             Creates and saves 3 world clouds (positive, neutral and negative) for a specific search term
-            :return: None
-            :rtype: None
-            """
+        """
 
         sentiment_types = ["Positive", "Negative", "Neutral"]
         stop_words = set(["https", "co", "RT"] + list(STOPWORDS))
         for sentiment in sentiment_types:
             sentiment_tweets = self.df_tweets['text'][
-                self.df_tweets['sentiment_{0}'.format(self.model_hugging_face)] == sentiment
+                self.df_tweets['sentiment_{0}'.format(self.model_str)] == sentiment
             ]
             sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
                                             background_color="white", stopwords=stop_words).generate(
@@ -245,7 +239,9 @@ class TwitterSentiment(Twitter):
             )
 
     def run_sentiment_analysis(self):
-
+        """
+        Runner
+        """
         self.calculate_sentiment_analysis()
         self.save_pie_chart_sentiment_analysis()
         self.save_word_cloud()
