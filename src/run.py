@@ -3,7 +3,7 @@ from twitter import TwitterScraper, TwitterSentiment
 if __name__ == "__main__":
 
     search_term = "luna"
-    twitter_scraper = TwitterScraper(search_term=search_term, limit_tweets=5000, tweet_type="popular")
+    twitter_scraper = TwitterScraper(search_term=search_term, limit_tweets=5000)
     df_tweets = twitter_scraper.get_scraped_tweets()
 
     model = "roberta"
