@@ -61,7 +61,7 @@ class TwitterScraper(Twitter):
         if token:
             text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet'.format(search_term, token)
         else:
-            text_query = '({0} OR @{0} OR #{0} OR "$LUNA" OR "$UST" OR "Do Kwon") -is:retweet'.format(search_term)
+            text_query = '({0} OR @{0} OR #{0}) -is:retweet'.format(search_term)
         return text_query
 
     @staticmethod
