@@ -38,7 +38,8 @@ class Twitter:
 
 class TwitterScraper(Twitter):
 
-    def __init__(self, search_term: str, token: str = "", limit_tweets: int = 1000, tweet_type: str = "mixed"):
+    def __init__(self, search_term: str, token: str = "", limit_tweets: int = 1000, tweet_type: str = "mixed",
+                 is_reply: tuple=()):
         """
         Constructor of TwitterScraping class
         :param search_term: queried term
@@ -49,7 +50,7 @@ class TwitterScraper(Twitter):
         :type tweet_type:
         """
         super().__init__(search_term=search_term)
-        self.text_query = self.build_text_query(search_term=search_term, token=token)
+        self.text_query = self.build_text_query(search_term=search_term, token=token, is_reply=is_reply)
         self.limit_tweets = limit_tweets
         self.tweet_type = self.assert_and_get_tweet_type(tweet_type=tweet_type)
         self.start_time = time.time()
@@ -57,11 +58,16 @@ class TwitterScraper(Twitter):
         self.create_result_folders_if_not_exist()
 
     @staticmethod
-    def build_text_query(search_term: str, token: str):
+    def build_text_query(search_term: str, token: str, is_reply: tuple):
         if token:
             text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet'.format(search_term, token)
+
+        elif is_reply:
+            text_query = "to:{0}".format(search_term)
+
         else:
             text_query = '({0} OR @{0} OR #{0}) -is:retweet'.format(search_term)
+
         return text_query
 
     @staticmethod
@@ -110,7 +116,22 @@ class TwitterScraper(Twitter):
             if not os.path.exists(path):
                 os.makedirs(path)
 
-    def get_scraped_tweets(self) -> pd.DataFrame:
+    def fill_dict_tweet(self, tweet: list) -> dict:
+        dict_tweet = {
+            'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
+            'created_at': tweet.created_at, 'username': tweet.user.screen_name,
+            'verified': tweet.user.verified, 'location': tweet.user.location,
+            'following': tweet.user.friends_count, 'followers': tweet.user.followers_count,
+            'total_tweets': tweet.user.statuses_count, 'favorite_count': tweet.favorite_count,
+            'retweet_count': tweet.retweet_count, 'hashtags': tweet.entities['hashtags'],
+            'tweet_type': tweet.metadata['result_type'], 'mentions': tweet.entities['user_mentions'],
+            'raw_text': tweet.text
+        }
+        dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
+
+        return dict_tweet
+
+    def get_scraped_tweets(self, is_reply: tuple) -> pd.DataFrame:
         """
         Twitter’s standard search API only searches against a sampling of recent Tweets published in the past 7 days
         Tweepy library: https://docs.tweepy.org/en/v4.8.0/api.html#tweepy.API.search_tweets
@@ -124,6 +145,7 @@ class TwitterScraper(Twitter):
         today = datetime.today()
         until_str = today.strftime('%Y-%m-%d')
         list_dict_tweets = []
+        list_dict_replies = []
         try:
             # FIXME: Take a closer look why some retweeted tweets are being returned even though -is:retweet is set
             list_twitter_items = [tweet for tweet in tweepy.Cursor(self.api.search_tweets, q=self.search_term,
@@ -131,26 +153,26 @@ class TwitterScraper(Twitter):
                                                                    until=until_str).items(self.limit_tweets)]
 
             for tweet in tqdm(list_twitter_items):
-                # fetch main information of tweet
-                dict_tweet = {
-                    'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
-                    'created_at': tweet.created_at, 'username': tweet.user.screen_name,
-                    'verified': tweet.user.verified, 'location': tweet.user.location,
-                    'following': tweet.user.friends_count, 'followers': tweet.user.followers_count,
-                    'total_tweets': tweet.user.statuses_count, 'favorite_count': tweet.favorite_count,
-                    'retweet_count': tweet.retweet_count, 'hashtags': tweet.entities['hashtags'],
-                    'tweet_type': tweet.metadata['result_type'], 'mentions': tweet.entities['user_mentions'],
-                    'raw_text': tweet.text
-                }
-                dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
 
-                list_dict_tweets.append(dict_tweet)
+                # fetch replies
+                if is_reply:
+                    if tweet.in_reply_to_status_id_str == is_reply[1]:
+                        dict_tweet = self.fill_dict_tweet(tweet)
+                        list_dict_replies.append(dict_tweet)
+
+                # fetch main information of tweet
+                else:
+                    dict_tweet = self.fill_dict_tweet(tweet)
+                    list_dict_tweets.append(dict_tweet)
 
         except BaseException as e:
             print('failed on_status,', str(e))
             time.sleep(3)
 
-        if list_dict_tweets:
+        if is_reply:
+            df_tweets = pd.DataFrame(list_dict_replies)
+
+        elif list_dict_tweets:
             df_tweets = pd.DataFrame(list_dict_tweets)
 
         else:
