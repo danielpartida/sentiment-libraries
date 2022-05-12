@@ -123,13 +123,12 @@ class TwitterScraper(Twitter):
 
         today = datetime.today()
         until_str = today.strftime('%Y-%m-%d')
-        yesterday = '2022-05-10'
         list_dict_tweets = []
         try:
             # FIXME: Take a closer look why some retweeted tweets are being returned even though -is:retweet is set
             list_twitter_items = [tweet for tweet in tweepy.Cursor(self.api.search_tweets, q=self.search_term,
-                                                                   lang="en", result_type=self.tweet_type, count=100,
-                                                                   until=yesterday).items(self.limit_tweets)]
+                                                                   lang="en", result_type=self.tweet_type, count=15,
+                                                                   until=until_str).items(self.limit_tweets)]
 
             for tweet in tqdm(list_twitter_items):
                 # fetch main information of tweet
@@ -164,6 +163,9 @@ class TwitterScraper(Twitter):
         self.logger.info("Tweets retrieved on {0} at {1} in {2} seconds".format(
             day, hour, time.time() - self.start_time)
         )
+
+        time_stamp_export = self.today.strftime("%d_%m_%H_%M")
+        df_tweets.to_csv("../data/backup/luna_tweets_{0}.csv".format(time_stamp_export))
 
         return df_tweets
 
