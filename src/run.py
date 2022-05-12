@@ -2,8 +2,8 @@ from twitter import TwitterScraper, TwitterSentiment
 
 if __name__ == "__main__":
 
-    search_term = "olympusdao"
-    twitter_scraper = TwitterScraper(search_term=search_term, limit_tweets=1000)
+    search_term = "crypto"
+    twitter_scraper = TwitterScraper(search_term=search_term, limit_tweets=50000)
     df_tweets = twitter_scraper.get_scraped_tweets()
 
     model = "roberta"
