@@ -38,30 +38,33 @@ class Twitter:
 
 class TwitterScraper(Twitter):
 
-    def __init__(self, search_term: str, token: str = "", limit_tweets: int = 1000, tweet_type: str = "mixed"):
+    def __init__(self, search_term: str, token: str = "", limit_tweets: int = 1000,
+                 from_time: datetime = datetime.today() - datetime.timedelta(days=1),
+                 until_time: datetime = datetime.today()):
         """
         Constructor of TwitterScraping class
         :param search_term: queried term
         :type search_term: str
         :param limit_tweets: maximal amount of tweets to scrap
         :type limit_tweets: int
-        :param tweet_type: "mixed", "recent", "popular"
-        :type tweet_type:
         """
         super().__init__(search_term=search_term)
         self.text_query = self.build_text_query(search_term=search_term, token=token)
         self.limit_tweets = limit_tweets
-        self.tweet_type = self.assert_and_get_tweet_type(tweet_type=tweet_type)
         self.start_time = time.time()
         self.api = self.get_tweepy_api()
+        self.from_time = from_time
+        self.until_time = until_time
+        self.client = tweepy.Client(bearer_token=os.getenv("bearer_token"))
         self.create_result_folders_if_not_exist()
 
     @staticmethod
     def build_text_query(search_term: str, token: str):
         if token:
-            text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet'.format(search_term, token)
+            text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet lang:en'.format(search_term, token)
         else:
-            text_query = '({0} OR @{0} OR #{0}) -is:retweet'.format(search_term)
+            # FIXME: Delete hard-coded tokens
+            text_query = '({0} OR @{0} OR #{0} or "$GST" "$GMT") -is:retweet lang:en'.format(search_term)
         return text_query
 
     @staticmethod
@@ -121,14 +124,15 @@ class TwitterScraper(Twitter):
         """
         self.logger.info("Searching for term {0}".format(self.search_term))
 
-        today = datetime.today()
-        until_str = today.strftime('%Y-%m-%d')
+        # Time format YYYY-MM-DDTHH:mm:ssZ
+        from_time_str = self.from_time.strftime('%Y-%m-%dT%H:M')
+        until_time_str = self.from_time.strftime('%Y-%m-%dT%H:M')
         list_dict_tweets = []
         try:
-            # FIXME: Take a closer look why some retweeted tweets are being returned even though -is:retweet is set
-            list_twitter_items = [tweet for tweet in tweepy.Cursor(self.api.search_tweets, q=self.search_term,
-                                                                   lang="en", result_type=self.tweet_type, count=15,
-                                                                   until=until_str).items(self.limit_tweets)]
+            # TODO: add annotations to account for crypto context
+            list_twitter_items = self.client.search_recent_tweets(query=self.text_query, end_time=until_time_str,
+                                                                  start_time=from_time_str,
+                                                                  max_resutls=self.limit_tweets)
 
             for tweet in tqdm(list_twitter_items):
                 # fetch main information of tweet
@@ -240,7 +244,7 @@ class TwitterSentiment(Twitter):
         for sentiment in sentiment_types:
             sentiment_tweets = df_tweets['text'][
                 df_tweets['sentiment_{0}'.format(self.model_str)] == sentiment
-            ]
+                ]
             sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
                                             background_color="white", stopwords=stop_words).generate(
                 str(sentiment_tweets)
@@ -290,8 +294,9 @@ class TwitterSentiment(Twitter):
 
         self.save_pie_chart_sentiment_analysis(df_tweets=self.df_tweets, is_quantile=False)
         self.save_word_cloud(df_tweets=self.df_tweets, is_quantile=False)
-        self.df_tweets.to_csv('../data/results/{0}/twitter/sentiment_{1}.csv'.format(self.search_term, self.today_string),
-                          sep=';')
+        self.df_tweets.to_csv(
+            '../data/results/{0}/twitter/sentiment_{1}.csv'.format(self.search_term, self.today_string),
+            sep=';')
 
         self.calculate_timeseries_analysis(df_tweets=self.df_tweets, is_quantile=False)
 
@@ -315,4 +320,3 @@ class TwitterSentiment(Twitter):
             self.search_term, self.today_string), sep=';')
 
         self.logger.info("Quantile analysis run in {0} seconds".format(time.time() - start_time))
-
