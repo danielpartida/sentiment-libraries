@@ -64,7 +64,7 @@ class TwitterScraper(Twitter):
             text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet lang:en'.format(search_term, token)
         else:
             # FIXME: Delete hard-coded tokens
-            text_query = '({0} OR @{0} OR #{0} OR "$GST" OR "$GMT") -is:retweet lang:en'.format(search_term)
+            text_query = '({0} OR @{0} OR #{0}) -is:retweet lang:en'.format(search_term)
         return text_query
 
     @staticmethod
@@ -130,8 +130,17 @@ class TwitterScraper(Twitter):
         list_dict_tweets = []
         try:
             # TODO: add annotations to account for crypto context
+            # TODO: Retrieve 500 times requests of 100
+            # https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
+            # https://docs.tweepy.org/en/stable/client.html#tweepy.Client.search_recent_tweets
             list_twitter_items = self.client.search_recent_tweets(query=self.text_query, end_time=until_time_str,
-                                                                  start_time=from_time_str)
+                                                                  start_time=from_time_str, max_results=100)
+
+            for tweet in tweepy.Paginator(
+                    self.client.search_recent_tweets, query=self.text_query, end_time=until_time_str,
+                    start_time=from_time_str, max_results=100,
+                    tweet_fields=['context_annotations', 'created_at']).flatten(limit=500):
+                print(tweet.id)
 
             for tweet in tqdm(list_twitter_items):
                 # fetch main information of tweet
@@ -168,7 +177,7 @@ class TwitterScraper(Twitter):
         )
 
         time_stamp_export = self.today.strftime("%d_%m_%H_%M")
-        df_tweets.to_csv("../data/backup/luna_tweets_{0}.csv".format(time_stamp_export))
+        df_tweets.to_csv("../data/backup/{0]_tweets_{1}.csv".format(self.search_term, time_stamp_export))
 
         return df_tweets
 
