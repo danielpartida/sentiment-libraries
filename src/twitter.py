@@ -135,14 +135,21 @@ class TwitterScraper(Twitter):
                     self.client.search_recent_tweets, query=self.text_query, end_time=until_time_str,
                     start_time=from_time_str, max_results=100,
                     tweet_fields=['context_annotations', 'created_at', 'author_id', 'conversation_id',
-                                  'entities']).flatten(limit=100):
+                                  'in_reply_to_user_id', 'entities', 'public_metrics']).flatten(limit=100):
 
                 # fetch main information of tweet
+                # tweet fields https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
                 dict_tweet = {
                     'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
-                    'author_id': tweet.author_id, 'conversation_id': tweet.conversation_id,
-                    'created_at': tweet.created_at, 'username': tweet.user.screen_name,
-                    'raw_text': tweet.text, 'context_annotations': tweet.context_annotations
+                    'created_at': tweet.created_at, 'author_id': tweet.author_id,
+                    'conversation_id': tweet.conversation_id,
+                    'in_reply_to_user_id': tweet.in_reply_to_user_id,
+                    'reply_count': tweet.public_metrics["reply_count"],
+                    'like_count': tweet.public_metrics["like_count"],
+                    'retweet_count': tweet.public_metrics["retweet_count"],
+                    'quote_count': tweet.public_metrics["quote_count"],
+                    'context_annotations': tweet.context_annotations,
+                    'raw_text': tweet.text
                 }
                 dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
 
@@ -167,7 +174,7 @@ class TwitterScraper(Twitter):
         )
 
         time_stamp_export = self.today.strftime("%d_%m_%H_%M")
-        df_tweets.to_csv("../data/backup/{0]_tweets_{1}.csv".format(self.search_term, time_stamp_export))
+        df_tweets.to_csv("../data/backup/{0}_tweets_{1}.csv".format(self.search_term, time_stamp_export))
 
         return df_tweets
 
