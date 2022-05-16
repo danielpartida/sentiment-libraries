@@ -1,9 +1,13 @@
+from datetime import datetime, timedelta
 from twitter import TwitterScraper, TwitterSentiment
 
 if __name__ == "__main__":
 
-    search_term = "crypto"
-    twitter_scraper = TwitterScraper(search_term=search_term, limit_tweets=50000)
+    search_term = "stepn"
+    from_time = datetime.utcnow() - timedelta(days=1)
+    until_time = datetime.utcnow() - timedelta(hours=1)
+    twitter_scraper = TwitterScraper(search_term=search_term, limit_tweets=150,
+                                     from_time=from_time, until_time=until_time)
     df_tweets = twitter_scraper.get_scraped_tweets()
 
     model = "roberta"
