@@ -126,7 +126,7 @@ class TwitterScraper(Twitter):
         list_dict_tweets = []
         try:
             # TODO: Add popular tweets using V1 Twitter API
-            for i in range(self.delta_days*24):
+            for i in range(self.delta_days*24 - 1):
                 self.from_time += timedelta(hours=1)
                 from_time_str = self.from_time.strftime('%Y-%m-%dT%H:%M:%SZ')
                 to_time = self.from_time + timedelta(hours=1)
@@ -319,7 +319,7 @@ class TwitterSentiment(Twitter):
         start_time = time.time()
 
         # Filter the upper 95 quantile of most liked tweets
-        quantile_favorite_tweets_95 = self.df_tweets.favorite_count.quantile(0.95)
+        quantile_favorite_tweets_95 = self.df_tweets.like_count.quantile(0.95)
         df_tweets_quantile = self.df_tweets.loc[self.df_tweets.like_count > quantile_favorite_tweets_95]
 
         self.save_pie_chart_sentiment_analysis(df_tweets=df_tweets_quantile, is_quantile=True)
