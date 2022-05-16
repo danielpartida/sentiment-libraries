@@ -4,10 +4,11 @@ from twitter import TwitterScraper, TwitterSentiment
 if __name__ == "__main__":
 
     search_term = "stepn"
-    from_time = datetime.utcnow() - timedelta(days=1)
+    delta_days = 6
+    from_time = datetime.utcnow() - timedelta(days=delta_days)
     until_time = datetime.utcnow() - timedelta(hours=1)
-    twitter_scraper = TwitterScraper(search_term=search_term, limit_tweets=1000,
-                                     from_time=from_time, until_time=until_time)
+    twitter_scraper = TwitterScraper(search_term=search_term, tweets_per_window=50,
+                                     from_time=from_time, delta_days=delta_days)
     df_tweets = twitter_scraper.get_scraped_tweets()
 
     model = "roberta"

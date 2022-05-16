@@ -8,7 +8,6 @@ import pandas as pd
 import tweepy
 from dotenv import load_dotenv
 from matplotlib import pyplot as plt
-from tqdm import tqdm
 from transformers import pipeline
 from wordcloud import WordCloud, STOPWORDS
 
@@ -38,25 +37,24 @@ class Twitter:
 
 class TwitterScraper(Twitter):
 
-    def __init__(self, search_term: str, token: str = "", limit_tweets: int = 1000,
-                 from_time: datetime = datetime.utcnow() - timedelta(days=1),
-                 until_time: datetime = datetime.utcnow() - timedelta(hours=1)):
+    def __init__(self, search_term: str, token: str = "", tweets_per_window: int = 1000,
+                 from_time: datetime = datetime.utcnow() - timedelta(days=1), delta_days: int = 6):
         """
         Constructor of TwitterScraping class
         :param search_term: queried term
         :type search_term: str
-        :param limit_tweets: maximal amount of tweets to scrap
-        :type limit_tweets: int
+        :param tweets_per_window: maximal amount of tweets to scrap
+        :type tweets_per_window: int
         """
         super().__init__(search_term=search_term)
         self.text_query = self.build_text_query(search_term=search_term, token=token)
-        self.limit_tweets = limit_tweets
+        self.limit_tweets = tweets_per_window
         self.start_time = time.time()
         self.api = self.get_tweepy_api()
         self.from_time = from_time
-        self.until_time = until_time
         self.client = tweepy.Client(bearer_token=os.getenv("bearer_token"))
         self.create_result_folders_if_not_exist()
+        self.delta_days = delta_days
 
     @staticmethod
     def build_text_query(search_term: str, token: str):
@@ -125,35 +123,39 @@ class TwitterScraper(Twitter):
         """
         self.logger.info("Searching for term {0}".format(self.search_term))
 
-        # TODO: Add rolling windows for time
-        from_time_str = self.from_time.strftime('%Y-%m-%dT%H:%M:%SZ')
-        until_time_str = self.until_time.strftime('%Y-%m-%dT%H:%M:%SZ')
         list_dict_tweets = []
         try:
-            for tweet in tweepy.Paginator(
-                    self.client.search_recent_tweets, query=self.text_query, end_time=until_time_str,
-                    start_time=from_time_str, max_results=100,
-                    tweet_fields=['context_annotations', 'created_at', 'author_id', 'conversation_id',
-                                  'in_reply_to_user_id', 'entities', 'public_metrics']
-            ).flatten(limit=self.limit_tweets):
+            # TODO: Add popular tweets using V1 Twitter API
+            for i in range(self.delta_days*24):
+                self.from_time += timedelta(hours=1)
+                from_time_str = self.from_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+                to_time = self.from_time + timedelta(hours=1)
+                to_time_str = to_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+                print("from_time:", from_time_str, "to_time:", to_time_str)
+                for tweet in tweepy.Paginator(
+                        self.client.search_recent_tweets, query=self.text_query,
+                        start_time=from_time_str, end_time=to_time_str, max_results=50,
+                        tweet_fields=['context_annotations', 'created_at', 'author_id', 'conversation_id',
+                                      'in_reply_to_user_id', 'entities', 'public_metrics']
+                ).flatten(limit=self.limit_tweets):
 
-                # fetch main information of tweet
-                # tweet fields https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
-                dict_tweet = {
-                    'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
-                    'created_at': tweet.created_at, 'author_id': tweet.author_id,
-                    'conversation_id': tweet.conversation_id,
-                    'in_reply_to_user_id': tweet.in_reply_to_user_id,
-                    'reply_count': tweet.public_metrics["reply_count"],
-                    'like_count': tweet.public_metrics["like_count"],
-                    'retweet_count': tweet.public_metrics["retweet_count"],
-                    'quote_count': tweet.public_metrics["quote_count"],
-                    'context_annotations': tweet.context_annotations,
-                    'raw_text': tweet.text
-                }
-                dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
+                    # fetch main information of tweet
+                    # tweet fields https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
+                    dict_tweet = {
+                        'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
+                        'created_at': tweet.created_at, 'author_id': tweet.author_id,
+                        'conversation_id': tweet.conversation_id,
+                        'in_reply_to_user_id': tweet.in_reply_to_user_id,
+                        'reply_count': tweet.public_metrics["reply_count"],
+                        'like_count': tweet.public_metrics["like_count"],
+                        'retweet_count': tweet.public_metrics["retweet_count"],
+                        'quote_count': tweet.public_metrics["quote_count"],
+                        'context_annotations': tweet.context_annotations,
+                        'raw_text': tweet.text
+                    }
+                    dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
 
-                list_dict_tweets.append(dict_tweet)
+                    list_dict_tweets.append(dict_tweet)
 
         except BaseException as e:
             print('failed on_status,', str(e))
