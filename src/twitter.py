@@ -318,7 +318,7 @@ class TwitterSentiment(Twitter):
 
         # Filter the upper 95 quantile of most liked tweets
         quantile_favorite_tweets_95 = self.df_tweets.favorite_count.quantile(0.95)
-        df_tweets_quantile = self.df_tweets.loc[self.df_tweets.favorite_count > quantile_favorite_tweets_95]
+        df_tweets_quantile = self.df_tweets.loc[self.df_tweets.like_count > quantile_favorite_tweets_95]
 
         self.save_pie_chart_sentiment_analysis(df_tweets=df_tweets_quantile, is_quantile=True)
         self.save_word_cloud(df_tweets=df_tweets_quantile, is_quantile=True)

@@ -6,7 +6,7 @@ if __name__ == "__main__":
     search_term = "stepn"
     from_time = datetime.utcnow() - timedelta(days=1)
     until_time = datetime.utcnow() - timedelta(hours=1)
-    twitter_scraper = TwitterScraper(search_term=search_term, limit_tweets=150,
+    twitter_scraper = TwitterScraper(search_term=search_term, limit_tweets=1000,
                                      from_time=from_time, until_time=until_time)
     df_tweets = twitter_scraper.get_scraped_tweets()
 
