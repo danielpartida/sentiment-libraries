@@ -119,6 +119,7 @@ class TwitterScraper(Twitter):
         Tweepy library: https://docs.tweepy.org/en/v4.8.0/api.html#tweepy.API.search_tweets
         API V1: https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets
         API V2: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference
+        Pagination https://docs.tweepy.org/en/latest/v2_pagination.html
         :return: dataframe of tweets
         :rtype: pd.DataFrame
         """
@@ -130,29 +131,18 @@ class TwitterScraper(Twitter):
         list_dict_tweets = []
         try:
             # TODO: add annotations to account for crypto context
-            # TODO: Retrieve 500 times requests of 100
-            # https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-recent
-            # https://docs.tweepy.org/en/stable/client.html#tweepy.Client.search_recent_tweets
-            list_twitter_items = self.client.search_recent_tweets(query=self.text_query, end_time=until_time_str,
-                                                                  start_time=from_time_str, max_results=100)
-
             for tweet in tweepy.Paginator(
                     self.client.search_recent_tweets, query=self.text_query, end_time=until_time_str,
                     start_time=from_time_str, max_results=100,
-                    tweet_fields=['context_annotations', 'created_at']).flatten(limit=500):
-                print(tweet.id)
+                    tweet_fields=['context_annotations', 'created_at', 'author_id', 'conversation_id',
+                                  'entities']).flatten(limit=100):
 
-            for tweet in tqdm(list_twitter_items):
                 # fetch main information of tweet
                 dict_tweet = {
                     'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
+                    'author_id': tweet.author_id, 'conversation_id': tweet.conversation_id,
                     'created_at': tweet.created_at, 'username': tweet.user.screen_name,
-                    'verified': tweet.user.verified, 'location': tweet.user.location,
-                    'following': tweet.user.friends_count, 'followers': tweet.user.followers_count,
-                    'total_tweets': tweet.user.statuses_count, 'favorite_count': tweet.favorite_count,
-                    'retweet_count': tweet.retweet_count, 'hashtags': tweet.entities['hashtags'],
-                    'tweet_type': tweet.metadata['result_type'], 'mentions': tweet.entities['user_mentions'],
-                    'raw_text': tweet.text
+                    'raw_text': tweet.text, 'context_annotations': tweet.context_annotations
                 }
                 dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
 
