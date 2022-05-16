@@ -1,7 +1,7 @@
 import logging
 import os
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import re
 
 import pandas as pd
@@ -39,8 +39,8 @@ class Twitter:
 class TwitterScraper(Twitter):
 
     def __init__(self, search_term: str, token: str = "", limit_tweets: int = 1000,
-                 from_time: datetime = datetime.today() - datetime.timedelta(days=1),
-                 until_time: datetime = datetime.today()):
+                 from_time: datetime = datetime.utcnow() - timedelta(days=1),
+                 until_time: datetime = datetime.utcnow() - timedelta(hours=1)):
         """
         Constructor of TwitterScraping class
         :param search_term: queried term
@@ -64,7 +64,7 @@ class TwitterScraper(Twitter):
             text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet lang:en'.format(search_term, token)
         else:
             # FIXME: Delete hard-coded tokens
-            text_query = '({0} OR @{0} OR #{0} or "$GST" "$GMT") -is:retweet lang:en'.format(search_term)
+            text_query = '({0} OR @{0} OR #{0} OR "$GST" OR "$GMT") -is:retweet lang:en'.format(search_term)
         return text_query
 
     @staticmethod
@@ -125,14 +125,13 @@ class TwitterScraper(Twitter):
         self.logger.info("Searching for term {0}".format(self.search_term))
 
         # Time format YYYY-MM-DDTHH:mm:ssZ
-        from_time_str = self.from_time.strftime('%Y-%m-%dT%H:M')
-        until_time_str = self.from_time.strftime('%Y-%m-%dT%H:M')
+        from_time_str = self.from_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+        until_time_str = self.until_time.strftime('%Y-%m-%dT%H:%M:%SZ')
         list_dict_tweets = []
         try:
             # TODO: add annotations to account for crypto context
             list_twitter_items = self.client.search_recent_tweets(query=self.text_query, end_time=until_time_str,
-                                                                  start_time=from_time_str,
-                                                                  max_resutls=self.limit_tweets)
+                                                                  start_time=from_time_str)
 
             for tweet in tqdm(list_twitter_items):
                 # fetch main information of tweet
