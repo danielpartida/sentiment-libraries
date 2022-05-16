@@ -125,17 +125,17 @@ class TwitterScraper(Twitter):
         """
         self.logger.info("Searching for term {0}".format(self.search_term))
 
-        # Time format YYYY-MM-DDTHH:mm:ssZ
+        # TODO: Add rolling windows for time
         from_time_str = self.from_time.strftime('%Y-%m-%dT%H:%M:%SZ')
         until_time_str = self.until_time.strftime('%Y-%m-%dT%H:%M:%SZ')
         list_dict_tweets = []
         try:
-            # TODO: add annotations to account for crypto context
             for tweet in tweepy.Paginator(
                     self.client.search_recent_tweets, query=self.text_query, end_time=until_time_str,
                     start_time=from_time_str, max_results=100,
                     tweet_fields=['context_annotations', 'created_at', 'author_id', 'conversation_id',
-                                  'in_reply_to_user_id', 'entities', 'public_metrics']).flatten(limit=100):
+                                  'in_reply_to_user_id', 'entities', 'public_metrics']
+            ).flatten(limit=self.limit_tweets):
 
                 # fetch main information of tweet
                 # tweet fields https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
@@ -174,7 +174,8 @@ class TwitterScraper(Twitter):
         )
 
         time_stamp_export = self.today.strftime("%d_%m_%H_%M")
-        df_tweets.to_csv("../data/backup/{0}_tweets_{1}.csv".format(self.search_term, time_stamp_export))
+        df_tweets.to_csv("../data/backup/{0}_tweets_{1}.csv".format(self.search_term, time_stamp_export),
+                         sep=';', decimal=',')
 
         return df_tweets
 
@@ -245,7 +246,7 @@ class TwitterSentiment(Twitter):
         """
 
         sentiment_types = ["Positive", "Negative", "Neutral"]
-        stop_words = set(["https", "co", "RT"] + list(STOPWORDS))
+        stop_words = set(["https", "co", "RT", "dtype"] + list(STOPWORDS))
         for sentiment in sentiment_types:
             sentiment_tweets = df_tweets['text'][
                 df_tweets['sentiment_{0}'.format(self.model_str)] == sentiment
