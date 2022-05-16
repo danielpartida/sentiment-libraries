@@ -126,10 +126,10 @@ class TwitterScraper(Twitter):
         list_dict_tweets = []
         try:
             # TODO: Add popular tweets using V1 Twitter API
-            for i in range(self.delta_days*24 - 1):
-                self.from_time += timedelta(hours=1)
+            for i in range(self.delta_days*24*4 - 1):
+                self.from_time += timedelta(minutes=15)
                 from_time_str = self.from_time.strftime('%Y-%m-%dT%H:%M:%SZ')
-                to_time = self.from_time + timedelta(hours=1)
+                to_time = self.from_time + timedelta(minutes=15)
                 to_time_str = to_time.strftime('%Y-%m-%dT%H:%M:%SZ')
                 print("from_time:", from_time_str, "to_time:", to_time_str)
                 for tweet in tweepy.Paginator(
