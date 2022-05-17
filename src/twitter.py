@@ -125,12 +125,36 @@ class TwitterScraper(Twitter):
 
         list_dict_tweets = []
         try:
-            # TODO: Add popular tweets using V1 Twitter API
-            for i in range(self.delta_days*24*4 - 1):
+            # Popular tweets
+            now = self.today.strftime("%Y-%m-%d")
+            popular_tweets = [tweet for tweet in tweepy.Cursor(self.api.search_tweets, q=self.search_term, lang="en",
+                                                               result_type="popular", count=15, until=now).items(1000)]
+            # FIXME: Add fields of Twitter API V1
+            for tweet in popular_tweets:
+                dict_tweet = {
+                    'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
+                    'author_id': tweet.author_id, 'created_at': tweet.created_at,
+                    'conversation_id': tweet.conversation_id,
+                    'in_reply_to_user_id': tweet.in_reply_to_user_id,
+                    'reply_count': tweet.public_metrics["reply_count"],
+                    'like_count': tweet.public_metrics["like_count"],
+                    'retweet_count': tweet.public_metrics["retweet_count"],
+                    'quote_count': tweet.public_metrics["quote_count"],
+                    'context_annotations': tweet.context_annotations,
+                    'raw_text': tweet.text, 'type': "popular"
+                }
+                dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
+
+                list_dict_tweets.append(dict_tweet)
+
+            # Rolling window scrapper
+            # FIXME: Adapt this loop for request limit  https://developer.twitter.com/en/docs/twitter-api/rate-limits
+            for i in range(self.delta_days * 24 * 4 - 1):
                 self.from_time += timedelta(minutes=15)
                 from_time_str = self.from_time.strftime('%Y-%m-%dT%H:%M:%SZ')
                 to_time = self.from_time + timedelta(minutes=15)
                 to_time_str = to_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+                # FIXME: Delete this print
                 print("from_time:", from_time_str, "to_time:", to_time_str)
                 for tweet in tweepy.Paginator(
                         self.client.search_recent_tweets, query=self.text_query,
@@ -138,7 +162,6 @@ class TwitterScraper(Twitter):
                         tweet_fields=['context_annotations', 'created_at', 'author_id', 'conversation_id',
                                       'in_reply_to_user_id', 'entities', 'public_metrics']
                 ).flatten(limit=self.limit_tweets):
-
                     # fetch main information of tweet
                     # tweet fields https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
                     dict_tweet = {
@@ -151,7 +174,7 @@ class TwitterScraper(Twitter):
                         'retweet_count': tweet.public_metrics["retweet_count"],
                         'quote_count': tweet.public_metrics["quote_count"],
                         'context_annotations': tweet.context_annotations,
-                        'raw_text': tweet.text
+                        'raw_text': tweet.text, 'type': "recent"
                     }
                     dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
 
