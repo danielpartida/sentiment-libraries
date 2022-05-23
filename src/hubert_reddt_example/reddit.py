@@ -8,10 +8,10 @@ api = PushshiftAPI()
 
 start_epoch = int(dt.datetime(2022, 5, 1).timestamp())
 
-search_term = "stepn"
+search_term = "solana"
 
 # FIXME: Change hardcoded subreddit
-gen = api.search_comments(q=search_term, after=start_epoch, subreddit='StepN', limit=10000)
+gen = api.search_comments(q=search_term, after=start_epoch, subreddit='solana', limit=10000)
 
 list_dict_comments = []
 for comment in tqdm(gen):
