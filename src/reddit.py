@@ -62,7 +62,12 @@ def calculate_timeseries_analysis(df: pd.DataFrame, model: str) -> None:
     ].count()
     model_unstack = model_group_by.unstack()
 
-    model_unstack.to_csv("../data/reddit/{0}_reddit_timeseries_{1}_{2}.csv".format(
+    df_pivot = pd.DataFrame(model_unstack)
+    df_pivot["sum"] = model_unstack.sum(axis=1)
+    df_pivot_rel = df_pivot[['Positive', 'Negative', 'Neutral']].div(df_pivot["sum"], axis=0)
+    df_pivot_rel["total_posts"] = df_pivot["sum"]
+
+    df_pivot_rel.to_csv("../data/reddit/{0}_reddit_timeseries_{1}_{2}.csv".format(
         reddit_search_term, model, today_string), sep=";", decimal=',')
 
 
