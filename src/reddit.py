@@ -44,7 +44,7 @@ def compute_sentiment_analysis(df: pd.DataFrame, model: str) -> pd.DataFrame:
     df['sentiment_{0}'.format(model)] = df["sentiment_dict"].apply(
         lambda x: x[0]['label'])
 
-    df.to_csv("../../data/reddit/{0}_reddit_{1}.csv".format(reddit_search_term, today_string),
+    df.to_csv("../data/reddit/{0}_reddit_{1}.csv".format(reddit_search_term, today_string),
               sep=";", decimal=',')
 
     return df
@@ -62,7 +62,7 @@ def calculate_timeseries_analysis(df: pd.DataFrame, model: str) -> None:
     ].count()
     model_unstack = model_group_by.unstack()
 
-    model_unstack.to_csv("../../data/reddit/{0}_reddit_timeseries_{1}_{2}.csv".format(
+    model_unstack.to_csv("../data/reddit/{0}_reddit_timeseries_{1}_{2}.csv".format(
         reddit_search_term, model, today_string), sep=";", decimal=',')
 
 
@@ -71,7 +71,7 @@ if __name__ == "__main__":
     today_string = today.strftime('%d-%m-%Y-%H-%M')
 
     reddit_search_term = "stepn"
-    reddit_generator = get_generator(start_epoch=int(datetime(2022, 1, 1).timestamp()),
+    reddit_generator = get_generator(start_epoch=int(datetime(2022, 5, 27).timestamp()),
                                      search_term=reddit_search_term, subreddit="stepn")
 
     df_reddit = get_dataframe_reddit_comments(generator=reddit_generator)
