@@ -58,16 +58,27 @@ def calculate_timeseries_analysis(df: pd.DataFrame, model: str) -> None:
     # sort values
     df.sort_values(by=["date"], ascending=True, inplace=True)
 
-    # group-by and pivot
-    model_group_by = df.groupby(by=['date', 'sentiment_{0}'.format(model)])[
+    # group-by and pivot sentiment
+    sentiment_group_by = df.groupby(by=['date', 'sentiment_{0}'.format(model)])[
         'sentiment_{0}'.format(model)].count()
-    model_unstack = model_group_by.unstack()
-    df_pivot = pd.DataFrame(model_unstack)
-    df_pivot["sum"] = model_unstack.sum(axis=1)
+    sentiment_unstack = sentiment_group_by.unstack()
+    sentiment_unstack.rename(
+        columns={"Negative": "negative_size", "Neutral": "neutral_size", "Positive": "positive_size"}, inplace=True)
+    sentiment_unstack["sum"] = sentiment_unstack.sum(axis=1)
 
-    # Calculate relative sentiments
-    df_pivot_rel = df_pivot[['Positive', 'Negative', 'Neutral']].div(df_pivot["sum"], axis=0)
-    df_pivot_rel["total_posts"] = df_pivot["sum"]
+    # group-by and pivot scores
+    scores_group_by = df.groupby(by=['date', 'sentiment_{0}'.format(model)])[
+        'score_{0}'.format(model)].mean()
+    scores_unstack = scores_group_by.unstack()
+    scores_unstack.rename(
+        columns={"Negative": "negative_score", "Neutral": "neutral_score", "Positive": "positive_score"}, inplace=True)
+
+    # Calculate relative sentiment sizes
+    df_pivot_rel = sentiment_unstack[['positive_size', 'negative_size', 'neutral_size']].div(
+        sentiment_unstack["sum"], axis=0)
+    df_pivot_rel["size"] = sentiment_unstack["sum"]
+    score_columns = ["negative_score", "neutral_score", "positive_score"]
+    df_pivot_rel[score_columns] = scores_unstack[score_columns]
 
     # Calculate mean probability of sentiment
     df_probability = df.groupby('date', as_index=False)["score_{0}".format(model)].mean()
