@@ -270,11 +270,12 @@ class TwitterSentiment(Twitter):
 
         sentiment_types = ["Positive", "Negative", "Neutral"]
         stop_words = set(["https", "co", "RT", "dtype"] + list(STOPWORDS))
+        color_maps = {"Positive": "YlGn", "Negative": "OrRd", "Neutral": "PuRd"}
         for sentiment in sentiment_types:
             sentiment_tweets = df_tweets['text'][
                 df_tweets['sentiment_{0}'.format(self.model_str)] == sentiment
                 ]
-            sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
+            sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100, colormap=color_maps[sentiment],
                                             background_color="white", stopwords=stop_words).generate(
                 str(sentiment_tweets)
             )
