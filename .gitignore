@@ -128,3 +128,4 @@ dmypy.json
 .pyre/
 .idea
 data/results/staratlas/discord/timeseries_roberta_sentiment_07-05-2022-18-31.csv
+*.csv
