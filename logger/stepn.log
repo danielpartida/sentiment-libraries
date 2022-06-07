@@ -4,3 +4,22 @@ Sentiment analysis starting for model cardiffnlp/twitter-roberta-base-sentiment-
 Sentiment analysis starting for model finiteautomata/bertweet-base-sentiment-analysis
 1000 total amount of tweets analyzed
 Analysis run in 176.99521780014038
+Searching for term stepn
+Searching for term stepn
+Tweets retrieved on 16/05/2022, at 16:26:43 in 8.785436630249023 seconds
+Analysis run in 130.05220937728882 seconds
+Analysis run in 130.05220937728882 seconds
+Searching for term stepn
+Tweets retrieved on 16/05/2022, at 17:48:19 in 253.62679743766785 seconds
+Analysis run in 2798.298148870468 seconds
+Analysis run in 2798.298148870468 seconds
+Quantile analysis run in 1.0625405311584473 seconds
+Quantile analysis run in 1.0625405311584473 seconds
+Searching for term stepn
+Tweets retrieved on 19/05/2022, at 14:42:31 in 10.885974407196045 seconds
+Searching for term stepn
+Tweets retrieved on 19/05/2022, at 14:44:01 in 98.74447989463806 seconds
+Analysis run in 1127.934722661972 seconds
+Analysis run in 1127.934722661972 seconds
+Quantile analysis run in 1.0635731220245361 seconds
+Quantile analysis run in 1.0635731220245361 seconds

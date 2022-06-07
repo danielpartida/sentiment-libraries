@@ -1,14 +1,13 @@
 import logging
 import os
 import time
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import re
 
 import pandas as pd
 import tweepy
 from dotenv import load_dotenv
 from matplotlib import pyplot as plt
-from tqdm import tqdm
 from transformers import pipeline
 from wordcloud import WordCloud, STOPWORDS
 
@@ -38,30 +37,31 @@ class Twitter:
 
 class TwitterScraper(Twitter):
 
-    def __init__(self, search_term: str, token: str = "", limit_tweets: int = 1000, tweet_type: str = "mixed"):
+    def __init__(self, search_term: str, token: str = "", tweets_per_window: int = 1000,
+                 from_time: datetime = datetime.utcnow() - timedelta(days=1), delta_days: int = 6):
         """
         Constructor of TwitterScraping class
         :param search_term: queried term
         :type search_term: str
-        :param limit_tweets: maximal amount of tweets to scrap
-        :type limit_tweets: int
-        :param tweet_type: "mixed", "recent", "popular"
-        :type tweet_type:
+        :param tweets_per_window: maximal amount of tweets to scrap
+        :type tweets_per_window: int
         """
         super().__init__(search_term=search_term)
         self.text_query = self.build_text_query(search_term=search_term, token=token)
-        self.limit_tweets = limit_tweets
-        self.tweet_type = self.assert_and_get_tweet_type(tweet_type=tweet_type)
+        self.limit_tweets = tweets_per_window
         self.start_time = time.time()
         self.api = self.get_tweepy_api()
+        self.from_time = from_time
+        self.client = tweepy.Client(bearer_token=os.getenv("bearer_token"))
         self.create_result_folders_if_not_exist()
+        self.delta_days = delta_days
 
     @staticmethod
     def build_text_query(search_term: str, token: str):
         if token:
-            text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet'.format(search_term, token)
+            text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet lang:en'.format(search_term, token)
         else:
-            text_query = '({0} OR @{0} OR #{0}) -is:retweet'.format(search_term)
+            text_query = '({0} OR @{0} OR #{0}) -is:retweet lang:en'.format(search_term)
         return text_query
 
     @staticmethod
@@ -116,35 +116,67 @@ class TwitterScraper(Twitter):
         Tweepy library: https://docs.tweepy.org/en/v4.8.0/api.html#tweepy.API.search_tweets
         API V1: https://developer.twitter.com/en/docs/twitter-api/v1/tweets/search/api-reference/get-search-tweets
         API V2: https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference
+        Pagination https://docs.tweepy.org/en/latest/v2_pagination.html
         :return: dataframe of tweets
         :rtype: pd.DataFrame
         """
         self.logger.info("Searching for term {0}".format(self.search_term))
 
-        today = datetime.today()
-        until_str = today.strftime('%Y-%m-%d')
         list_dict_tweets = []
         try:
-            # FIXME: Take a closer look why some retweeted tweets are being returned even though -is:retweet is set
-            list_twitter_items = [tweet for tweet in tweepy.Cursor(self.api.search_tweets, q=self.search_term,
-                                                                   lang="en", result_type=self.tweet_type, count=15,
-                                                                   until=until_str).items(self.limit_tweets)]
+            # Popular tweets
+            # now = self.today.strftime("%Y-%m-%d")
+            # popular_tweets = [tweet for tweet in tweepy.Cursor(self.api.search_tweets, q=self.search_term, lang="en",
+            #                                                    result_type="popular", count=15, until=now).items(1000)]
+            # # FIXME: Add fields of Twitter API V1
+            # for tweet in popular_tweets:
+            #     dict_tweet = {
+            #         'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
+            #         'author_id': tweet.author_id, 'created_at': tweet.created_at,
+            #         'conversation_id': tweet.conversation_id,
+            #         'in_reply_to_user_id': tweet.in_reply_to_user_id,
+            #         'reply_count': tweet.public_metrics["reply_count"],
+            #         'like_count': tweet.public_metrics["like_count"],
+            #         'retweet_count': tweet.public_metrics["retweet_count"],
+            #         'quote_count': tweet.public_metrics["quote_count"],
+            #         'context_annotations': tweet.context_annotations,
+            #         'raw_text': tweet.text, 'type': "popular"
+            #     }
+            #     dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
+            #
+            #     list_dict_tweets.append(dict_tweet)
 
-            for tweet in tqdm(list_twitter_items):
-                # fetch main information of tweet
-                dict_tweet = {
-                    'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
-                    'created_at': tweet.created_at, 'username': tweet.user.screen_name,
-                    'verified': tweet.user.verified, 'location': tweet.user.location,
-                    'following': tweet.user.friends_count, 'followers': tweet.user.followers_count,
-                    'total_tweets': tweet.user.statuses_count, 'favorite_count': tweet.favorite_count,
-                    'retweet_count': tweet.retweet_count, 'hashtags': tweet.entities['hashtags'],
-                    'tweet_type': tweet.metadata['result_type'], 'mentions': tweet.entities['user_mentions'],
-                    'raw_text': tweet.text
-                }
-                dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
+            # Rolling window scrapper
+            # FIXME: Adapt this loop for request limit  https://developer.twitter.com/en/docs/twitter-api/rate-limits
+            for i in range(self.delta_days * 24 - 1):
+                self.from_time += timedelta(hours=1)
+                from_time_str = self.from_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+                to_time = self.from_time + timedelta(hours=1)
+                to_time_str = to_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+                print("from_time:", from_time_str, "to_time:", to_time_str)
+                for tweet in tweepy.Paginator(
+                        self.client.search_recent_tweets, query=self.text_query,
+                        start_time=from_time_str, end_time=to_time_str, max_results=50,
+                        tweet_fields=['context_annotations', 'created_at', 'author_id', 'conversation_id',
+                                      'in_reply_to_user_id', 'entities', 'public_metrics']
+                ).flatten(limit=self.limit_tweets):
+                    # fetch main information of tweet
+                    # tweet fields https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
+                    dict_tweet = {
+                        'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
+                        'created_at': tweet.created_at, 'author_id': tweet.author_id,
+                        'conversation_id': tweet.conversation_id,
+                        'in_reply_to_user_id': tweet.in_reply_to_user_id,
+                        'reply_count': tweet.public_metrics["reply_count"],
+                        'like_count': tweet.public_metrics["like_count"],
+                        'retweet_count': tweet.public_metrics["retweet_count"],
+                        'quote_count': tweet.public_metrics["quote_count"],
+                        'context_annotations': tweet.context_annotations,
+                        'raw_text': tweet.text, 'type': "recent"
+                    }
+                    dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
 
-                list_dict_tweets.append(dict_tweet)
+                    list_dict_tweets.append(dict_tweet)
 
         except BaseException as e:
             print('failed on_status,', str(e))
@@ -165,7 +197,8 @@ class TwitterScraper(Twitter):
         )
 
         time_stamp_export = self.today.strftime("%d_%m_%H_%M")
-        df_tweets.to_csv("../data/backup/luna_tweets_{0}.csv".format(time_stamp_export))
+        df_tweets.to_csv("../data/backup/{0}_tweets_{1}.csv".format(self.search_term, time_stamp_export),
+                         sep=';', decimal=',')
 
         return df_tweets
 
@@ -236,11 +269,11 @@ class TwitterSentiment(Twitter):
         """
 
         sentiment_types = ["Positive", "Negative", "Neutral"]
-        stop_words = set(["https", "co", "RT"] + list(STOPWORDS))
+        stop_words = set(["https", "co", "RT", "dtype"] + list(STOPWORDS))
         for sentiment in sentiment_types:
             sentiment_tweets = df_tweets['text'][
                 df_tweets['sentiment_{0}'.format(self.model_str)] == sentiment
-            ]
+                ]
             sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,
                                             background_color="white", stopwords=stop_words).generate(
                 str(sentiment_tweets)
@@ -290,8 +323,9 @@ class TwitterSentiment(Twitter):
 
         self.save_pie_chart_sentiment_analysis(df_tweets=self.df_tweets, is_quantile=False)
         self.save_word_cloud(df_tweets=self.df_tweets, is_quantile=False)
-        self.df_tweets.to_csv('../data/results/{0}/twitter/sentiment_{1}.csv'.format(self.search_term, self.today_string),
-                          sep=';')
+        self.df_tweets.to_csv(
+            '../data/results/{0}/twitter/sentiment_{1}.csv'.format(self.search_term, self.today_string),
+            sep=';')
 
         self.calculate_timeseries_analysis(df_tweets=self.df_tweets, is_quantile=False)
 
@@ -306,8 +340,8 @@ class TwitterSentiment(Twitter):
         start_time = time.time()
 
         # Filter the upper 95 quantile of most liked tweets
-        quantile_favorite_tweets_95 = self.df_tweets.favorite_count.quantile(0.95)
-        df_tweets_quantile = self.df_tweets.loc[self.df_tweets.favorite_count > quantile_favorite_tweets_95]
+        quantile_favorite_tweets_95 = self.df_tweets.like_count.quantile(0.95)
+        df_tweets_quantile = self.df_tweets.loc[self.df_tweets.like_count > quantile_favorite_tweets_95]
 
         self.save_pie_chart_sentiment_analysis(df_tweets=df_tweets_quantile, is_quantile=True)
         self.save_word_cloud(df_tweets=df_tweets_quantile, is_quantile=True)
@@ -315,4 +349,3 @@ class TwitterSentiment(Twitter):
             self.search_term, self.today_string), sep=';')
 
         self.logger.info("Quantile analysis run in {0} seconds".format(time.time() - start_time))
-
