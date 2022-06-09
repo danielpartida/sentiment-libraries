@@ -3,7 +3,7 @@ from twitter import TwitterScraper, TwitterSentiment
 
 if __name__ == "__main__":
 
-    search_term = "context:11.689566306014617600"
+    search_term = "context:66.913142676819648512"
     delta_days = 7
     from_time = datetime.utcnow() - timedelta(days=delta_days)
     until_time = datetime.utcnow() - timedelta(hours=1)
