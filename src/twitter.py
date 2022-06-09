@@ -29,7 +29,12 @@ class Twitter:
         """
         logger = logging.getLogger("tweepy")
         logging.basicConfig(level=logging.INFO)
-        handler = logging.FileHandler(filename="../logger/{0}.log".format(self.search_term))
+
+        if self.search_term.find("context") != -1:
+            handler = logging.FileHandler(filename="../logger/context_annotation.log")
+        else:
+            handler = logging.FileHandler(filename="../logger/{0}.log".format(self.search_term))
+        
         logger.addHandler(handler)
 
         return logger
@@ -107,10 +112,21 @@ class TwitterScraper(Twitter):
         :return: None
         :rtype: None
         """
-        paths = ["../data/results/{0}/discord".format(self.search_term),
-                 "../data/results/{0}/twitter".format(self.search_term), "../img/{0}/discord".format(self.search_term),
-                 "../img/{0}/twitter/bert".format(self.search_term),
-                 "../img/{0}/twitter/roberta".format(self.search_term)]
+
+        if self.search_term.find("context") != -1:
+            context = "context"
+            paths = ["../data/results/{0}/discord".format(context),
+                    "../data/results/{0}/twitter".format(context), "../img/{0}/discord".format(context),
+                    "../img/{0}/twitter/bert".format(context),
+                    "../img/{0}/twitter/roberta".format(context)]
+
+        else:
+
+            paths = ["../data/results/{0}/discord".format(self.search_term),
+                    "../data/results/{0}/twitter".format(self.search_term), "../img/{0}/discord".format(self.search_term),
+                    "../img/{0}/twitter/bert".format(self.search_term),
+                    "../img/{0}/twitter/roberta".format(self.search_term)]
+
         for path in paths:
             if not os.path.exists(path):
                 os.makedirs(path)
@@ -202,7 +218,13 @@ class TwitterScraper(Twitter):
         )
 
         time_stamp_export = self.today.strftime("%d_%m_%H_%M")
-        df_tweets.to_csv("../data/backup/{0}_tweets_{1}.csv".format(self.search_term, time_stamp_export),
+
+        if self.search_term.find("context") != -1:
+            context = "context"
+            df_tweets.to_csv("../data/backup/{0}_tweets_{1}.csv".format(context, time_stamp_export),
+                         sep=';', decimal=',')
+        else:
+            df_tweets.to_csv("..data/backup/{0}_tweets_{1}.csv".format(self.search_term, time_stamp_export),
                          sep=';', decimal=',')
 
         return df_tweets
