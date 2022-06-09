@@ -60,8 +60,13 @@ class TwitterScraper(Twitter):
     def build_text_query(search_term: str, token: str):
         if token:
             text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet lang:en'.format(search_term, token)
+
+        elif search_term.find("context") != -1:
+            text_query = search_term
+
         else:
             text_query = '({0} OR @{0} OR #{0}) -is:retweet lang:en'.format(search_term)
+
         return text_query
 
     @staticmethod
