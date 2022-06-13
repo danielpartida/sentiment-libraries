@@ -275,7 +275,8 @@ class TwitterSentiment(Twitter):
             sentiment_tweets = df_tweets['text'][
                 df_tweets['sentiment_{0}'.format(self.model_str)] == sentiment
                 ]
-            sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100, colormap=color_maps[sentiment],
+            # FIXME: Add proper colormap
+            sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100, #colormap=color_maps[sentiment],
                                             background_color="white", stopwords=stop_words).generate(
                 str(sentiment_tweets)
             )
