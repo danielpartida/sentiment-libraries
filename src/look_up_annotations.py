@@ -12,7 +12,9 @@ def save_to_csv(path: str, entity_key: int) -> None:
 
 if __name__ == "__main__":
 
-    data = pd.read_csv("../data/backup/crypto_context_tweets_09_06_17_05.csv", sep=';', decimal=',')
+    one_day = "crypto_context_tweets_09_06_17_05.csv"
+    seven_days = "context_tweets_14_06_15_02.csv"
+    data = pd.read_csv("../data/backup/{0}".format(seven_days), sep=';', decimal=',')
     context_annotations = data.context_annotations
     # convert str to list
     series_annotations = context_annotations.apply(lambda x: eval(x))
