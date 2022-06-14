@@ -50,3 +50,6 @@ if __name__ == "__main__":
     for key in look_up_dict.keys():
         entities[key] = look_up_dict[key]["name"]
         save_to_csv(path=basic_path, entity_key=key)
+
+    df_entities = pd.DataFrame([entities]).T
+    df_entities.to_csv(basic_path + "entities.csv", sep=';', decimal=',')
