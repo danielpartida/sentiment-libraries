@@ -1,0 +1,142 @@
+[
+  {
+    "domain": {
+      "id": "46",
+      "name": "Brand Category",
+      "description": "Categories within Brand Verticals that narrow down the scope of Brands"
+    },
+    "entity": { "id": "781974596157181956", "name": "Online Site" }
+  },
+  {
+    "domain": {
+      "id": "47",
+      "name": "Brand",
+      "description": "Brands and Companies"
+    },
+    "entity": {
+      "id": "1066103029693263872",
+      "name": "The Verge",
+      "description": "The Verge"
+    }
+  },
+  {
+    "domain": {
+      "id": "30",
+      "name": "Entities [Entity Service]",
+      "description": "Entity Service top level domain, every item that is in Entity Service should be in this domain"
+    },
+    "entity": { "id": "1139229372198469633", "name": "Dogecoin cryptocurrency" }
+  },
+  {
+    "domain": {
+      "id": "30",
+      "name": "Entities [Entity Service]",
+      "description": "Entity Service top level domain, every item that is in Entity Service should be in this domain"
+    },
+    "entity": { "id": "1448236149676261380", "name": "Shiba Inu" }
+  },
+  {
+    "domain": {
+      "id": "30",
+      "name": "Entities [Entity Service]",
+      "description": "Entity Service top level domain, every item that is in Entity Service should be in this domain"
+    },
+    "entity": {
+      "id": "848920371311001600",
+      "name": "Technology",
+      "description": "Technology and computing"
+    }
+  },
+  {
+    "domain": {
+      "id": "66",
+      "name": "Interests and Hobbies Category",
+      "description": "A grouping of interests and hobbies entities, like Novelty Food or Destinations"
+    },
+    "entity": {
+      "id": "913142676819648512",
+      "name": "Cryptocurrencies",
+      "description": "Cryptocurrency"
+    }
+  },
+  {
+    "domain": {
+      "id": "165",
+      "name": "Technology",
+      "description": "for individual and types of technology, e.g., food technology, 3D printing"
+    },
+    "entity": {
+      "id": "848920371311001600",
+      "name": "Technology",
+      "description": "Technology and computing"
+    }
+  },
+  {
+    "domain": {
+      "id": "166",
+      "name": "Stocks",
+      "description": "for individual and types of stocks, e.g., $TRX, $QQQ"
+    },
+    "entity": { "id": "1303026843365171206", "name": "$DOGE" }
+  },
+  {
+    "domain": {
+      "id": "174",
+      "name": "Digital Assets & Crypto",
+      "description": "For cryptocurrency entities"
+    },
+    "entity": { "id": "1139215200878395392", "name": "Verge cryptocurrency" }
+  },
+  {
+    "domain": {
+      "id": "174",
+      "name": "Digital Assets & Crypto",
+      "description": "For cryptocurrency entities"
+    },
+    "entity": { "id": "1139229372198469633", "name": "Dogecoin cryptocurrency" }
+  },
+  {
+    "domain": {
+      "id": "10",
+      "name": "Person",
+      "description": "Named people in the world like Nelson Mandela"
+    },
+    "entity": {
+      "id": "808713037230157824",
+      "name": "Elon Musk",
+      "description": "Elon Musk"
+    }
+  },
+  {
+    "domain": {
+      "id": "65",
+      "name": "Interests and Hobbies Vertical",
+      "description": "Top level interests and hobbies groupings, like Food or Travel"
+    },
+    "entity": { "id": "781974596148793345", "name": "Business & finance" }
+  },
+  {
+    "domain": {
+      "id": "66",
+      "name": "Interests and Hobbies Category",
+      "description": "A grouping of interests and hobbies entities, like Novelty Food or Destinations"
+    },
+    "entity": {
+      "id": "857878777191211008",
+      "name": "Leadership",
+      "description": "Leadership"
+    }
+  },
+  {
+    "domain": {
+      "id": "30",
+      "name": "Entities [Entity Service]",
+      "description": "Entity Service top level domain, every item that is in Entity Service should be in this domain"
+    },
+    "entity": {
+      "id": "857879456773357569",
+      "name": "Technology",
+      "description": "Technology"
+    }
+  }
+]

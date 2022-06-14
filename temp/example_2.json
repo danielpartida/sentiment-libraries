@@ -1,0 +1,46 @@
+[
+  {
+    "domain": {
+      "id": "47",
+      "name": "Brand",
+      "description": "Brands and Companies"
+    },
+    "entity": { "id": "1372588659346612225", "name": "Binance" }
+  },
+  {
+    "domain": {
+      "id": "30",
+      "name": "Entities [Entity Service]",
+      "description": "Entity Service top level domain, every item that is in Entity Service should be in this domain"
+    },
+    "entity": {
+      "id": "848920371311001600",
+      "name": "Technology",
+      "description": "Technology and computing"
+    }
+  },
+  {
+    "domain": {
+      "id": "66",
+      "name": "Interests and Hobbies Category",
+      "description": "A grouping of interests and hobbies entities, like Novelty Food or Destinations"
+    },
+    "entity": {
+      "id": "913142676819648512",
+      "name": "Cryptocurrencies",
+      "description": "Cryptocurrency"
+    }
+  },
+  {
+    "domain": {
+      "id": "165",
+      "name": "Technology",
+      "description": "for individual and types of technology, e.g., food technology, 3D printing"
+    },
+    "entity": {
+      "id": "848920371311001600",
+      "name": "Technology",
+      "description": "Technology and computing"
+    }
+  }
+]
