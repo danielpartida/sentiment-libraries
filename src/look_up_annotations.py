@@ -35,3 +35,14 @@ if __name__ == "__main__":
         print(e)
 
     print(look_up_dict)
+
+    df_entities = pd.DataFrame(look_up_dict[30]["entities"]).T
+    df_entities.to_csv("../look_up_tables/df_entities.csv", sep=';', decimal=',')
+
+    df_hobbies = pd.DataFrame(look_up_dict[66]["entities"]).T
+
+    df_cryptos = pd.DataFrame(look_up_dict[174]["entities"]).T
+    df_tickers = pd.DataFrame(look_up_dict[166]["entities"]).T
+    df_brands = pd.DataFrame(look_up_dict[47]["entities"]).T
+    df_technologies = pd.DataFrame(look_up_dict[165]["entities"]).T
+    df_people = pd.DataFrame(look_up_dict[10]["entities"]).T
