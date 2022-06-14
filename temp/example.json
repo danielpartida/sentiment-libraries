@@ -1,0 +1,22 @@
+[
+  {
+    "domain": {
+      "id": "30",
+      "name": "Entities [Entity Service]",
+      "description": "Entity Service top level domain, every item that is in Entity Service should be in this domain"
+    },
+    "entity": { "id": "1468157909318045697", "name": "Solana cryptocurrency" }
+  },
+  {
+    "domain": {
+      "id": "66",
+      "name": "Interests and Hobbies Category",
+      "description": "A grouping of interests and hobbies entities, like Novelty Food or Destinations"
+    },
+    "entity": {
+      "id": "913142676819648512",
+      "name": "Cryptocurrencies",
+      "description": "Cryptocurrency"
+    }
+  }
+]
