@@ -29,6 +29,11 @@ if __name__ == "__main__":
 
     total_tweet_count = data["meta"]["total_tweet_count"]
     df_tweets = pd.DataFrame(data=data["data"])
-    df_tweets.set_index(df_tweets.start, inplace=True)
+    df_tweets["start"] = pd.to_datetime(df_tweets.start).dt.strftime('%Y-%m-%d %H:%M')
+    df_tweets["end"] = pd.to_datetime(df_tweets.end).dt.strftime('%Y-%m-%d %H:%M')
+    df_tweets["dates"] = [pd.to_datetime(d) for d in df_tweets.start]
+
+    df_tweets.plot(kind="scatter", x='start', y='tweet_count', c='tweet_count', colormap='coolwarm',
+                   title='Daily count of Bitcoin Tweets')
 
     print("Run")
