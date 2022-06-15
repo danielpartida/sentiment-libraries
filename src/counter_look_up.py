@@ -2,15 +2,9 @@ import os
 
 import pandas as pd
 import requests
+from dotenv import load_dotenv
 
-
-class BearerAuth(requests.auth.AuthBase):
-    def __init__(self, token):
-        self.token = token
-
-    def __call__(self, r):
-        r.headers["authorization"] = "Bearer " + self.token
-        return r
+load_dotenv()
 
 if __name__ == "__main__":
 
@@ -26,8 +20,7 @@ if __name__ == "__main__":
     url = "https://api.twitter.com/2/tweets/counts/recent?query=context:{0}.{1}".format(entity_id, annotation_id)
 
     token = os.getenv('bearer_token')
-    token = "AAAAAAAAAAAAAAAAAAAAALnHbgEAAAAAIvPN2uwC7u3Bk2Gcacx8lOG%2FbYY%3DEi1nQg8LcjhT4yONksZAt8gQlIqV77LwIm0nQe6UXE9dgAVbv7"
     headers = {"Authorization": "Bearer {0}".format(token)}
-    response = requests.get(url=url, auth=BearerAuth(token))
+    response = requests.get(url=url, headers=headers)
 
     print("Run")
