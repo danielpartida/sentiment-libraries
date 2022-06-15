@@ -13,7 +13,8 @@ if __name__ == "__main__":
     entities = pd.read_csv("../look_up_tables/entities.csv", sep=';', decimal=',')
     entities.rename(columns={"Unnamed: 0": "id", "0": "name"}, inplace=True)
 
-    # FIXME: Create dynamic entity and annotation_id
+    # FIXME: Fetch dynamically entity and annotation
+    # TODO: Set dynamically entity_id and annotation_id
     entity_id = 174
     annotation_id = 1007360414114435072
     granularity = "hour"  # day, hour or minute
@@ -33,7 +34,8 @@ if __name__ == "__main__":
     df_tweets["end"] = pd.to_datetime(df_tweets.end).dt.strftime('%Y-%m-%d %H:%M')
     df_tweets["dates"] = [pd.to_datetime(d) for d in df_tweets.start]
 
-    df_tweets.plot(kind="scatter", x='start', y='tweet_count', c='tweet_count', colormap='coolwarm',
-                   title='Daily count of Bitcoin Tweets')
+    # TODO: Set title dynamically
+    df_tweets.plot(kind="scatter", x='dates', y='tweet_count', c='tweet_count', colormap='coolwarm',
+                   title='Hourly count of Bitcoin Tweets')
 
     print("Run")
