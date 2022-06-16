@@ -15,17 +15,22 @@ if __name__ == "__main__":
 
     # FIXME: Fetch dynamically entity and annotation
     # TODO: Set dynamically entity_id and annotation_id
-    entity_id = 174
-    annotation_id = 1007360414114435072
+    entity_id = 174  # digital assets
+    annotation_id = 1007360414114435072  # Bitcoin
+    query_annotation = "context:{0}.{1}".format(entity_id, annotation_id)
+
     basic_url = "https://api.twitter.com/2/tweets"
     query_type = "counts"
     granularity = "day"  # day, hour or minute
     start = "2022-01-01T00:00:00Z"
     end = "2022-06-15T00:00:00Z"
+    access_type = "all"  # "all" for academic access, "recent" for premium access
+    query_text = "bitcoin"
+
     # TODO: Include next token
-    next_toke = ""
-    url = "{0}/{1}/recent?query=context:{2}.{3}&granularity={4}&start_time={5}&end_time={6}".format(
-        basic_url, query_type, entity_id, annotation_id, granularity, start, end
+    next_token = ""
+    url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}".format(
+        basic_url, query_type, access_type, query_text, granularity, start, end
     )
 
     # Source https://developer.twitter.com/en/docs/twitter-api/tweets/counts/quick-start/recent-tweet-counts
