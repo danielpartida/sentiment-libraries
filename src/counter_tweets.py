@@ -53,11 +53,19 @@ def build_url(request_type: str = "counts", access_level: str = "all", granulari
 
     basic_url = "https://api.twitter.com/2/tweets"
 
+    # last run
     if not next_token_id:
         url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}".format(
             basic_url, request_type, access_level, search_term, granularity_level, start_date, end_date
         )
 
+    # first run
+    elif next_token_id == "first_run":
+        url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}".format(
+            basic_url, request_type, access_level, search_term, granularity_level, start_date, end_date
+        )
+
+    # all runs besides first and last run
     else:
         url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}&next_token={7}".format(
             basic_url, request_type, access_level, search_term, granularity_level, start_date, end_date, next_token_id
@@ -124,7 +132,7 @@ def build_url_with_annotation():
 
 
 # TODO: Set title dynamically
-def plot():
+def plot(df_tweets: pd.DataFrame):
     # df_tweets.plot(kind="scatter", x='dates', y='tweet_count', c='tweet_count', colormap='coolwarm',
     #                title='Hourly count of Bitcoin Tweets')
     pass
@@ -150,7 +158,7 @@ if __name__ == "__main__":
 
     all_df_tweets = []
     total_tweets = 0
-    next_token = None
+    next_token = "first_run"
     while next_token:
         constructed_url = build_url(request_type=query_type, access_level=access_type, granularity_level=granularity,
                                     start_date=start, end_date=end, search_term=query_text, next_token_id=next_token)
@@ -161,5 +169,10 @@ if __name__ == "__main__":
         df_tweets_window, total_tweets_window, next_token = convert_data_into_df(response_data)
         all_df_tweets.append(df_tweets_window)
         total_tweets += total_tweets_window
-    
+
+    df = pd.concat(all_df_tweets)
+    df.set_index("dates", inplace=True)
+
+    # TODO: Add exporter to csv
+    # TODO: Add scatter plot
     print("Run")
