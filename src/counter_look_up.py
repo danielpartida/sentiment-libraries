@@ -17,14 +17,15 @@ if __name__ == "__main__":
     # TODO: Set dynamically entity_id and annotation_id
     entity_id = 174
     annotation_id = 1007360414114435072
-    granularity = "hour"  # day, hour or minute
+    granularity = "day"  # day, hour or minute
     url = "https://api.twitter.com/2/tweets/counts/recent?query=context:{0}.{1}&granularity={2}".format(
         entity_id, annotation_id, granularity
     )
 
     # Source https://developer.twitter.com/en/docs/twitter-api/tweets/counts/quick-start/recent-tweet-counts
     token = os.getenv('bearer_token')
-    headers = {"Authorization": "Bearer {0}".format(token)}
+    academic = os.getenv('academic')
+    headers = {"Authorization": "Bearer {0}".format(academic)}
     response = requests.get(url=url, headers=headers)
     data = response.json()
 
