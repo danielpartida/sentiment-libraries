@@ -52,7 +52,7 @@ def build_url(request_type: str = "counts", access_level: str = "all", granulari
 
     basic_url = "https://api.twitter.com/2/tweets"
 
-    if len(next_token):
+    if not next_token_id:
         url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}".format(
             basic_url, request_type, access_level, search_term, granularity_level, start_date, end_date
         )
@@ -63,7 +63,6 @@ def build_url(request_type: str = "counts", access_level: str = "all", granulari
         )
 
     return url
-
 
 # TODO: Set dynamically entity_id and annotation_id
 def build_url_with_annotation():
@@ -99,12 +98,27 @@ if __name__ == "__main__":
     query_text = "bitcoin"
 
     request_url = build_url(request_type=query_type, access_level=access_type, granularity_level=granularity,
-                            start_date=start, end_date=end, search_term=query_text, next_token_id="")
+                            start_date=start, end_date=end, search_term=query_text)
 
     response = requests.get(url=request_url, headers=authentication_header)
-    data = response.json()
 
-    next_token = data["meta"]["next_token"]
+    # Fetch response data as dictionary
+    if response.status_code == 200:
+        data = response.json()
+
+    elif response.status_code == 400:
+        raise PermissionError("Bad request {0}, check if the url {1} is correct".format(
+            response.status_code, request_url)
+        )
+
+    else:
+        raise ValueError("Unknown error, status code is {0}, check if the url {1} is correct".format(
+            response.status_code, request_url)
+        )
+
+    if "next_token" in data["meta"].keys():
+        next_token = data["meta"]["next_token"]
+
     total_tweet_count = data["meta"]["total_tweet_count"]
     df_tweets = pd.DataFrame(data=data["data"])
     df_tweets["start"] = pd.to_datetime(df_tweets.start).dt.strftime('%Y-%m-%d %H:%M')
