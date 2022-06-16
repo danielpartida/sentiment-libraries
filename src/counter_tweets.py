@@ -66,6 +66,32 @@ def build_url(request_type: str = "counts", access_level: str = "all", granulari
     return url
 
 
+def get_data_with_control_flow(request_response: requests.models.Response, request_url: str) -> dict:
+    """
+    Gets data from response checking control flow
+    :param request_response: request response
+    :type request_response: requests.models.Response
+    :param request_url: request url
+    :type request_url: str
+    :return: response data
+    :rtype: dict
+    """
+    if request_response.status_code == 200:
+        data = request_response.json()
+
+    elif request_response.status_code == 400:
+        raise PermissionError("Bad request {0}, check if the url {1} is correct".format(
+            request_response.status_code, request_url)
+        )
+
+    else:
+        raise ValueError("Unknown error, status code is {0}, check if the url {1} is correct".format(
+            request_response.status_code, request_url)
+        )
+
+    return data
+
+
 def convert_data_into_df(data: dict) -> Tuple:
     """
     Builds dataframe with response data, fetches the total tweets and gets next_token_id
@@ -122,25 +148,18 @@ if __name__ == "__main__":
     access_type = "all"  # "all" for academic access, "recent" for premium access
     query_text = "bitcoin"
 
-    request_url = build_url(request_type=query_type, access_level=access_type, granularity_level=granularity,
-                            start_date=start, end_date=end, search_term=query_text)
+    all_df_tweets = []
+    total_tweets = 0
+    next_token = None
+    while next_token:
+        constructed_url = build_url(request_type=query_type, access_level=access_type, granularity_level=granularity,
+                                    start_date=start, end_date=end, search_term=query_text, next_token_id=next_token)
 
-    response = requests.get(url=request_url, headers=authentication_header)
+        response = requests.get(url=constructed_url, headers=authentication_header)
+        response_data = get_data_with_control_flow(request_response=response, request_url=constructed_url)
 
-    # Fetch response data as dictionary
-    if response.status_code == 200:
-        response_data = response.json()
-
-    elif response.status_code == 400:
-        raise PermissionError("Bad request {0}, check if the url {1} is correct".format(
-            response.status_code, request_url)
-        )
-
-    else:
-        raise ValueError("Unknown error, status code is {0}, check if the url {1} is correct".format(
-            response.status_code, request_url)
-        )
-
-    df_tweets_window, total_tweets_window, next_token = convert_data_into_df(response_data)
-
+        df_tweets_window, total_tweets_window, next_token = convert_data_into_df(response_data)
+        all_df_tweets.append(df_tweets_window)
+        total_tweets += total_tweets_window
+    
     print("Run")
