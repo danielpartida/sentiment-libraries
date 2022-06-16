@@ -1,4 +1,5 @@
 import os
+from typing import Tuple
 
 import pandas as pd
 import requests
@@ -64,6 +65,30 @@ def build_url(request_type: str = "counts", access_level: str = "all", granulari
 
     return url
 
+
+def convert_data_into_df(data: dict) -> Tuple:
+    """
+    Builds dataframe with response data, fetches the total tweets and gets next_token_id
+    :param data: response data
+    :type data: dict
+    :return: df of timeseries of total tweets per granularity, total tweets in that window, and next token id
+    :rtype: Tuple
+    """
+    if "next_token" in data["meta"].keys():
+        next_token_id = data["meta"]["next_token"]
+
+    else:
+        next_token_id = None
+
+    total_tweet_count = data["meta"]["total_tweet_count"]
+    df_tweets = pd.DataFrame(data=data["data"])
+    df_tweets["start"] = pd.to_datetime(df_tweets.start).dt.strftime('%Y-%m-%d %H:%M')
+    df_tweets["end"] = pd.to_datetime(df_tweets.end).dt.strftime('%Y-%m-%d %H:%M')
+    df_tweets["dates"] = [pd.to_datetime(d) for d in df_tweets.start]
+
+    return df_tweets, total_tweet_count, next_token_id
+
+
 # TODO: Set dynamically entity_id and annotation_id
 def build_url_with_annotation():
     # entity_id = 174  # digital asset
@@ -104,7 +129,7 @@ if __name__ == "__main__":
 
     # Fetch response data as dictionary
     if response.status_code == 200:
-        data = response.json()
+        response_data = response.json()
 
     elif response.status_code == 400:
         raise PermissionError("Bad request {0}, check if the url {1} is correct".format(
@@ -116,14 +141,6 @@ if __name__ == "__main__":
             response.status_code, request_url)
         )
 
-    if "next_token" in data["meta"].keys():
-        next_token = data["meta"]["next_token"]
-
-    total_tweet_count = data["meta"]["total_tweet_count"]
-    df_tweets = pd.DataFrame(data=data["data"])
-    df_tweets["start"] = pd.to_datetime(df_tweets.start).dt.strftime('%Y-%m-%d %H:%M')
-    df_tweets["end"] = pd.to_datetime(df_tweets.end).dt.strftime('%Y-%m-%d %H:%M')
-    df_tweets["dates"] = [pd.to_datetime(d) for d in df_tweets.start]
-
+    df_tweets_window, total_tweets_window, next_token = convert_data_into_df(response_data)
 
     print("Run")
