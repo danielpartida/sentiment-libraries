@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# TODO: Add context annotations, language, etc
+
 def create_url():
-    return "https://api.twitter.com/2/tweets/sample/stream"
+    return "https://api.twitter.com/2/tweets/sample/stream?tweet.fields=context_annotations,lang"
 
 
 def bearer_oauth(r):
