@@ -90,7 +90,8 @@ def filter_context_annotations(tweet_response: list) -> dict:
                 result["domain_id"] = int(context["domain"]["id"])
                 result["entity_id"] = int(context["entity"]["id"])
                 result["entity_name"] = context["entity"]["name"]
-                result["entity_description"] = context["entity"]["description"]
+                if "entity_description" in context["entity"].keys():
+                    result["entity_description"] = context["entity"]["description"]
 
         if check_crypto_context(context=context):
             return result
