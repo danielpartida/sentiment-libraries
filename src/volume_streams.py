@@ -148,6 +148,5 @@ if __name__ == "__main__":
     bearer_token = os.environ.get("BEARER_TOKEN")
 
     # TODO: Handle connections and rate limits, 50 requests per 15-minute window shared among all users of your app
-    # TODO: Build try & catch for control flow (key errors)
     run_volume_streams()
     session.close()
