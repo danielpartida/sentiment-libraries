@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from dotenv import load_dotenv
 
-from utils import get_engine
+from helper import get_engine
 
 load_dotenv()
 
@@ -17,7 +17,7 @@ class TwitterStreams(Base):
     language = Column(String)
     text = Column(String)
     tweet_id = Column(Integer, primary_key=True, autoincrement=False)
-
+    # TODO: Add datetime column
 
 if __name__ == "__main__":
     engine = get_engine()
