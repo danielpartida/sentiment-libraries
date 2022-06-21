@@ -4,6 +4,8 @@ import json
 import requests
 from dotenv import load_dotenv
 
+from src.db.utils import get_session
+
 load_dotenv()
 
 
@@ -26,14 +28,14 @@ def connect_to_endpoint(url):
 
     crypto_tweets = []
     for response_line in response.iter_lines():
-        # TODO: Filter only English tweets
         if response_line:
             json_response = json.loads(response_line)
-            crypto_tweet = filter_context_annotations(tweet_response=json_response)
+            if json_response["data"]["lang"] == "eng":
+                crypto_tweet = filter_context_annotations(tweet_response=json_response)
 
-            if bool(crypto_tweet):
-                crypto_tweets.append(crypto_tweet)
-                print(json.dumps(crypto_tweet, indent=4, sort_keys=True))
+                if bool(crypto_tweet):
+                    crypto_tweets.append(crypto_tweet)
+                    print(json.dumps(crypto_tweet, indent=4, sort_keys=True))
 
     if response.status_code != 200:
         raise Exception(
@@ -100,6 +102,9 @@ def filter_context_annotations(tweet_response: list) -> dict:
 
 
 if __name__ == "__main__":
+
+    # TODO: Get session and stream tweet volumes
+    # session = get_session()
 
     bearer_token = os.environ.get("BEARER_TOKEN")
 
