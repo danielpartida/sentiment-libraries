@@ -1,6 +1,8 @@
 import os
 
 import json
+import re
+
 import requests
 from datetime import datetime
 from dotenv import load_dotenv
@@ -25,6 +27,14 @@ def bearer_oauth(r):
     return r
 
 
+def clean_tweet(tweet: str):
+    """
+    Utility function to clean tweet text by removing links, special characters using simple regex statements.
+    Example taken from https://www.geeksforgeeks.org/twitter-sentiment-analysis-using-python/?ref=lbp
+    """
+    return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) | (\w+:\ / \ / \S+)", " ", tweet).split())
+
+
 def connect_to_endpoint(url):
     """
     Topic sources: https://blog.twitter.com/en_us/topics/product/2020/topics-behind-the-tweets
@@ -41,7 +51,6 @@ def connect_to_endpoint(url):
         if response_line:
             json_response = json.loads(response_line)
             if json_response["data"]["lang"] == "en":
-                # FIXME: Clean text of tweet
                 crypto_tweet = filter_context_annotations(tweet_response=json_response)
 
                 if bool(crypto_tweet):
@@ -57,7 +66,7 @@ def connect_to_endpoint(url):
                         tweet_id=crypto_tweet["tweet_id"],
                         date=now
                     )
-                    # TODO: Delete print statement and move session.commit() statement
+                    # TODO: Delete print statement
                     session.add(tweet_stream)
                     session.commit()
                     print(json.dumps(crypto_tweet, indent=4, sort_keys=True))
