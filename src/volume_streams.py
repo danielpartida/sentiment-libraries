@@ -2,7 +2,11 @@ import os
 
 import json
 import requests
+from datetime import datetime
 from dotenv import load_dotenv
+
+from db.helper import get_session
+from db.entities import TwitterStreams
 
 load_dotenv()
 
@@ -22,18 +26,41 @@ def bearer_oauth(r):
 
 
 def connect_to_endpoint(url):
+    """
+    Topic sources: https://blog.twitter.com/en_us/topics/product/2020/topics-behind-the-tweets
+    https://twitter.com/i/topics/picker/home
+    :param url: request url
+    :type url: str
+    :return: Sends tweet to database
+    :rtype: None
+    """
     response = requests.request("GET", url, auth=bearer_oauth, stream=True)
 
     crypto_tweets = []
     for response_line in response.iter_lines():
-        # TODO: Filter only English tweets
         if response_line:
             json_response = json.loads(response_line)
-            crypto_tweet = filter_context_annotations(tweet_response=json_response)
+            if json_response["data"]["lang"] == "en":
+                # FIXME: Clean text of tweet
+                crypto_tweet = filter_context_annotations(tweet_response=json_response)
 
-            if bool(crypto_tweet):
-                crypto_tweets.append(crypto_tweet)
-                print(json.dumps(crypto_tweet, indent=4, sort_keys=True))
+                if bool(crypto_tweet):
+                    crypto_tweets.append(crypto_tweet)
+
+                    now = datetime.now()
+                    tweet_stream = TwitterStreams(
+                        domain_id=crypto_tweet["domain_id"],
+                        entity_id=crypto_tweet["entity_id"],
+                        entity_name=crypto_tweet["entity_name"],
+                        language=crypto_tweet["lang"],
+                        text=crypto_tweet["text"],
+                        tweet_id=crypto_tweet["tweet_id"],
+                        date=now
+                    )
+                    # TODO: Delete print statement and move session.commit() statement
+                    session.add(tweet_stream)
+                    session.commit()
+                    print(json.dumps(crypto_tweet, indent=4, sort_keys=True))
 
     if response.status_code != 200:
         raise Exception(
@@ -101,7 +128,11 @@ def filter_context_annotations(tweet_response: list) -> dict:
 
 if __name__ == "__main__":
 
+    session = get_session()
+
     bearer_token = os.environ.get("BEARER_TOKEN")
 
     # TODO: Handle connections and rate limits, 50 requests per 15-minute window shared among all users of your app
+    # TODO: Build try & catch for control flow (key errors)
     run_volume_streams()
+    session.close()
