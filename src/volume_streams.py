@@ -1,6 +1,8 @@
 import os
 
 import json
+import re
+
 import requests
 from datetime import datetime
 from dotenv import load_dotenv
@@ -24,6 +26,14 @@ def bearer_oauth(r):
     r.headers["User-Agent"] = "v2SampledStreamPython"
     return r
 
+# FIXME: Double check tweet clean, particularly if emojis are deleted
+def clean_tweet(tweet: str):
+    """
+    Utility function to clean tweet text by removing links, special characters using simple regex statements.
+    Example taken from https://www.geeksforgeeks.org/twitter-sentiment-analysis-using-python/?ref=lbp
+    """
+    return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) | (\w+:\ / \ / \S+)", " ", tweet).split())
+
 
 def connect_to_endpoint(url):
     """
@@ -41,7 +51,6 @@ def connect_to_endpoint(url):
         if response_line:
             json_response = json.loads(response_line)
             if json_response["data"]["lang"] == "en":
-                # FIXME: Clean text of tweet
                 crypto_tweet = filter_context_annotations(tweet_response=json_response)
 
                 if bool(crypto_tweet):
@@ -57,7 +66,7 @@ def connect_to_endpoint(url):
                         tweet_id=crypto_tweet["tweet_id"],
                         date=now
                     )
-                    # TODO: Delete print statement and move session.commit() statement
+                    # TODO: Delete print statement
                     session.add(tweet_stream)
                     session.commit()
                     print(json.dumps(crypto_tweet, indent=4, sort_keys=True))
@@ -105,22 +114,28 @@ def filter_context_annotations(tweet_response: list) -> dict:
     :return: dictionary of filtered data containing only tweets related to crypto assets
     :rtype: dict
     """
-    data = tweet_response["data"]
-    result = {"tweet_id": data["id"], "lang": data["lang"], "text": data["text"]}
+    try:
+        data = tweet_response["data"]
+        result = {"tweet_id": data["id"], "lang": data["lang"]}
 
-    if "context_annotations" in data.keys():
-        for context in data["context_annotations"]:
-            # check if domain is "interest & hobbies: category" and annotation is "crypto" or domain is "crypto"
+        if "context_annotations" in data.keys():
+            for context in data["context_annotations"]:
+                # check if domain is "interest & hobbies: category" and annotation is "crypto" or domain is "crypto"
+                if check_crypto_context(context=context):
+
+                    result["domain_id"] = int(context["domain"]["id"])
+                    result["entity_id"] = int(context["entity"]["id"])
+                    result["entity_name"] = context["entity"]["name"]
+                    if "entity_description" in context["entity"].keys():
+                        result["entity_description"] = context["entity"]["description"]
+
+                    result["text"] = clean_tweet(data["text"])
+
             if check_crypto_context(context=context):
+                return result
 
-                result["domain_id"] = int(context["domain"]["id"])
-                result["entity_id"] = int(context["entity"]["id"])
-                result["entity_name"] = context["entity"]["name"]
-                if "entity_description" in context["entity"].keys():
-                    result["entity_description"] = context["entity"]["description"]
-
-        if check_crypto_context(context=context):
-            return result
+    except ValueError as err:
+        print("An error just occurred: {0}".format(err))
 
     else:
         return {}
@@ -133,6 +148,5 @@ if __name__ == "__main__":
     bearer_token = os.environ.get("BEARER_TOKEN")
 
     # TODO: Handle connections and rate limits, 50 requests per 15-minute window shared among all users of your app
-    # TODO: Build try & catch for control flow (key errors)
     run_volume_streams()
     session.close()
