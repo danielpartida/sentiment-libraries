@@ -36,14 +36,17 @@ def connect_to_endpoint(url):
 
                 if bool(crypto_tweet):
                     crypto_tweets.append(crypto_tweet)
-                    # TwitterStreams(
-                    #     domain_id=crypto_tweet["domain_id"],
-                    #     entity_id=crypto_tweet["entity_id"],
-                    #     entity_name=crypto_tweet["entity_name"],
-                    #     language=crypto_tweet["lang"],
-                    #     text=crypto_tweet["text"],
-                    #     tweet_id=crypto_tweet["tweet_id"]
-                    # )
+                    tweet_stream = TwitterStreams(
+                        domain_id=crypto_tweet["domain_id"],
+                        entity_id=crypto_tweet["entity_id"],
+                        entity_name=crypto_tweet["entity_name"],
+                        language=crypto_tweet["lang"],
+                        text=crypto_tweet["text"],
+                        tweet_id=crypto_tweet["tweet_id"]
+                    )
+                    session.add(tweet_stream)
+                    # TODO: Delete print statement and move session.commit() statement
+                    session.commit()
                     print(json.dumps(crypto_tweet, indent=4, sort_keys=True))
 
     if response.status_code != 200:
@@ -118,3 +121,4 @@ if __name__ == "__main__":
 
     # TODO: Handle connections and rate limits, 50 requests per 15-minute window shared among all users of your app
     run_volume_streams()
+    session.close()
