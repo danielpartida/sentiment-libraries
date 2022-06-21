@@ -4,7 +4,8 @@ import json
 import requests
 from dotenv import load_dotenv
 
-from src.db.utils import get_session
+from db.helper import get_session
+from db.entities import TwitterStreams
 
 load_dotenv()
 
@@ -35,6 +36,14 @@ def connect_to_endpoint(url):
 
                 if bool(crypto_tweet):
                     crypto_tweets.append(crypto_tweet)
+                    # TwitterStreams(
+                    #     domain_id=crypto_tweet["domain_id"],
+                    #     entity_id=crypto_tweet["entity_id"],
+                    #     entity_name=crypto_tweet["entity_name"],
+                    #     language=crypto_tweet["lang"],
+                    #     text=crypto_tweet["text"],
+                    #     tweet_id=crypto_tweet["tweet_id"]
+                    # )
                     print(json.dumps(crypto_tweet, indent=4, sort_keys=True))
 
     if response.status_code != 200:
@@ -103,8 +112,7 @@ def filter_context_annotations(tweet_response: list) -> dict:
 
 if __name__ == "__main__":
 
-    # TODO: Get session and stream tweet volumes
-    # session = get_session()
+    session = get_session()
 
     bearer_token = os.environ.get("BEARER_TOKEN")
 
