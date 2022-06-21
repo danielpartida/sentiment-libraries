@@ -26,7 +26,7 @@ def bearer_oauth(r):
     r.headers["User-Agent"] = "v2SampledStreamPython"
     return r
 
-
+# FIXME: Double check tweet clean, particularly if emojis are deleted
 def clean_tweet(tweet: str):
     """
     Utility function to clean tweet text by removing links, special characters using simple regex statements.
