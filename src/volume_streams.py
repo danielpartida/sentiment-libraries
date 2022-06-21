@@ -30,7 +30,7 @@ def connect_to_endpoint(url):
     for response_line in response.iter_lines():
         if response_line:
             json_response = json.loads(response_line)
-            if json_response["data"]["lang"] == "eng":
+            if json_response["data"]["lang"] == "en":
                 crypto_tweet = filter_context_annotations(tweet_response=json_response)
 
                 if bool(crypto_tweet):
