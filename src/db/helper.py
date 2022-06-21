@@ -24,3 +24,8 @@ def get_session():
     session = Session()
 
     return session
+
+
+if __name__ == "__main__":
+
+    print("Hello helper function")

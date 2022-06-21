@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from dotenv import load_dotenv
 
-from utils import get_engine
+from helper import get_engine
 
 load_dotenv()
 
