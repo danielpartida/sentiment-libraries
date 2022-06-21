@@ -5,7 +5,7 @@ import requests
 from dotenv import load_dotenv
 
 from db.helper import get_session
-# from db.entities import TwitterStreams
+from db.entities import TwitterStreams
 
 load_dotenv()
 
