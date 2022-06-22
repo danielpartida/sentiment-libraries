@@ -7,8 +7,8 @@ import requests
 from datetime import datetime
 from dotenv import load_dotenv
 
-from db.helper import get_session
-from db.entities import TwitterStreams
+from src.db.helper import get_session
+from src.db.entities import TwitterStreams
 
 load_dotenv()
 
@@ -27,7 +27,7 @@ def bearer_oauth(r):
     return r
 
 
-# TODO: Double how method cleans tweet and what is removed
+# TODO: Double check how method cleans tweet and what is removed
 def clean_tweet(tweet: str):
     """
     Utility function to clean tweet text by removing links, special characters using simple regex statements.
