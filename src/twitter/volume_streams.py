@@ -27,7 +27,7 @@ def bearer_oauth(r):
     return r
 
 
-# TODO: Double how method cleans tweet and what is removed
+# TODO: Double check how method cleans tweet and what is removed
 def clean_tweet(tweet: str):
     """
     Utility function to clean tweet text by removing links, special characters using simple regex statements.

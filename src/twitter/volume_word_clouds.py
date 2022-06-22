@@ -1,20 +1,49 @@
 from datetime import datetime, timedelta
 
-from src.db.helper import get_session
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud, STOPWORDS
+
 from src.db.entities import TwitterStreams
+from src.db.helper import get_session
 
 
-def compute_word_clouds():
-    pass
+def compute_word_cloud(tweet_object: list) -> None:
+    """
+    Computes and saves word_cloud
+    :param tweet_object: last tweets as sqlalchemy ORM object
+    :type tweet_object: list of TwitterStreams
+    :return: None
+    :rtype: None
+    """
+    stop_words = set(["https", "co", "RT", "dtype", "t", "X", "x"] + list(STOPWORDS))
+
+    # sentiment_types = ["Positive", "Negative", "Neutral"]
+    # color_maps = {"Positive": "YlGn", "Negative": "OrRd", "Neutral": "PuRd"}
+
+    tweets = list(map(lambda x: x.text, tweet_object))
+
+    world_cloud = WordCloud(max_font_size=50, max_words=100,  # colormap=color_maps[sentiment],
+                            background_color="white", stopwords=stop_words).generate(str(tweets))
+
+    now = datetime.now()
+    now = datetime(now.year, now.month, now.day, now.hour, now.minute, now.second)
+    now_string = now.strftime("%m_%d_%H_%M")
+
+    plt.figure()
+    plt.title("Twitter Wordcloud - {0}".format(now))
+    plt.imshow(world_cloud, interpolation="bilinear")
+    plt.axis("off")
+
+    plt.savefig('../../img/volume_streams/wordcloud_{0}'.format(now_string))
 
 
-def query_last_streams(time_delta: timedelta) -> TwitterStreams:
+def query_last_streams(time_delta: datetime) -> list:
     """
     Fetches last tweets using sqlalchemy ORM
     :param time_delta: time_delta e.g. datetime.now() - timedelta(hours=12)
-    :type time_delta: timedelta
+    :type time_delta: datetime
     :return: last twitter streams
-    :rtype: TwitterStreams
+    :rtype: list of TwitterStreams
     """
     last_streams = session.query(TwitterStreams).filter(
         TwitterStreams.domain_id == 66, TwitterStreams.date >= time_delta
@@ -29,6 +58,8 @@ if __name__ == "__main__":
 
     delta = datetime.now() - timedelta(hours=12)
     last_tweets = query_last_streams(time_delta=delta)
+
+    compute_word_cloud(tweet_object=last_tweets)
 
     session.close()
 
