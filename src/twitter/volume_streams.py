@@ -7,8 +7,8 @@ import requests
 from datetime import datetime
 from dotenv import load_dotenv
 
-from db.helper import get_session
-from db.entities import TwitterStreams
+from src.db.helper import get_session
+from src.db.entities import TwitterStreams
 
 load_dotenv()
 

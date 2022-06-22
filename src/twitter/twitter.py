@@ -31,7 +31,7 @@ class Twitter:
         logging.basicConfig(level=logging.INFO)
 
         if self.search_term.find("context") != -1:
-            handler = logging.FileHandler(filename="../logger/context_annotation.log")
+            handler = logging.FileHandler(filename="../../logger/context_annotation.log")
         else:
             handler = logging.FileHandler(filename="../logger/{0}.log".format(self.search_term))
         

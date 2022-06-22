@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
     # Export results
     entities = {}
-    basic_path = "../look_up_tables/"
+    basic_path = "../../look_up_tables/"
     for key in look_up_dict.keys():
         entities[key] = look_up_dict[key]["name"]
         save_to_csv(path=basic_path, entity_key=key)

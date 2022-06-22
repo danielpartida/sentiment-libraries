@@ -140,10 +140,10 @@ def plot(df_tweets: pd.DataFrame):
 
 if __name__ == "__main__":
 
-    df = pd.read_csv("../look_up_tables/df_Digital Assets & Crypto.csv", sep=";", decimal=',')
+    df = pd.read_csv("../../look_up_tables/df_Digital Assets & Crypto.csv", sep=";", decimal=',')
     df.rename(columns={"Unnamed: 0": "id"}, inplace=True)
 
-    entities = pd.read_csv("../look_up_tables/entities.csv", sep=';', decimal=',')
+    entities = pd.read_csv("../../look_up_tables/entities.csv", sep=';', decimal=',')
     entities.rename(columns={"Unnamed: 0": "id", "0": "name"}, inplace=True)
 
     # Build header to authenticate using bearer token
