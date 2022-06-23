@@ -76,5 +76,8 @@ with st.container():
     st.subheader("Tweet counts for {0}".format(project_option))
     st.bar_chart(data=bar_chart_data, use_container_width=True)
 
+if option == crypto and project_option:
+    st.sidebar.markdown("# {0} 💸".format(project_option))
 
-
+elif option == nft and project_option:
+    st.sidebar.markdown("# {0} 🎭".format(project_option))

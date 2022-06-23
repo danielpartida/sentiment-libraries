@@ -4,10 +4,7 @@
 import streamlit as st
 from PIL import Image
 
-# Run command "py -m streamlit run app.py"
-if __name__ == "__main__":
-
-    st.set_page_config(
+st.set_page_config(
         page_title="moonpass.ai Dashboard",
         page_icon=":moon",
         layout="wide",
@@ -19,8 +16,14 @@ if __name__ == "__main__":
         }
     )
 
+# Run command "py -m streamlit run app.py"
+if __name__ == "__main__":
+
     st.markdown("# Mooonpass Dashboard 🌚🧭")
     st.sidebar.markdown("# Main page 🌚🧭")
+
+    st.balloons()
+    # st.snow()
 
     image_projects = Image.open('img/projects.png')
     image_rocket = Image.open('img/rocket.png')
