@@ -116,30 +116,33 @@ def filter_context_annotations(tweet_response: list) -> dict:
     :rtype: dict
     """
     try:
-        data = tweet_response["data"]
-        result = {"tweet_id": data["id"], "lang": data["lang"]}
+        if "data" in tweet_response.keys():
+            data = tweet_response["data"]
+            result = {"tweet_id": data["id"], "lang": data["lang"]}
 
-        if "context_annotations" in data.keys():
-            for context in data["context_annotations"]:
-                # check if domain is "interest & hobbies: category" and annotation is "crypto" or domain is "crypto"
+            if "context_annotations" in data.keys():
+                for context in data["context_annotations"]:
+                    # check if domain is "interest & hobbies: category" and annotation is "crypto" or domain is "crypto"
+                    if check_crypto_context(context=context):
+
+                        result["domain_id"] = int(context["domain"]["id"])
+                        result["entity_id"] = int(context["entity"]["id"])
+                        result["entity_name"] = context["entity"]["name"]
+                        if "entity_description" in context["entity"].keys():
+                            result["entity_description"] = context["entity"]["description"]
+
+                        result["text"] = clean_tweet(data["text"])
+
                 if check_crypto_context(context=context):
+                    return result
+            else:
+                return {}
 
-                    result["domain_id"] = int(context["domain"]["id"])
-                    result["entity_id"] = int(context["entity"]["id"])
-                    result["entity_name"] = context["entity"]["name"]
-                    if "entity_description" in context["entity"].keys():
-                        result["entity_description"] = context["entity"]["description"]
-
-                    result["text"] = clean_tweet(data["text"])
-
-            if check_crypto_context(context=context):
-                return result
+        else:
+            return {}
 
     except ValueError as err:
         print("An error just occurred: {0}".format(err))
-
-    else:
-        return {}
 
 
 if __name__ == "__main__":
