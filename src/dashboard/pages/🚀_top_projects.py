@@ -3,16 +3,28 @@ import streamlit as st
 st.markdown("# Top Projects 🚀")
 st.sidebar.markdown("# Top Projects 🚀")
 
-option = st.selectbox(
-     'Which top projects would you like to see?',
-     ('Top 10 cryptocurrencies', 'Top 10 NFT projects'))
+crypto = 'Top 10 cryptocurrencies'
+cryptos = ("BTC", "ETH", "BNB", "ADA", "XRP", "SOL", "DOGE", "DOT", "TRX", "AVAX")
 
-st.write('You selected:', option)
+nft = 'Top 10 NFT projects'
+nfts = ("BAYC", "CryptoPunks", "Azukis", "Nouns", "Moonbirds", "Meebits",
+        "Doodles", "Goblintown", "ArtBlocks", "CloneX")
 
-with st.expander("See explanation"):
-    st.write("""
-         The chart above shows some numbers I picked for you.
-         I rolled actual dice for these, so they're *guaranteed* to
-         be random.
-     """)
-    st.image("https://static.streamlit.io/examples/dice.jpg")
+with st.container():
+    col1, col2 = st.columns(2)
+    with col1:
+        option = st.selectbox(
+            'What category? 🤔',
+            (crypto, nft))
+
+    with col2:
+        if option == crypto:
+            st.selectbox(
+                'Which top crypto project? 💸 ',
+                cryptos)
+
+        elif option == nft:
+            st.selectbox(
+                'Which top NFT project? 🎭',
+                nfts
+            )
