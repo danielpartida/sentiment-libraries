@@ -1,7 +1,5 @@
 # Good starting point https://github.com/ucg8j/awesome-dash
 # Getting started https://docs.streamlit.io/library/get-started/
-# Layout: https://blog.streamlit.io/introducing-new-layout-options-for-streamlit/
-# Wordcloud: https://discuss.streamlit.io/t/how-to-add-wordcloud-graph-in-streamlit/818/3
 
 import streamlit as st
 from PIL import Image
