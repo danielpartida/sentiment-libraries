@@ -47,7 +47,8 @@ def compute_word_cloud(tweet_object: list) -> None:
     :return: None
     :rtype: None
     """
-    stop_words = set(["https", "co", "RT", "dtype", "t", "X", "x"] + list(STOPWORDS))
+    stop_words = set(["https", "co", "RT", "dtype", "t", "X", "x", "giveaway", "GIVEAWAY", "tag", "follow", "Follow",
+                      "friend", "friends", "airdrop", "FOLLOW", "AIRDROP"] + list(STOPWORDS))
 
     # sentiment_types = ["Positive", "Negative", "Neutral"]
     # color_maps = {"Positive": "YlGn", "Negative": "OrRd", "Neutral": "PuRd"}
