@@ -109,10 +109,12 @@ sidebar = html.Div(
         dbc.Collapse(
             dbc.Nav(
                 [
-
+                    # TODO: Add hovering for project selection
                     dbc.NavLink([html.I(className=""), "Solana"],
-                                href="/solana", active="exact",
-                                style={'paddingTop': "0px"}),
+                                href="/solana", # active="exact",
+                                style={'paddingTop': "0px",
+                                       "color": "white"
+                                       }),
 
                     dbc.NavLink([html.I(className=""), "StepN"],
                                 href="/stepn", disabled=True,
@@ -165,6 +167,18 @@ landing_page_children = html.Div([
     dbc.Row(
         dbc.Col(html.Hr())
     ),
+
+    dbc.Row(
+        [
+            dbc.Col(
+                html.H1("Left")
+            ),
+            dbc.Col(
+                html.H1("Right")
+            )
+        ]
+    )
+
 ])
 
 project_page_children = html.Div([
