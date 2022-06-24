@@ -5,7 +5,7 @@ import streamlit as st
 from PIL import Image
 
 st.set_page_config(
-        page_title="moonpass.ai Dashboard",
+        page_title="moonpass.ai app",
         page_icon=":moon",
         layout="wide",
         initial_sidebar_state="auto",
