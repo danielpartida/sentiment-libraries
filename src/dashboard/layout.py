@@ -18,18 +18,6 @@ moonpass_colors = {
     'dark_blue': 'rgb(19, 29, 51)'
 }
 
-color_blue = {
-    'blue_1': 'rgb(235, 239, 241)',
-    'blue_2': 'rgb(214, 234, 248)',
-    'blue_3': 'rgb(174, 214, 241)',
-    'blue_4': 'rgb(133, 193, 233)',
-    'blue_5': 'rgb(93, 173, 226)',
-    'blue_6': 'rgb(52, 152, 219)',
-    'blue_7': 'rgb(46, 134, 193)',
-    'blue_8': 'rgb(40, 116, 166)',
-    'blue_9': 'rgb(21, 67, 96)'
-}
-
 
 def color_gradient(gradient_factor: float, col: tuple):
     """
@@ -60,42 +48,26 @@ def color_gradient(gradient_factor: float, col: tuple):
 
 
 # COLORS
-theme_color = moonpass_colors['dark_blue']
-header_color = theme_color
-tab_color = theme_color
-button_color = theme_color
-button_color_set_target = moonpass_colors['light_blue']
-button_font_color = 'white'
 main_color_tuple = (0, 123, 255)
-box_background_color = 'white'
 background_page = color_gradient(1.98, main_color_tuple)  # "rgb(244, 244, 251)"
-font_color = 'grey' # "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap"
-font_family = 'Poppins'
-font_family_table = 'Roboto'
-KPI_color = font_color
-colors = {'background': '#F2F2F2'}  # d-fine color
-box_shadow = "0px 1px 3px rgba(0,0,0,0.12), 0px 1px 2px rgba(0,0,0,0.24)"
+font_color = 'grey'
+font_family = 'Poppins'  # "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap"
 
-# we use the Row and Col components to construct the sidebar header
-# it consists of a title, and a toggle, the latter is hidden on large screens
 sidebar_header = dbc.Row(
     [
-        dbc.Col(html.Label(dbc.CardImg(src='assets/logo.png',
+        dbc.Col(html.Label(dbc.CardImg(src='assets/logo_moonpass_white.png',
                                        style={'height': "100%", 'width': '100%', "maxHeight": "200px",
-                                              "maxWidth": "200px"}),
-                           className="display-4"),
-                style={"fontFamily": font_family}),
+                                              "maxWidth": "200px", "borderRadius": "15px"}),
+                           className="display-4"), style={"fontFamily": font_family}),
 
         dbc.Col(
             [
                 html.Button(
-                    # use the Bootstrap navbar-toggler classes to style
                     html.Span(className="navbar-toggler-icon"),
                     className="navbar-toggler",
-                    # the navbar-toggler classes don't set color
                     style={
-                        "color": "rgba(0,0,0,.5)",
-                        "borderColor": "rgba(256,256,256,1)",
+                        "color": moonpass_colors["pink"],
+                        "borderColor": moonpass_colors["white"],
                     },
                     id="navbar-toggle",
                 ),
@@ -105,16 +77,14 @@ sidebar_header = dbc.Row(
                     className="navbar-toggler",
                     # the navbar-toggler classes don't set color
                     style={
-                        "color": "rgba(0,0,0,.5)",
-                        "borderColor": "rgba(256,256,256,1)",
+                        "color": moonpass_colors["pink"],
+                        "borderColor": moonpass_colors["white"],
                     },
                     id="sidebar-toggle",
                 ),
             ],
-            # the column containing the toggle will be only as wide as the
-            # toggle, resulting in the toggle being right aligned
+            # the column containing the toggle will be only as wide as the toggle
             width="auto",
-            # vertically align the toggle in the center
             align="center",
         ),
     ]
@@ -123,16 +93,15 @@ sidebar_header = dbc.Row(
 sidebar = html.Div(
     [
         sidebar_header,
-        # we wrap the horizontal rule and short blurb in a div that can be
-        # hidden on a small screen
+        # we wrap the horizontal rule and short blurb in a div that can be hidden on a small screen
         html.Div(
             [
                 html.Hr(style={"backgroundColor": "white"}),
-                # html.P(
-                #     "Pages",
-                #     className="lead",
-                #     style={"fontFamily": font_family}
-                # ),
+                html.P(
+                    "Web3 Projects",
+                    className="lead",
+                    style={"fontFamily": font_family}
+                ),
             ],
             id="blurb",
         ),

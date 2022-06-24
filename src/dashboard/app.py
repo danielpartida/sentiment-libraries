@@ -31,9 +31,6 @@ app.title = 'Moonpass App'
 app.layout = html.Div(style={'backgroundColor': background_page},
                       children=[dcc.Location(id="url"), sidebar, content])
 
-col_name_base_kpis = "base_kpis (of 35)"
-col_name_all_kpis = "all_granular_kpis (of 892)"
-
 
 @app.callback(
     Output("sidebar", "className"),
