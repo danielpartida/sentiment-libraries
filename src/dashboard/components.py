@@ -120,7 +120,7 @@ landing_page_children = html.Div([
                                 html.H4("Analyze fully a web3 project", className="card-title",
                                         style={"color": moonpass_colors["purple"]}),
                                 html.P("Understand whether a project is good to invest based on social data",
-                                   className="card-text", style={"color": moonpass_colors["purple"]})
+                                       className="card-text", style={"color": moonpass_colors["purple"]})
                             ]
                         ),
                         dbc.CardImg(src="assets/projects.png", top=True, style={"width": "60%", "height": "60%"},
@@ -178,9 +178,9 @@ content = html.Div(
     id="page-content", style=CONTENT_STYLE, children=[
         html.Div(id='landing_page_id', children=landing_page_children),
         html.Div(id='project_page_id', children=project_page_children),
-        # FIXME: Make footer at the bottom of the page
-        html.Div([
+        html.Footer([
             html.I(className="far fa-copyright"), "2022 moopass.ai"],
-            style={"position": "absolute", "bottom": "1", "right": "0", "marginRight": "15px", "fontSize": "80%"})
+            style={"position": "absolute", "bottom": "1", "right": "0", "marginRight": "15px", "marginTop": "15px",
+                   "fontSize": "80%"})
     ]
 )
