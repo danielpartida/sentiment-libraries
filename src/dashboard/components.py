@@ -1,13 +1,22 @@
-import dash_core_components as dcc
-import dash_bootstrap_components as dbc
-import dash_html_components as html
-import plotly.express as px
+import random
 
+import plotly
+from dash import dcc
+import dash_bootstrap_components as dbc
+from dash import html
+import plotly.express as px
+import plotly.graph_objs as go
 
 from layout import moonpass_colors, font_family, CONTENT_STYLE
 
-df = px.data.iris()  # iris is a pandas DataFrame
-fig = px.scatter(df, x="sepal_width", y="sepal_length")
+# FIXME: Change data
+df = px.data.gapminder().query("continent == 'Oceania'")
+fig_community = px.line(df, x='year', y='lifeExp', color='country')
+fig_sentiment = px.area(df, x="year", y="pop", color="country", line_group="country")
+
+words = dir(go)[:10]
+colors = [plotly.colors.DEFAULT_PLOTLY_COLORS[random.randrange(1, 10)] for i in range(30)]
+weights = [random.randint(15, 35) for i in range(15)]
 
 sidebar_header = dbc.Row(
     [
@@ -211,7 +220,7 @@ project_page_children = html.Div([
                 [
                     dbc.ButtonGroup(
                         [
-                            dbc.Button(children=["Website", html.I(className="fas fa-globe")], outline=True,
+                            dbc.Button(children=["Website ", html.I(className="fas fa-globe")], outline=True,
                                        color="primary", href="https://solana.com/", target="_blank"),
                             dbc.Button(children=["Whitepaper ", html.I(className="fa fa-book")], outline=True,
                                        color="primary", href="https://solana.com/solana-whitepaper.pdf",
@@ -230,16 +239,108 @@ project_page_children = html.Div([
     ),
 
     dbc.Row(
-      html.H4("Community Growth", style={"color": moonpass_colors["pink"]})
+        [
+            dbc.Col(
+                [
+                    html.H4("Community Growth", style={"color": moonpass_colors["pink"]}),
+                    dcc.Graph(figure=fig_community),
+                    # FIXME: Modify slider to buttons similar to CoinmarketCap
+                    html.Div([
+                        dcc.RangeSlider(min=0, max=20, value=[5, 15], id='community-range-slider'),
+                        html.Div(id='community-slider-output-container')
+                    ])
+                ], width=10
+            ),
+
+            dbc.Col(
+                [
+                    html.H5("Key metrics", style={"color": moonpass_colors["pink"]}),
+                    dbc.ListGroup(
+                        [
+                            dbc.ListGroupItem(children=["Price change",
+                                                        dbc.Button(children=[html.I(className="fa fa-angle-up"),
+                                                                             " 7.48%"], color="success", className="sm",
+                                                                   disabled=True)]),
+                            dbc.ListGroupItem(children=["Tweets change",
+                                                        dbc.Button(children=[html.I(className="fa fa-angle-up"),
+                                                                             " 3.61%"], color="success", className="sm",
+                                                                   disabled=True)]),
+                            dbc.ListGroupItem(children=["Correlation",
+                                                        dbc.Button(children=["0.75"], color="dark", className="sm",
+                                                                   disabled=True)])
+                        ], style={"marginTop": "80px"}
+                    )
+                ], width=2
+            )
+        ]
+    ),
+
+    dbc.Row(
+        dbc.Col(html.Br())
     ),
 
     dbc.Row(
         [
             dbc.Col(
-                dcc.Graph(figure=fig), width=10
+                [
+                    html.H4("Sentiment development", style={"color": moonpass_colors["pink"]}),
+                    dcc.Graph(figure=fig_sentiment),
+                    # FIXME: Modify slider to buttons similar to CoinmarketCap
+                    html.Div([
+                        dcc.RangeSlider(min=0, max=20, value=[5, 15], id='sentiment-range-slider'),
+                        html.Div(id='sentiment-slider-output-container')
+                    ])
+                ], width=10
+            ),
+
+            dbc.Col(
+                [
+                    html.H5("Topics being discussed", style={"color": moonpass_colors["pink"]}),
+                    dbc.ListGroup(
+                        [
+                            dbc.ListGroupItem("StepN"),
+                            dbc.ListGroupItem("Not Okay Bear"),
+                            dbc.ListGroupItem("Solana congested"),
+                        ], style={"marginTop": "80px"}
+                    )
+                ],
+                width=2
             )
         ]
-    )
+    ),
+
+    dbc.Row(
+        [
+            dbc.Col(
+                dbc.CardBody(
+                    [
+                        html.H4("What the bulls are saying 🐂", className="card-title"),
+                        html.H6("Twitter Profile", className="card-subtitle"),
+                        html.P(
+                            "Solana is a great blockchain because they solve a real issue in the ecosystem, they"
+                            "lower the transaction fees",
+                            className="card-text",
+                        ),
+                        dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
+                    ]
+                ),
+            ),
+
+            dbc.Col(
+                dbc.CardBody(
+                    [
+                        html.H4("What the bears are saying 🐻", className="card-title"),
+                        html.H6("Twitter Profile", className="card-subtitle"),
+                        html.P(
+                            "Tweet content, this project is very bad. Solana is congested the whole time making it not "
+                            "decentralized",
+                            className="card-text"),
+                        dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
+                    ]
+                ),
+            ),
+        ]
+    ),
 ])
 
 # Content Page
