@@ -100,7 +100,7 @@ landing_page_children = html.Div([
             html.H2(children='Moonpass App',
                     style={
                         'textAlign': 'left',
-                        'color': '#000080'
+                        'color': moonpass_colors["purple"]
                     }
                     ), width="auto"
         )
@@ -113,14 +113,47 @@ landing_page_children = html.Div([
     dbc.Row(
         [
             dbc.Col(
-                html.H1("Left")
+                dbc.Card(
+                    [
+                        dbc.CardBody(
+                            [
+                                html.H4("Analyze fully a web3 project", className="card-title",
+                                        style={"color": moonpass_colors["purple"]}),
+                                html.P("Understand whether a project is good to invest based on social data",
+                                   className="card-text", style={"color": moonpass_colors["purple"]})
+                            ]
+                        ),
+                        dbc.CardImg(src="assets/projects.png", top=True, style={"width": "60%", "height": "60%"},
+                                    className = 'align-self-center'),
+                        # TODO: Add functionality to button
+                        dbc.Button("Top web3 projects 🚀", color="primary", outline=True,
+                                   className="card-footer text-center")
+                    ]
+                ),
+                width=6
             ),
+
             dbc.Col(
-                html.H1("Right")
+                dbc.Card(
+                    [
+                        dbc.CardBody(
+                            [
+                                html.H4("Discover the newest projects", className="card-title",
+                                        style={"color": moonpass_colors["pink"]}),
+                                html.P("Never miss the coolest projects and what the community is talking about them",
+                                       className="card-text", style={"color": moonpass_colors["pink"]})
+                            ]
+                        ),
+                        dbc.CardImg(src="assets/rocket.png", top=True, style={"width": "60%", "height": "60%"},
+                                    className = 'align-self-center'),
+                        dbc.Button("Trending web3 projects 🔥", color="secondary", outline=True, disabled=True,
+                                   className="card-footer text-center")
+                    ],
+                ),
+                width=6
             )
         ]
     )
-
 ])
 
 project_page_children = html.Div([
