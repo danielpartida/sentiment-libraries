@@ -84,7 +84,7 @@ def render_page_content(pathname):
     if pathname == "/":
         return {'display': 'block'}, {'display': 'none'}
 
-    elif pathname == "/project":
+    elif pathname == "{0}".format(pathname):
         return {'display': 'none'}, {'display': 'block'}
 
     # If the user tries to reach a different page, return a 404 message

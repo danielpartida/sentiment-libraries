@@ -1,14 +1,25 @@
+import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
+import plotly.express as px
+
 
 from layout import moonpass_colors, font_family, CONTENT_STYLE
 
+df = px.data.iris()  # iris is a pandas DataFrame
+fig = px.scatter(df, x="sepal_width", y="sepal_length")
+
 sidebar_header = dbc.Row(
     [
-        dbc.Col(html.Label(dbc.CardImg(src='assets/logo_moonpass_white.png',
-                                       style={'height': "100%", 'width': '100%', "maxHeight": "200px",
-                                              "maxWidth": "200px", "borderRadius": "15px"}),
-                           className="display-4"), style={"fontFamily": font_family}),
+        # FIXME: Add return button
+        dbc.Col(
+            html.Label(
+                dbc.CardImg(src='assets/logo_moonpass_white.png',
+                            style={'height': "100%", 'width': '100%', "maxHeight": "200px",
+                                   "maxWidth": "200px", "borderRadius": "15px"}),
+                className="display-4"),
+            style={"fontFamily": font_family}
+        ),
 
         dbc.Col(
             [
@@ -41,6 +52,7 @@ sidebar_header = dbc.Row(
     ]
 )
 
+# FIXME: Add button to return home
 sidebar = html.Div(
     [
         sidebar_header,
@@ -159,10 +171,10 @@ landing_page_children = html.Div([
 project_page_children = html.Div([
     dbc.Row(
         dbc.Col(
-            html.H2(children='Project Overview',
+            html.H2(children='Moonpass - Solana Project Overview',
                     style={
                         'textAlign': 'left',
-                        'color': '#000080'
+                        'color': moonpass_colors["purple"]
                     }
                     ), width="auto"
         )
@@ -171,6 +183,63 @@ project_page_children = html.Div([
     dbc.Row(
         dbc.Col(html.Hr())
     ),
+
+    dbc.Row(
+        [
+            # FIXME: Update dynamically
+            dbc.Col(
+                html.H5(children=["Price: $42.36 ", dbc.Button(children=[html.I(className="fa fa-angle-up"), " 0.24%"],
+                                                               color="success", className="sm", disabled=True)],
+                        style={"color": moonpass_colors["purple"]})
+            ),
+
+            dbc.Col(
+                [
+                    html.Div(
+                        [
+                            html.I(className="fab fa-twitter", style={"paddingRight": "7px"}),
+                            html.A(html.H5("Followers: 1.9M"), href="https://twitter.com/solana", target="_blank",
+                                   style={"color": moonpass_colors["purple"]})
+                        ],
+                        style={"display": "flex"}
+                    )
+                    # html.A("Tweet", className="twitter-share-button", href="https://twitter.com/intent/tweet?text=Hello%20world")
+                ]
+            ),
+
+            dbc.Col(
+                [
+                    dbc.ButtonGroup(
+                        [
+                            dbc.Button(children=["Website", html.I(className="fas fa-globe")], outline=True,
+                                       color="primary", href="https://solana.com/", target="_blank"),
+                            dbc.Button(children=["Whitepaper ", html.I(className="fa fa-book")], outline=True,
+                                       color="primary", href="https://solana.com/solana-whitepaper.pdf",
+                                       target="_blank"),
+                            dbc.Button(children=["GitHub ", html.I(className="fab fa-github")], outline=True,
+                                       color="primary", href="https://github.com/solana-labs/solana", target="_blank"),
+                        ], size="sm",
+                    ),
+                ], style={"display": "inline-block"}
+            )
+        ]
+    ),
+
+    dbc.Row(
+        dbc.Col(html.Br())
+    ),
+
+    dbc.Row(
+      html.H4("Community Growth", style={"color": moonpass_colors["pink"]})
+    ),
+
+    dbc.Row(
+        [
+            dbc.Col(
+                dcc.Graph(figure=fig), width=10
+            )
+        ]
+    )
 ])
 
 # Content Page
