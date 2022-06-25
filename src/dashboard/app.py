@@ -4,7 +4,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
 
-from layout import (background_page, content, sidebar)
+from components import (content, sidebar)
+from layout import background_page
 
 FA = "https://use.fontawesome.com/releases/v5.12.1/css/all.css"
 FG = "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap"
@@ -28,8 +29,7 @@ server = app.server
 app.config.suppress_callback_exceptions = True
 app.title = 'Moonpass App'
 
-app.layout = html.Div(style={'backgroundColor': background_page},
-                      children=[dcc.Location(id="url"), sidebar, content])
+app.layout = html.Div(style={'backgroundColor': background_page}, children=[dcc.Location(id="url"), sidebar, content])
 
 
 @app.callback(
