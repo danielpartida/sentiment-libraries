@@ -57,6 +57,7 @@ def get_price_from_coingecko(token: str = "solana", include_market_cap: bool = T
 
     epoch = data["last_updated_at"]
     last_update_time = datetime.fromtimestamp(epoch)
+    date_format_long = '%d/%m/%Y %H:%M'
     data["last_updated_at"] = last_update_time.strftime(date_format_long)
 
     price_before = data["usd"] - data['usd_24h_change']

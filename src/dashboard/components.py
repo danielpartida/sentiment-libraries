@@ -1,4 +1,5 @@
 import random
+from typing import Tuple
 
 import plotly
 from dash import dcc
@@ -8,6 +9,20 @@ import plotly.express as px
 import plotly.graph_objs as go
 
 from layout import moonpass_colors, font_family, CONTENT_STYLE
+from price_data import get_price_from_coingecko
+
+
+def get_color_and_symbol() -> Tuple:
+    """
+    html_colors = "https://htmlcolorcodes.com/colors/shades-of-green/"
+    :return: green or red depending if the last return was positive or negative
+    :rtype: Tuple(str, str)
+    """
+    if price_data["daily_return"] > 0:
+        return "#50C878", "fa fa-angle-up"
+    else:
+        return "#D22B2B", "fa fa-angle-down"
+
 
 # FIXME: Change data
 df = px.data.gapminder().query("continent == 'Oceania'")
@@ -17,6 +32,13 @@ fig_sentiment = px.area(df, x="year", y="pop", color="country", line_group="coun
 words = dir(go)[:10]
 colors = [plotly.colors.DEFAULT_PLOTLY_COLORS[random.randrange(1, 10)] for i in range(30)]
 weights = [random.randint(15, 35) for i in range(15)]
+
+price_data = get_price_from_coingecko("solana")
+last_price = price_data["usd"]
+last_return = '{:.1%}'.format(price_data["daily_return"])
+last_update = price_data["last_updated_at"]
+color_return, symbol = get_color_and_symbol()
+
 
 sidebar_header = dbc.Row(
     [
@@ -196,11 +218,21 @@ project_page_children = html.Div([
 
     dbc.Row(
         [
-            # FIXME: Update dynamically
             dbc.Col(
-                html.H5(children=["Price: $42.36 ", dbc.Button(children=[html.I(className="fa fa-angle-up"), " 0.24%"],
-                                                               color="success", className="sm", disabled=True)],
-                        style={"color": moonpass_colors["purple"]})
+                html.Div(
+                    [
+                        html.H5(children=["Price: ${0}".format(last_price), html.Span(
+                            children=[html.I(className=symbol), last_return],
+                            style={"color": color_return, "marginLeft": "10px", "cursor": "pointer"})],
+                                style={"color": moonpass_colors["purple"]}, id="price_id"),
+
+                        dbc.Tooltip(
+                            "Last price fetched at {0}".format(last_update),
+                            placement="bottom",
+                            target="price_id",
+                        ),
+                    ]
+                )
             ),
 
             dbc.Col(
@@ -259,16 +291,23 @@ project_page_children = html.Div([
                     dbc.ListGroup(
                         [
                             dbc.ListGroupItem(children=["Price change",
-                                                        dbc.Button(children=[html.I(className="fa fa-angle-up"),
-                                                                             " 7.48%"], color="success", className="sm",
-                                                                   disabled=True, style={"float": "right"})]),
+                                                        html.Span(
+                                                            children=[html.I(className=symbol), last_return],
+                                                            style={"color": color_return, "marginLeft": "10px",
+                                                                   "cursor": "pointer", "float": "right"})
+                                                        ]),
+                            # FIXME: Change dynamically tweet change
                             dbc.ListGroupItem(children=["Tweets change",
-                                                        dbc.Button(children=[html.I(className="fa fa-angle-up"),
-                                                                             " 3.61%"], color="success", className="sm",
-                                                                   disabled=True, style={"float": "right"})]),
+                                                        html.Span(children=[html.I(className=symbol), 3.61],
+                                                                  style={"color": color_return, "marginLeft": "10px",
+                                                                         "cursor": "pointer", "float": "right"})
+                                                        ]),
+                            # FIXME: Change correlation automatically
                             dbc.ListGroupItem(children=["Correlation",
-                                                        dbc.Button(children=["0.75"], color="dark", className="sm",
-                                                                   disabled=True, style={"float": "right"})])
+                                                        html.Span(children=[0.75],
+                                                                  style={"color": "dark", "marginLeft": "10px",
+                                                                         "float": "right"})
+                                                        ])
                         ], style={"marginTop": "80px"}
                     )
                 ], width=2
