@@ -148,7 +148,7 @@ landing_page_children = html.Div([
                                     className = 'align-self-center'),
                         # TODO: Add functionality to button
                         dbc.Button("Top web3 projects 🚀", color="primary", outline=True,
-                                   className="card-footer text-center")
+                                   className="card-footer text-center", id="button_web3_projects")
                     ]
                 ),
                 width=6
@@ -176,6 +176,7 @@ landing_page_children = html.Div([
         ]
     )
 ])
+
 
 project_page_children = html.Div([
     dbc.Row(
@@ -260,14 +261,14 @@ project_page_children = html.Div([
                             dbc.ListGroupItem(children=["Price change",
                                                         dbc.Button(children=[html.I(className="fa fa-angle-up"),
                                                                              " 7.48%"], color="success", className="sm",
-                                                                   disabled=True)]),
+                                                                   disabled=True, style={"float": "right"})]),
                             dbc.ListGroupItem(children=["Tweets change",
                                                         dbc.Button(children=[html.I(className="fa fa-angle-up"),
                                                                              " 3.61%"], color="success", className="sm",
-                                                                   disabled=True)]),
+                                                                   disabled=True, style={"float": "right"})]),
                             dbc.ListGroupItem(children=["Correlation",
                                                         dbc.Button(children=["0.75"], color="dark", className="sm",
-                                                                   disabled=True)])
+                                                                   disabled=True, style={"float": "right"})])
                         ], style={"marginTop": "80px"}
                     )
                 ], width=2
