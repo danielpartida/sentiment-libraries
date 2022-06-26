@@ -76,9 +76,3 @@ if __name__ == '__main__':
     yahoo_price = get_price_from_yahoo(token="SOL-USD", start=start_date, end=end_date)
 
     coingecko_price = get_price_from_coingecko(token="solana")
-    print(coingecko_price)
-
-
-
-
-
