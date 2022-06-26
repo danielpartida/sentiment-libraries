@@ -25,6 +25,21 @@ def get_price_from_yahoo(token: str = "SOL-USD", start: str = '01/01/2022',
 
 def get_price_from_coingecko(token: str = "solana", include_market_cap: bool = True, include_24_vol: bool = False,
                              include_24_change: bool = True, include_last_update: bool = True):
+    """
+    Gets simple price from CoinGecko
+    :param token: "solana"
+    :type token: str
+    :param include_market_cap: to include last market cap
+    :type include_market_cap: bool
+    :param include_24_vol: to include 24h volume
+    :type include_24_vol: bool
+    :param include_24_change: to include change of price in last 24h
+    :type include_24_change: bool
+    :param include_last_update: to include the epoch of last update
+    :type include_last_update: bool
+    :return: dictionary containing price, volume, daily return and last update
+    :rtype: dict
+    """
     with open("config.yml", "r") as config:
         config = yaml.load(config)
         base_url = config["base_coingecko_url"]
@@ -37,13 +52,18 @@ def get_price_from_coingecko(token: str = "solana", include_market_cap: bool = T
     update = "include_last_updated_at=true" if include_last_update else "include_last_updated_at=false"
 
     complete_url = base_url + price_url + "&" + market_cap + "&" + volume + "&" + change + "&" + update
-    data = requests.get(complete_url).json()
+    full_data = requests.get(complete_url).json()
+    data = full_data[token]
 
-    epoch = data[token]["last_updated_at"]
+    epoch = data["last_updated_at"]
     last_update_time = datetime.fromtimestamp(epoch)
-    data[token]["last_updated_at"] = last_update_time.strftime(date_format_long)
+    data["last_updated_at"] = last_update_time.strftime(date_format_long)
 
-    return data[token]
+    price_before = data["usd"] - data['usd_24h_change']
+    daily_returns = (data["usd"] - price_before)/price_before
+    data["daily_return"] = daily_returns
+
+    return data
 
 
 if __name__ == '__main__':
