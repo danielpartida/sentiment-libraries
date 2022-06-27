@@ -1,34 +1,17 @@
-import random
-from typing import Tuple
-
 import pandas as pd
-import plotly
 from dash import dcc
 import dash_bootstrap_components as dbc
 from dash import html
 import plotly.express as px
-import plotly.graph_objs as go
 
 from layout import moonpass_colors, font_family, CONTENT_STYLE
-from price_data import get_price_from_coingecko
+from price_data import get_current_price_from_coingecko, get_historical_price_from_coingecko
+from utils import get_color_and_symbol
 
+token = "solana"
 
-# Helper methods
-def get_color_and_symbol(number: float) -> Tuple:
-    """
-    html_colors = "https://htmlcolorcodes.com/colors/shades-of-green/"
-    :return: green or red depending if the last return was positive or negative
-    :rtype: Tuple(str, str)
-    """
-    if number > 0:
-        return "#50C878", "fa fa-angle-up"
-    else:
-        return "#D22B2B", "fa fa-angle-down"
-
-
-# Data
-# TODO: Add tweets with positive and negative sentiment
-df_community = pd.read_csv("data/solana_27_06.csv", sep=';', decimal=',')
+# Community Data
+df_community = pd.read_csv("data/{0}_27_06.csv".format(token), sep=';', decimal=',')
 total_tweets = sum(df_community.tweet_count)
 total_tweets /= 1000000
 last_tweet_change = (df_community.tweet_count.iloc[-1] - df_community.tweet_count.iloc[-2]) / \
@@ -37,19 +20,20 @@ last_tweet_return = '{:.1%}'.format(last_tweet_change)
 fig_community = px.bar(df_community, x='dates', y='tweet_count')
 
 # FIXME: Change data
+# TODO: Add tweets with positive and negative sentiment
 df = px.data.gapminder().query("continent == 'Oceania'")
 fig_sentiment = px.area(df, x="year", y="pop", color="country", line_group="country")
 
-words = dir(go)[:10]
-colors = [plotly.colors.DEFAULT_PLOTLY_COLORS[random.randrange(1, 10)] for i in range(30)]
-weights = [random.randint(15, 35) for i in range(15)]
-
-price_data = get_price_from_coingecko("solana")
-last_price = price_data["usd"]
-last_price_return = '{:.1%}'.format(price_data["daily_return"])
-last_price_update = price_data["last_updated_at"]
-price_color_return, price_symbol = get_color_and_symbol(number=price_data["daily_return"])
+# Price data
+current_price_data = get_current_price_from_coingecko(token=token)
+last_price = current_price_data["usd"]
+last_price_return = '{:.1%}'.format(current_price_data["daily_return"])
+last_price_update = current_price_data["last_updated_at"]
+price_color_return, price_symbol = get_color_and_symbol(number=current_price_data["daily_return"])
 tweet_color_return, tweet_symbol = get_color_and_symbol(number=last_tweet_change)
+
+df_price = get_historical_price_from_coingecko(token=token)
+fig_price = px.line(df_price, x="date", y="price")
 
 # Style
 style_arrows = {"marginRight": "5px"}
@@ -236,7 +220,7 @@ project_page_children = html.Div([
                     [
                         html.H5(children=[html.Span("Price: ${0}".format(last_price), id="price_id"), html.Span(
                             children=[html.I(className=price_symbol, style=style_arrows), last_price_return],
-                            style={"color": price_color_return, "marginLeft": "10px", "cursor": "pointer"}, id="return_id")],
+                            style={"color": price_color_return, "marginLeft": "10px"}, id="return_id")],
                                 style={"color": moonpass_colors["purple"]}),
 
                         dbc.Tooltip(
@@ -300,7 +284,8 @@ project_page_children = html.Div([
                     html.Div([
                         dcc.RangeSlider(min=0, max=20, value=[5, 15], id='community-range-slider'),
                         html.Div(id='community-slider-output-container')
-                    ])
+                    ]),
+                    dcc.Graph(figure=fig_price),
                 ], width=10
             ),
 
