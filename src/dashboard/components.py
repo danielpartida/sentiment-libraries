@@ -32,7 +32,7 @@ last_price = current_price_data["usd"]
 last_price_return = '{:.1%}'.format(current_price_data["daily_return"])
 last_price_update = current_price_data["last_updated_at"]
 price_color_return, price_symbol = get_color_and_symbol(number=current_price_data["daily_return"])
-tweet_color_return, tweet_symbol = get_color_and_symbol(number=last_tweet_change)
+tweet_color_return, tweet_arrow = get_color_and_symbol(number=last_tweet_change)
 df_price = get_historical_price_from_coingecko(token=token)
 
 # TODO: Check if the join is necessary or working with two separate dfs is fine
@@ -48,6 +48,7 @@ fig_price_community.update_yaxes(title_text="price", secondary_y=True)
 
 # Style
 style_arrows = {"marginRight": "5px"}
+twitter_symbol = html.I(className="fab fa-twitter", style=style_arrows),
 
 sidebar_header = dbc.Row(
     [
@@ -308,9 +309,10 @@ project_page_children = html.Div([
                                                         html.Span("{0}M".format(str(round(total_tweets, 1))),
                                                                   style={"color": "#36454F", "float": "right"})]),
 
-                            dbc.ListGroupItem(children=["Tweets change", html.Span(children=[
-                                html.I(className=tweet_symbol, style=style_arrows), last_tweet_return],
-                                style={"color": tweet_color_return,
+                            dbc.ListGroupItem(children=[html.I(className="fab fa-twitter", style={"paddingRight": "7px"}),
+                                                        "change", html.Span(children=[
+                                    html.I(className=tweet_arrow, style=style_arrows), last_tweet_return],
+                                    style={"color": tweet_color_return,
                                        "marginLeft": "10px", "cursor": "pointer", "float": "right"})]),
 
                             dbc.ListGroupItem(children=["Price change",
