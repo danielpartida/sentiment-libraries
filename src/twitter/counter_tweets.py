@@ -178,6 +178,9 @@ if __name__ == "__main__":
 
     df = pd.concat(all_df_tweets)
     df.set_index("dates", inplace=True)
+    df.sort_index(inplace=True)
+    df = df.tweet_count
 
-    df.to_csv("../dashboard/data/{0}_{1}.csv".format(query_text, today.strftime(date_format_short)))
+    df.to_csv("../dashboard/data/{0}_{1}.csv".format(query_text, today.strftime(date_format_short)),
+              decimal=',', sep=';')
     print("Run")

@@ -1,6 +1,7 @@
 import random
 from typing import Tuple
 
+import pandas as pd
 import plotly
 from dash import dcc
 import dash_bootstrap_components as dbc
@@ -24,9 +25,12 @@ def get_color_and_symbol() -> Tuple:
         return "#D22B2B", "fa fa-angle-down"
 
 
+# TODO: Add tweets with positive and negative sentiment
+df_community = pd.read_csv("data/solana_27_06.csv", sep=';', decimal=',')
+fig_community = px.bar(df_community, x='dates', y='tweet_count')
+
 # FIXME: Change data
 df = px.data.gapminder().query("continent == 'Oceania'")
-fig_community = px.line(df, x='year', y='lifeExp', color='country')
 fig_sentiment = px.area(df, x="year", y="pop", color="country", line_group="country")
 
 words = dir(go)[:10]
