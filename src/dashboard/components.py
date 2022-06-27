@@ -1,9 +1,10 @@
-import pandas as pd
-from dash import dcc
 import dash_bootstrap_components as dbc
-from dash import html
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from dash import dcc
+from dash import html
+from plotly.subplots import make_subplots
 
 from layout import moonpass_colors, font_family, CONTENT_STYLE
 from price_data import get_current_price_from_coingecko, get_historical_price_from_coingecko
@@ -14,7 +15,6 @@ token = "solana"
 # Community Data
 df_community = pd.read_csv("data/{0}_27_06.csv".format(token), sep=';', decimal=',',
                            index_col="dates", parse_dates=True)
-df_community["tweet_count"] /= 1000
 total_tweets = sum(df_community.tweet_count)
 total_tweets /= 1000000
 last_tweet_change = (df_community.tweet_count.iloc[-1] - df_community.tweet_count.iloc[-2]) / \
@@ -33,15 +33,18 @@ last_price_return = '{:.1%}'.format(current_price_data["daily_return"])
 last_price_update = current_price_data["last_updated_at"]
 price_color_return, price_symbol = get_color_and_symbol(number=current_price_data["daily_return"])
 tweet_color_return, tweet_symbol = get_color_and_symbol(number=last_tweet_change)
-
 df_price = get_historical_price_from_coingecko(token=token)
 
 # TODO: Check if the join is necessary or working with two separate dfs is fine
 df_price_community = join_two_dfs(df_price, df_community)
-fig_price_community = px.bar(df_price_community, x="dates", y="tweet_count")
+fig_price_community = make_subplots(specs=[[{"secondary_y": True}]])
+fig_price_community.add_bar(x=df_price_community.dates, y=df_price_community.tweet_count, name="tweet count")
 fig_price_community.add_trace(
-    go.Scatter(x=df_price_community.dates, y=df_price_community.price, mode='lines', name="price")
+    go.Scatter(x=df_price_community.dates, y=df_price_community.price, mode='lines', name="{0} price".format(token)),
+    secondary_y=True
 )
+fig_price_community.update_yaxes(title_text="tweets", secondary_y=False)
+fig_price_community.update_yaxes(title_text="price", secondary_y=True)
 
 # Style
 style_arrows = {"marginRight": "5px"}
