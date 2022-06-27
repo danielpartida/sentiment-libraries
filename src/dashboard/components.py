@@ -48,7 +48,7 @@ fig_price_community.update_yaxes(title_text="price", secondary_y=True)
 
 # Style
 style_arrows = {"marginRight": "5px"}
-twitter_symbol = html.I(className="fab fa-twitter", style=style_arrows),
+twitter_symbol = html.I(className="fab fa-twitter", style=style_arrows)
 
 sidebar_header = dbc.Row(
     [
@@ -242,7 +242,7 @@ project_page_children = html.Div([
                         ),
 
                         dbc.Tooltip(
-                            "24 hours return",
+                            "24h price change",
                             placement="bottom",
                             target="return_id",
                         ),
@@ -254,7 +254,7 @@ project_page_children = html.Div([
                 [
                     html.Div(
                         [
-                            html.I(className="fab fa-twitter", style={"paddingRight": "7px"}),
+                            twitter_symbol,
                             html.A(html.H5("Followers: 1.9M"), href="https://twitter.com/solana", target="_blank",
                                    style={"color": moonpass_colors["purple"]})
                         ],
@@ -305,22 +305,38 @@ project_page_children = html.Div([
                     html.H5("Key metrics", style={"color": moonpass_colors["pink"]}),
                     dbc.ListGroup(
                         [
-                            dbc.ListGroupItem(children=["2022 tweets",
-                                                        html.Span("{0}M".format(str(round(total_tweets, 1))),
-                                                                  style={"color": "#36454F", "float": "right"})]),
+                            dbc.ListGroupItem(children=[
+                                html.Div([
+                                    twitter_symbol, "2022", html.Span("{0}M".format(str(round(total_tweets, 1))),
+                                                                      style={"color": "#36454F", "float": "right"})
+                                ], id="tweets_2022_id"),
 
-                            dbc.ListGroupItem(children=[html.I(className="fab fa-twitter", style={"paddingRight": "7px"}),
-                                                        "change", html.Span(children=[
-                                    html.I(className=tweet_arrow, style=style_arrows), last_tweet_return],
-                                    style={"color": tweet_color_return,
-                                       "marginLeft": "10px", "cursor": "pointer", "float": "right"})]),
+                                dbc.Tooltip("Total amount of tweets retrieved in 2022",
+                                            target="tweets_2022_id", placement="left")
+                            ]),
 
-                            dbc.ListGroupItem(children=["Price change",
-                                                        html.Span(children=[
-                                                            html.I(className=price_symbol, style=style_arrows),
-                                                            last_price_return],
-                                                            style={"color": price_color_return, "marginLeft": "10px",
-                                                                   "cursor": "pointer", "float": "right"})]),
+                            dbc.ListGroupItem(children=[
+                                html.Div(
+                                    [
+                                        twitter_symbol, html.Span(children=[
+                                        html.I(className=tweet_arrow, style=style_arrows), last_tweet_return],
+                                        style={"color": tweet_color_return,
+                                               "marginLeft": "10px", "float": "right"})
+                                    ], id="tweet_change_id"
+                                ),
+                                dbc.Tooltip("24h daily tweets change", target="tweet_change_id", placement="left")
+                            ]),
+
+                            dbc.ListGroupItem(children=[
+                                html.Div(
+                                    [
+                                        html.I(className="fas fa-dollar-sign", style=style_arrows), html.Span(children=[
+                                        html.I(className=price_symbol, style=style_arrows), last_price_return],
+                                        style={"color": price_color_return, "marginLeft": "10px", "float": "right"})
+                                    ], id="price_change_id"
+                                ),
+                                dbc.Tooltip("24h price change", target="price_change_id", placement="left")
+                            ]),
 
                             # FIXME: Change correlation automatically
                             dbc.ListGroupItem(children=["Correlation",
