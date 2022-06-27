@@ -106,11 +106,11 @@ def get_historical_price_from_coingecko(token: str) -> pd.DataFrame:
 
     dates = list(map(lambda x: x[0], data))
     dates = list(map(lambda x: datetime.fromtimestamp(x / 1000), dates))
+    # truncate timestamp to date
+    dates = list(map(lambda x: x.date(), dates))
 
     prices = list(map(lambda x: x[1], data))
     df_data = pd.DataFrame(prices, columns=["price"], index=dates)
-    df_data.reset_index(level=0, inplace=True)
-    df_data.rename(columns={"index": "date"}, inplace=True)
 
     return df_data
 
@@ -127,3 +127,4 @@ if __name__ == '__main__':
     token_id_coingecko = "solana"
     coingecko_current_price = get_current_price_from_coingecko(token=token_id_coingecko, date_format=date_format_long)
     coingecko_historical_price = get_historical_price_from_coingecko(token=token_id_coingecko)
+    print(coingecko_historical_price)
