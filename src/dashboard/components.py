@@ -46,6 +46,32 @@ fig_price_community.add_trace(
 )
 fig_price_community.update_yaxes(title_text="tweets", secondary_y=False)
 fig_price_community.update_yaxes(title_text="price", secondary_y=True)
+# Add ranges with sliders https://plotly.com/python/range-slider/
+fig_price_community.update_layout(
+    xaxis=dict(
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1,
+                     label="1m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=6,
+                     label="6m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=1,
+                     label="YTD",
+                     step="year",
+                     stepmode="todate"),
+                dict(step="all")
+            ])
+        ),
+        rangeslider=dict(
+            visible=True
+        ),
+        type="date"
+    )
+)
 
 # Style
 style_arrows = {"marginRight": "5px"}
@@ -293,11 +319,6 @@ project_page_children = html.Div([
                 [
                     html.H4("Community Growth", style={"color": moonpass_colors["pink"]}),
                     dcc.Graph(figure=fig_price_community),
-                    # FIXME: Modify slider to buttons similar to CoinmarketCap
-                    html.Div([
-                        dcc.RangeSlider(min=0, max=20, value=[5, 15], id='community-range-slider'),
-                        html.Div(id='community-slider-output-container')
-                    ]),
                 ], width=10
             ),
 
@@ -367,11 +388,6 @@ project_page_children = html.Div([
                 [
                     html.H4("Sentiment development", style={"color": moonpass_colors["pink"]}),
                     dcc.Graph(figure=fig_sentiment),
-                    # FIXME: Modify slider to buttons similar to CoinmarketCap
-                    html.Div([
-                        dcc.RangeSlider(min=0, max=20, value=[5, 15], id='sentiment-range-slider'),
-                        html.Div(id='sentiment-slider-output-container')
-                    ])
                 ], width=10
             ),
 
