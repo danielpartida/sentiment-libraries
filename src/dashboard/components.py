@@ -12,6 +12,8 @@ from utils import get_color_and_symbol, join_two_dfs
 
 token = "solana"
 
+custom_div = html.Div(id="custom_div_id", **{'data-url': "https://www.moonpass.ai/"})
+
 # Community Data
 df_community = pd.read_csv("data/{0}_27_06.csv".format(token), sep=';', decimal=',',
                            index_col="dates", parse_dates=True)
@@ -274,7 +276,7 @@ project_page_children = html.Div([
                             target="return_id",
                         ),
                     ]
-                )
+                ), width=4
             ),
 
             dbc.Col(
@@ -283,12 +285,11 @@ project_page_children = html.Div([
                         [
                             twitter_symbol,
                             html.A(html.H5("Followers: 1.9M"), href="https://twitter.com/solana", target="_blank",
-                                   style={"color": moonpass_colors["purple"]})
+                                   style={"color": moonpass_colors["purple"]}),
                         ],
                         style={"display": "flex"}
                     )
-                    # html.A("Tweet", className="twitter-share-button", href="https://twitter.com/intent/tweet?text=Hello%20world")
-                ]
+                ], width=4
             ),
 
             dbc.Col(
@@ -304,13 +305,23 @@ project_page_children = html.Div([
                                        color="primary", href="https://github.com/solana-labs/solana", target="_blank"),
                         ], size="sm",
                     ),
-                ], style={"display": "inline-block"}
-            )
+                ], style={"display": "inline-block"}, width=4
+            ),
         ]
     ),
 
     dbc.Row(
-        dbc.Col(html.Br())
+        # Source: https://publish.twitter.com/?buttonType=TweetButton&widget=Button &
+        # https://github.com/plotly/dash/pull/237
+        dbc.Col(html.A("Tweet", **{'data-url': "www.moonpass.ai", "data-via": "moonpass_ai",
+                                   "data-related": "moonpass_ai", "data-show-count": "false"},
+                       href="https://twitter.com/share?ref_src=twsrc%5Etfw", target="_blank", style={"float": "right"},
+                       className="twitter-share-button")
+                )
+    ),
+
+    dbc.Row(
+      dbc.Col(html.Br())
     ),
 
     dbc.Row(
@@ -362,11 +373,11 @@ project_page_children = html.Div([
 
                             dbc.ListGroupItem(children=[
                                 html.Div(
-                                     [
-                                         "Correlation", html.Span(children=[correlation_price_community],
-                                                                  style={"color": "#36454F", "marginLeft": "10px",
-                                                                         "float": "right"})
-                                     ], id="correlation_id"
+                                    [
+                                        "Corr.", html.Span(children=[correlation_price_community],
+                                                           style={"color": "#36454F", "marginLeft": "10px",
+                                                                  "float": "right"})
+                                    ], id="correlation_id"
                                 ),
                                 dbc.Tooltip("Correlation between price and tweets", target="correlation_id",
                                             placement="left")
