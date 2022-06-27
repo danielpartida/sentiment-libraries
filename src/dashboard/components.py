@@ -3,21 +3,23 @@ from dash import dcc
 import dash_bootstrap_components as dbc
 from dash import html
 import plotly.express as px
+import plotly.graph_objects as go
 
 from layout import moonpass_colors, font_family, CONTENT_STYLE
 from price_data import get_current_price_from_coingecko, get_historical_price_from_coingecko
-from utils import get_color_and_symbol
+from utils import get_color_and_symbol, join_two_dfs
 
 token = "solana"
 
 # Community Data
-df_community = pd.read_csv("data/{0}_27_06.csv".format(token), sep=';', decimal=',')
+df_community = pd.read_csv("data/{0}_27_06.csv".format(token), sep=';', decimal=',',
+                           index_col="dates", parse_dates=True)
+df_community["tweet_count"] /= 1000
 total_tweets = sum(df_community.tweet_count)
 total_tweets /= 1000000
 last_tweet_change = (df_community.tweet_count.iloc[-1] - df_community.tweet_count.iloc[-2]) / \
                     df_community.tweet_count.iloc[-2]
 last_tweet_return = '{:.1%}'.format(last_tweet_change)
-fig_community = px.bar(df_community, x='dates', y='tweet_count')
 
 # FIXME: Change data
 # TODO: Add tweets with positive and negative sentiment
@@ -33,7 +35,13 @@ price_color_return, price_symbol = get_color_and_symbol(number=current_price_dat
 tweet_color_return, tweet_symbol = get_color_and_symbol(number=last_tweet_change)
 
 df_price = get_historical_price_from_coingecko(token=token)
-fig_price = px.line(df_price, x="date", y="price")
+
+# TODO: Check if the join is necessary or working with two separate dfs is fine
+df_price_community = join_two_dfs(df_price, df_community)
+fig_price_community = px.bar(df_price_community, x="dates", y="tweet_count")
+fig_price_community.add_trace(
+    go.Scatter(x=df_price_community.dates, y=df_price_community.price, mode='lines', name="price")
+)
 
 # Style
 style_arrows = {"marginRight": "5px"}
@@ -279,13 +287,12 @@ project_page_children = html.Div([
             dbc.Col(
                 [
                     html.H4("Community Growth", style={"color": moonpass_colors["pink"]}),
-                    dcc.Graph(figure=fig_community),
+                    dcc.Graph(figure=fig_price_community),
                     # FIXME: Modify slider to buttons similar to CoinmarketCap
                     html.Div([
                         dcc.RangeSlider(min=0, max=20, value=[5, 15], id='community-range-slider'),
                         html.Div(id='community-slider-output-container')
                     ]),
-                    dcc.Graph(figure=fig_price),
                 ], width=10
             ),
 
