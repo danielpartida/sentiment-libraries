@@ -21,7 +21,7 @@ last_tweet_change = (df_community.tweet_count.iloc[-1] - df_community.tweet_coun
                     df_community.tweet_count.iloc[-2]
 last_tweet_return = '{:.1%}'.format(last_tweet_change)
 
-# FIXME: Change data
+# FIXME: Change sentiment data
 # TODO: Add tweets with positive and negative sentiment
 df = px.data.gapminder().query("continent == 'Oceania'")
 fig_sentiment = px.area(df, x="year", y="pop", color="country", line_group="country")
@@ -37,6 +37,7 @@ df_price = get_historical_price_from_coingecko(token=token)
 
 # TODO: Check if the join is necessary or working with two separate dfs is fine
 df_price_community = join_two_dfs(df_price, df_community)
+correlation_price_community = round(df_price_community.corr().price[1], 2)
 fig_price_community = make_subplots(specs=[[{"secondary_y": True}]])
 fig_price_community.add_bar(x=df_price_community.dates, y=df_price_community.tweet_count, name="tweet count")
 fig_price_community.add_trace(
@@ -338,11 +339,17 @@ project_page_children = html.Div([
                                 dbc.Tooltip("24h price change", target="price_change_id", placement="left")
                             ]),
 
-                            # FIXME: Change correlation automatically
-                            dbc.ListGroupItem(children=["Correlation",
-                                                        html.Span(children=[0.75],
+                            dbc.ListGroupItem(children=[
+                                html.Div(
+                                     [
+                                         "Correlation", html.Span(children=[correlation_price_community],
                                                                   style={"color": "#36454F", "marginLeft": "10px",
-                                                                         "float": "right"})]),
+                                                                         "float": "right"})
+                                     ], id="correlation_id"
+                                ),
+                                dbc.Tooltip("Correlation between price and tweets", target="correlation_id",
+                                            placement="left")
+                            ]),
                         ], style={"marginTop": "80px"}
                     )
                 ], width=2
