@@ -10,14 +10,14 @@ from layout import background_page
 FA = "https://use.fontawesome.com/releases/v5.12.1/css/all.css"
 FG = "https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap"
 FC = "assets/sidebar.css"
-FJ = 'assets/custom-script.js'
 
 # Dash app
 # TODO: Check libraries
 #  Add code for share graphs
 app = dash.Dash(__name__,
                 external_stylesheets=[dbc.themes.BOOTSTRAP, FA, FG, FC],
-                external_scripts=['https://code.jquery.com/jquery-3.3.1.min.js'],
+                external_scripts=['https://code.jquery.com/jquery-3.3.1.min.js',
+                                  "https://platform-api.sharethis.com/js/sharethis.js#property=62b5c3f58dda770019a57a7a&product=sticky-share-buttons"],
                 meta_tags=[
                     {"name": "viewport", "content": "width=device-width, initial-scale=1"}
                 ])
