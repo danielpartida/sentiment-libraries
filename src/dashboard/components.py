@@ -13,20 +13,27 @@ from layout import moonpass_colors, font_family, CONTENT_STYLE
 from price_data import get_price_from_coingecko
 
 
-def get_color_and_symbol() -> Tuple:
+# Helper methods
+def get_color_and_symbol(number: float) -> Tuple:
     """
     html_colors = "https://htmlcolorcodes.com/colors/shades-of-green/"
     :return: green or red depending if the last return was positive or negative
     :rtype: Tuple(str, str)
     """
-    if price_data["daily_return"] > 0:
+    if number > 0:
         return "#50C878", "fa fa-angle-up"
     else:
         return "#D22B2B", "fa fa-angle-down"
 
 
+# Data
 # TODO: Add tweets with positive and negative sentiment
 df_community = pd.read_csv("data/solana_27_06.csv", sep=';', decimal=',')
+total_tweets = sum(df_community.tweet_count)
+total_tweets /= 1000000
+last_tweet_change = (df_community.tweet_count.iloc[-1] - df_community.tweet_count.iloc[-2]) / \
+                    df_community.tweet_count.iloc[-2]
+last_tweet_return = '{:.1%}'.format(last_tweet_change)
 fig_community = px.bar(df_community, x='dates', y='tweet_count')
 
 # FIXME: Change data
@@ -39,10 +46,13 @@ weights = [random.randint(15, 35) for i in range(15)]
 
 price_data = get_price_from_coingecko("solana")
 last_price = price_data["usd"]
-last_return = '{:.1%}'.format(price_data["daily_return"])
-last_update = price_data["last_updated_at"]
-color_return, symbol = get_color_and_symbol()
+last_price_return = '{:.1%}'.format(price_data["daily_return"])
+last_price_update = price_data["last_updated_at"]
+price_color_return, price_symbol = get_color_and_symbol(number=price_data["daily_return"])
+tweet_color_return, tweet_symbol = get_color_and_symbol(number=last_tweet_change)
 
+# Style
+style_arrows = {"marginRight": "5px"}
 
 sidebar_header = dbc.Row(
     [
@@ -110,7 +120,7 @@ sidebar = html.Div(
                     # TODO: Add hovering for project selection
                     #  Add dynamically many buttons
                     dbc.NavLink([html.I(className=""), "Solana"],
-                                href="/solana", # active="exact",
+                                href="/solana",  # active="exact",
                                 style={'paddingTop': "0px",
                                        "color": "white"
                                        }),
@@ -171,7 +181,7 @@ landing_page_children = html.Div([
                             ]
                         ),
                         dbc.CardImg(src="assets/projects.png", top=True, style={"width": "60%", "height": "60%"},
-                                    className = 'align-self-center'),
+                                    className='align-self-center'),
                         # TODO: Add functionality to button
                         dbc.Button("Top web3 projects 🚀", color="primary", outline=True,
                                    className="card-footer text-center", id="button_web3_projects")
@@ -192,7 +202,7 @@ landing_page_children = html.Div([
                             ]
                         ),
                         dbc.CardImg(src="assets/rocket.png", top=True, style={"width": "60%", "height": "60%"},
-                                    className = 'align-self-center'),
+                                    className='align-self-center'),
                         dbc.Button("Trending web3 projects 🔥", color="secondary", outline=True, disabled=True,
                                    className="card-footer text-center")
                     ],
@@ -202,7 +212,6 @@ landing_page_children = html.Div([
         ]
     )
 ])
-
 
 project_page_children = html.Div([
     dbc.Row(
@@ -225,15 +234,21 @@ project_page_children = html.Div([
             dbc.Col(
                 html.Div(
                     [
-                        html.H5(children=["Price: ${0}".format(last_price), html.Span(
-                            children=[html.I(className=symbol), last_return],
-                            style={"color": color_return, "marginLeft": "10px", "cursor": "pointer"})],
-                                style={"color": moonpass_colors["purple"]}, id="price_id"),
+                        html.H5(children=[html.Span("Price: ${0}".format(last_price), id="price_id"), html.Span(
+                            children=[html.I(className=price_symbol, style=style_arrows), last_price_return],
+                            style={"color": price_color_return, "marginLeft": "10px", "cursor": "pointer"}, id="return_id")],
+                                style={"color": moonpass_colors["purple"]}),
 
                         dbc.Tooltip(
-                            "Last price fetched at {0}".format(last_update),
+                            "Fetched at {0}".format(last_price_update),
                             placement="bottom",
                             target="price_id",
+                        ),
+
+                        dbc.Tooltip(
+                            "24 hours return",
+                            placement="bottom",
+                            target="return_id",
                         ),
                     ]
                 )
@@ -294,24 +309,27 @@ project_page_children = html.Div([
                     html.H5("Key metrics", style={"color": moonpass_colors["pink"]}),
                     dbc.ListGroup(
                         [
+                            dbc.ListGroupItem(children=["2022 tweets",
+                                                        html.Span("{0}M".format(str(round(total_tweets, 1))),
+                                                                  style={"color": "#36454F", "float": "right"})]),
+
+                            dbc.ListGroupItem(children=["Tweets change", html.Span(children=[
+                                html.I(className=tweet_symbol, style=style_arrows), last_tweet_return],
+                                style={"color": tweet_color_return,
+                                       "marginLeft": "10px", "cursor": "pointer", "float": "right"})]),
+
                             dbc.ListGroupItem(children=["Price change",
-                                                        html.Span(
-                                                            children=[html.I(className=symbol), last_return],
-                                                            style={"color": color_return, "marginLeft": "10px",
-                                                                   "cursor": "pointer", "float": "right"})
-                                                        ]),
-                            # FIXME: Change dynamically tweet change
-                            dbc.ListGroupItem(children=["Tweets change",
-                                                        html.Span(children=[html.I(className=symbol), 3.61],
-                                                                  style={"color": color_return, "marginLeft": "10px",
-                                                                         "cursor": "pointer", "float": "right"})
-                                                        ]),
+                                                        html.Span(children=[
+                                                            html.I(className=price_symbol, style=style_arrows),
+                                                            last_price_return],
+                                                            style={"color": price_color_return, "marginLeft": "10px",
+                                                                   "cursor": "pointer", "float": "right"})]),
+
                             # FIXME: Change correlation automatically
                             dbc.ListGroupItem(children=["Correlation",
                                                         html.Span(children=[0.75],
-                                                                  style={"color": "dark", "marginLeft": "10px",
-                                                                         "float": "right"})
-                                                        ])
+                                                                  style={"color": "#36454F", "marginLeft": "10px",
+                                                                         "float": "right"})]),
                         ], style={"marginTop": "80px"}
                     )
                 ], width=2
