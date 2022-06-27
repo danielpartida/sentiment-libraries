@@ -1,5 +1,6 @@
 import os
 from typing import Tuple
+from datetime import datetime
 
 import pandas as pd
 import requests
@@ -143,18 +144,23 @@ if __name__ == "__main__":
     df = pd.read_csv("../../look_up_tables/df_Digital Assets & Crypto.csv", sep=";", decimal=',')
     df.rename(columns={"Unnamed: 0": "id"}, inplace=True)
 
-    entities = pd.read_csv("../../look_up_tables/entities.csv", sep=';', decimal=',')
-    entities.rename(columns={"Unnamed: 0": "id", "0": "name"}, inplace=True)
+    # entities = pd.read_csv("../../look_up_tables/entities.csv", sep=';', decimal=',')
+    # entities.rename(columns={"Unnamed: 0": "id", "0": "name"}, inplace=True)
 
     # Build header to authenticate using bearer token
     authentication_header = get_authentication_headers(academic_access=True)
 
     query_type = "counts"
-    granularity = "day"  # day, hour or minute
+    granularity = "day"  # day, hour or min
+    # ute
     start = "2022-01-01T00:00:00Z"
-    end = "2022-06-15T00:00:00Z"
+    today = datetime.today()
+    date_format_long = '%Y-%m-%dT00:00:00Z'
+    date_format_short = '%d_%m'
+    end = today.strftime(date_format_long)
+
     access_type = "all"  # "all" for academic access, "recent" for premium access
-    query_text = "bitcoin"
+    query_text = "solana"
 
     all_df_tweets = []
     total_tweets = 0
@@ -173,6 +179,5 @@ if __name__ == "__main__":
     df = pd.concat(all_df_tweets)
     df.set_index("dates", inplace=True)
 
-    # TODO: Add exporter to csv
-    # TODO: Add scatter plot
+    df.to_csv("../dashboard/data/{0}_{1}.csv".format(query_text, today.strftime(date_format_short)))
     print("Run")
