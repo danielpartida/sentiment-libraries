@@ -52,19 +52,19 @@ def build_url(request_type: str = "search", access_level: str = "all", start_dat
 
     # last run
     if not next_token_id:
-        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&max_results=500".format(
+        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&max_results=500&sort_order=relevancy".format(
             basic_url, request_type, access_level, search_term, start_date, end_date
         )
 
     # first run
     elif next_token_id == "first_run":
-        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&max_results=500".format(
+        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&max_results=500&sort_order=relevancy".format(
             basic_url, request_type, access_level, search_term, start_date, end_date
         )
 
     # all runs besides first and last run
     else:
-        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&next_token={6}&max_results=500".format(
+        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&next_token={6}&max_results=500&sort_order=relevancy".format(
             basic_url, request_type, access_level, search_term, start_date, end_date, next_token_id
         )
 
