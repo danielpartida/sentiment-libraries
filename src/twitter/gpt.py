@@ -22,8 +22,8 @@ if __name__ == "__main__":
 
     long_tweet = begin
     counter = 1
-    for tweet in tweets[60:75]:
-        long_tweet += "\n{0}{1}".format(str(counter), ". ") + "\"{0}\"".format(tweet)
+    for tweet in tweets.text[60:75]:
+        long_tweet += "\n{0}{1}".format(str(counter), ". ") + "\"{0}\"".format(tweet, counter)
         counter += 1
 
     long_tweet += end
