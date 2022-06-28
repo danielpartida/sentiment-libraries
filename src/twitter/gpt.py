@@ -72,8 +72,16 @@ if __name__ == "__main__":
 
         result = response["choices"][0]["text"]
         results = result.split("\n\n")
-        results = list(map(lambda x: x.split(" ")[1], results[1:]))
 
+        # TODO: Add other results, e.g. ['Positive', 'Excited', 'Engaged', 'Optimistic']
+
+        if len(results) > 2:
+            results = list(map(lambda x: x.split(" ")[1], results[1:]))
+
+        else:
+            continue
+
+        # TODO: Store this metrics
         positive += sum('Positive' in s for s in results)
         negative += sum('Negative' in s for s in results)
 
