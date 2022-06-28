@@ -229,6 +229,13 @@ class TwitterScraper(Twitter):
 
         return df_tweets
 
+    def get_scraped_tweets_academic(self) -> pd.DataFrame:
+        """
+        API Academic V2: https://docs.tweepy.org/en/stable/client.html#search-tweets
+        :return:
+        :rtype:
+        """
+        pass
 
 class TwitterSentiment(Twitter):
 
