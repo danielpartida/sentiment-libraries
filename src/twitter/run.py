@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from twitter import TwitterScraper, TwitterSentiment
+from twitter import TwitterPremium, TwitterSentiment
 
 if __name__ == "__main__":
     
@@ -7,7 +7,7 @@ if __name__ == "__main__":
     delta_days = 7
     from_time = datetime.utcnow() - timedelta(days=delta_days)
     until_time = datetime.utcnow() - timedelta(hours=1)
-    twitter_scraper = TwitterScraper(search_term=search_term, tweets_per_window=50,
+    twitter_scraper = TwitterPremium(search_term=search_term, tweets_per_window=50,
                                      from_time=from_time, delta_days=delta_days)
     df_tweets = twitter_scraper.get_scraped_tweets()
 

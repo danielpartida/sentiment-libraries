@@ -33,14 +33,66 @@ class Twitter:
         if self.search_term.find("context") != -1:
             handler = logging.FileHandler(filename="../../logger/context_annotation.log")
         else:
-            handler = logging.FileHandler(filename="../logger/{0}.log".format(self.search_term))
-        
+            handler = logging.FileHandler(filename="../../logger/{0}.log".format(self.search_term))
+
         logger.addHandler(handler)
 
         return logger
 
+    @staticmethod
+    def build_text_query(search_term: str, token: str):
+        if token:
+            text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet lang:en'.format(search_term, token)
 
-class TwitterScraper(Twitter):
+        elif search_term.find("context") != -1:
+            text_query = search_term
+
+        else:
+            text_query = '({0} OR @{0} OR #{0}) -is:retweet lang:en'.format(search_term)
+
+        return text_query
+
+    @staticmethod
+    def clean_tweet(tweet: str):
+        """
+        Utility function to clean tweet text by removing links, special characters using simple regex statements.
+        Example taken from https://www.geeksforgeeks.org/twitter-sentiment-analysis-using-python/?ref=lbp
+        """
+        return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) | (\w+:\ / \ / \S+)", " ", tweet).split())
+
+    @staticmethod
+    def assert_and_get_tweet_type(tweet_type: str) -> str:
+        assert tweet_type in ["mixed", "recent", "popular"], "Supported result types are mixed, recent and popular"
+        return tweet_type
+
+    def create_result_folders_if_not_exist(self) -> None:
+        """
+        Creates data and img result folders
+        :return: None
+        :rtype: None
+        """
+
+        if self.search_term.find("context") != -1:
+            context = "context"
+            paths = ["../data/results/{0}/discord".format(context),
+                     "../data/results/{0}/twitter".format(context), "../img/{0}/discord".format(context),
+                     "../img/{0}/twitter/bert".format(context),
+                     "../img/{0}/twitter/roberta".format(context)]
+
+        else:
+
+            paths = ["../data/results/{0}/discord".format(self.search_term),
+                     "../data/results/{0}/twitter".format(self.search_term),
+                     "../img/{0}/discord".format(self.search_term),
+                     "../img/{0}/twitter/bert".format(self.search_term),
+                     "../img/{0}/twitter/roberta".format(self.search_term)]
+
+        for path in paths:
+            if not os.path.exists(path):
+                os.makedirs(path)
+
+
+class TwitterPremium(Twitter):
 
     def __init__(self, search_term: str, token: str = "", tweets_per_window: int = 1000,
                  from_time: datetime = datetime.utcnow() - timedelta(days=1), delta_days: int = 6):
@@ -62,24 +114,6 @@ class TwitterScraper(Twitter):
         self.delta_days = delta_days
 
     @staticmethod
-    def build_text_query(search_term: str, token: str):
-        if token:
-            text_query = '({0} OR @{0} OR #{0} OR "${1}") -is:retweet lang:en'.format(search_term, token)
-
-        elif search_term.find("context") != -1:
-            text_query = search_term
-
-        else:
-            text_query = '({0} OR @{0} OR #{0}) -is:retweet lang:en'.format(search_term)
-
-        return text_query
-
-    @staticmethod
-    def assert_and_get_tweet_type(tweet_type: str) -> str:
-        assert tweet_type in ["mixed", "recent", "popular"], "Supported result types are mixed, recent and popular"
-        return tweet_type
-
-    @staticmethod
     def get_tweepy_api() -> tweepy.API:
         """
         Authenticates to Twitter API and returns tweepy API
@@ -98,39 +132,6 @@ class TwitterScraper(Twitter):
 
         return api
 
-    @staticmethod
-    def clean_tweet(tweet: str):
-        """
-        Utility function to clean tweet text by removing links, special characters using simple regex statements.
-        Example taken from https://www.geeksforgeeks.org/twitter-sentiment-analysis-using-python/?ref=lbp
-        """
-        return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) | (\w+:\ / \ / \S+)", " ", tweet).split())
-
-    def create_result_folders_if_not_exist(self) -> None:
-        """
-        Creates data and img result folders
-        :return: None
-        :rtype: None
-        """
-
-        if self.search_term.find("context") != -1:
-            context = "context"
-            paths = ["../data/results/{0}/discord".format(context),
-                    "../data/results/{0}/twitter".format(context), "../img/{0}/discord".format(context),
-                    "../img/{0}/twitter/bert".format(context),
-                    "../img/{0}/twitter/roberta".format(context)]
-
-        else:
-
-            paths = ["../data/results/{0}/discord".format(self.search_term),
-                    "../data/results/{0}/twitter".format(self.search_term), "../img/{0}/discord".format(self.search_term),
-                    "../img/{0}/twitter/bert".format(self.search_term),
-                    "../img/{0}/twitter/roberta".format(self.search_term)]
-
-        for path in paths:
-            if not os.path.exists(path):
-                os.makedirs(path)
-
     def get_scraped_tweets(self) -> pd.DataFrame:
         """
         Twitter’s standard search API only searches against a sampling of recent Tweets published in the past 7 days
@@ -145,28 +146,6 @@ class TwitterScraper(Twitter):
 
         list_dict_tweets = []
         try:
-            # Popular tweets
-            # now = self.today.strftime("%Y-%m-%d")
-            # popular_tweets = [tweet for tweet in tweepy.Cursor(self.api.search_tweets, q=self.search_term, lang="en",
-            #                                                    result_type="popular", count=15, until=now).items(1000)]
-            # # FIXME: Add fields of Twitter API V1
-            # for tweet in popular_tweets:
-            #     dict_tweet = {
-            #         'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
-            #         'author_id': tweet.author_id, 'created_at': tweet.created_at,
-            #         'conversation_id': tweet.conversation_id,
-            #         'in_reply_to_user_id': tweet.in_reply_to_user_id,
-            #         'reply_count': tweet.public_metrics["reply_count"],
-            #         'like_count': tweet.public_metrics["like_count"],
-            #         'retweet_count': tweet.public_metrics["retweet_count"],
-            #         'quote_count': tweet.public_metrics["quote_count"],
-            #         'context_annotations': tweet.context_annotations,
-            #         'raw_text': tweet.text, 'type': "popular"
-            #     }
-            #     dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
-            #
-            #     list_dict_tweets.append(dict_tweet)
-
             # Rolling window scrapper
             # FIXME: Adapt this loop for request limit  https://developer.twitter.com/en/docs/twitter-api/rate-limits
             for i in range(self.delta_days * 24 - 1):
@@ -222,12 +201,34 @@ class TwitterScraper(Twitter):
         if self.search_term.find("context") != -1:
             context = "context"
             df_tweets.to_csv("../data/backup/{0}_tweets_{1}.csv".format(context, time_stamp_export),
-                         sep=';', decimal=',')
+                             sep=';', decimal=',')
         else:
             df_tweets.to_csv("..data/backup/{0}_tweets_{1}.csv".format(self.search_term, time_stamp_export),
-                         sep=';', decimal=',')
+                             sep=';', decimal=',')
 
         return df_tweets
+
+
+class TwitterAcademic(Twitter):
+
+    def __init__(self, search_term: str, token: str = "", tweets_per_window: int = 500,
+                 start_time: datetime = datetime.combine(date(2022, 1, 1), datetime.min.time()),
+                 end_time: datetime = datetime.utcnow()):
+        """
+        Constructor of TwitterScraping class
+        :param search_term: queried term
+        :type search_term: str
+        :param tweets_per_window: maximal amount of tweets to scrap
+        :type tweets_per_window: int
+        """
+        super().__init__(search_term=search_term)
+        self.text_query = self.build_text_query(search_term=search_term, token=token)
+        self.limit_tweets = tweets_per_window
+        self.t1 = time.time()
+        self.start_time = start_time
+        self.end_time = end_time
+        self.client = tweepy.Client(bearer_token=os.getenv("academic"))
+        self.create_result_folders_if_not_exist()
 
     def get_scraped_tweets_academic(self) -> pd.DataFrame:
         """
@@ -235,7 +236,69 @@ class TwitterScraper(Twitter):
         :return:
         :rtype:
         """
-        pass
+        self.logger.info("Searching for term {0}".format(self.search_term))
+
+        list_dict_tweets = []
+        try:
+            # Rolling window scrapper
+            delta = self.end_time - self.start_time
+            delta_days = delta.days
+            for i in range(delta_days * 24 - 1):
+                self.start_time += timedelta(hours=1)
+                start_time_str = self.start_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+                temp_end_time = self.start_time + timedelta(hours=1)
+                temp_end_time_str = temp_end_time.strftime('%Y-%m-%dT%H:%M:%SZ')
+                print("from_time:", start_time_str, "to_time:", temp_end_time_str)
+                # TODO: Add next_token algorithm
+                for tweet in tweepy.Paginator(
+                        self.client.search_all_tweets, query=self.text_query,
+                        start_time=start_time_str, end_time=temp_end_time_str, max_results=100,
+                        tweet_fields=['context_annotations', 'created_at', 'author_id', 'conversation_id',
+                                      'in_reply_to_user_id', 'entities', 'public_metrics']
+                ).flatten(limit=self.limit_tweets):
+                    # fetch main information of tweet fields
+                    # https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
+                    dict_tweet = {
+                        'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
+                        'created_at': tweet.created_at, 'author_id': tweet.author_id,
+                        'conversation_id': tweet.conversation_id,
+                        'in_reply_to_user_id': tweet.in_reply_to_user_id,
+                        'reply_count': tweet.public_metrics["reply_count"],
+                        'like_count': tweet.public_metrics["like_count"],
+                        'retweet_count': tweet.public_metrics["retweet_count"],
+                        'quote_count': tweet.public_metrics["quote_count"],
+                        'context_annotations': tweet.context_annotations,
+                        'raw_text': tweet.text, 'type': "recent"
+                    }
+                    dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
+
+                    list_dict_tweets.append(dict_tweet)
+
+        except BaseException as e:
+            print('failed on_status,', str(e))
+            time.sleep(3)
+
+        if list_dict_tweets:
+            df_tweets = pd.DataFrame(list_dict_tweets)
+
+        else:
+            df_tweets = pd.DataFrame()
+
+        now = self.today.strftime("%d/%m/%Y, %H:%M:%S")
+        list_now = now.split()
+        day = list_now[0]
+        hour = list_now[1]
+        self.logger.info("Tweets retrieved on {0} at {1} in {2} seconds".format(
+            day, hour, time.time() - self.t1)
+        )
+
+        time_stamp_export = self.today.strftime("%d_%m_%H_%M")
+
+        df_tweets.to_csv("../../data/backup/{0}_tweets_{1}.csv".format(self.search_term, time_stamp_export),
+                         sep=';', decimal=',')
+
+        return df_tweets
+
 
 class TwitterSentiment(Twitter):
 
@@ -310,7 +373,7 @@ class TwitterSentiment(Twitter):
                 df_tweets['sentiment_{0}'.format(self.model_str)] == sentiment
                 ]
             # FIXME: Add proper colormap
-            sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100, #colormap=color_maps[sentiment],
+            sentiment_wordcloud = WordCloud(max_font_size=50, max_words=100,  # colormap=color_maps[sentiment],
                                             background_color="white", stopwords=stop_words).generate(
                 str(sentiment_tweets)
             )
