@@ -109,7 +109,8 @@ class TwitterPremium(Twitter):
         self.start_time = time.time()
         self.api = self.get_tweepy_api()
         self.from_time = from_time
-        self.client = tweepy.Client(bearer_token=os.getenv("bearer_token"))
+        self.client = tweepy.Client(bearer_token=os.getenv("bearer_token"), wait_on_rate_limit=True,
+                                    wait_on_rate_limit_notify=True)
         self.create_result_folders_if_not_exist()
         self.delta_days = delta_days
 
@@ -211,7 +212,7 @@ class TwitterPremium(Twitter):
 
 class TwitterAcademic(Twitter):
 
-    def __init__(self, search_term: str, token: str = "", tweets_per_window: int = 500,
+    def __init__(self, search_term: str, token: str = "", tweets_per_window: int = 50,
                  start_time: datetime = datetime.combine(date(2022, 1, 1), datetime.min.time()),
                  end_time: datetime = datetime.utcnow()):
         """
@@ -249,13 +250,12 @@ class TwitterAcademic(Twitter):
                 temp_end_time = self.start_time + timedelta(hours=1)
                 temp_end_time_str = temp_end_time.strftime('%Y-%m-%dT%H:%M:%SZ')
                 print("from_time:", start_time_str, "to_time:", temp_end_time_str)
-                # TODO: Add next_token algorithm
                 for tweet in tweepy.Paginator(
                         self.client.search_all_tweets, query=self.text_query,
-                        start_time=start_time_str, end_time=temp_end_time_str, max_results=100,
+                        start_time=start_time_str, end_time=temp_end_time_str, max_results=50,
                         tweet_fields=['context_annotations', 'created_at', 'author_id', 'conversation_id',
                                       'in_reply_to_user_id', 'entities', 'public_metrics']
-                ).flatten(limit=self.limit_tweets):
+                ).flatten(limit=50):
                     # fetch main information of tweet fields
                     # https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
                     dict_tweet = {
@@ -273,6 +273,9 @@ class TwitterAcademic(Twitter):
                     dict_tweet['text'] = self.clean_tweet(dict_tweet['raw_text'])
 
                     list_dict_tweets.append(dict_tweet)
+
+                    # https://docs.tweepy.org/en/v4.10.0/faq.html#why-am-i-getting-rate-limited-so-quickly-when-using-client-search-all-tweets-with-paginator
+                    time.sleep(1)
 
         except BaseException as e:
             print('failed on_status,', str(e))
