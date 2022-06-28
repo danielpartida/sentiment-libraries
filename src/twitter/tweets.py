@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from typing import Tuple
+import re
 
 import pandas as pd
 import requests
@@ -108,6 +109,14 @@ def get_data_with_control_flow(request_response: requests.models.Response, reque
     return data
 
 
+def clean_tweet(tweet: str):
+        """
+        Utility function to clean tweet text by removing links, special characters using simple regex statements.
+        Example taken from https://www.geeksforgeeks.org/twitter-sentiment-analysis-using-python/?ref=lbp
+        """
+        return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) | (\w+:\ / \ / \S+)", " ", tweet).split())
+
+
 def convert_data_into_df(data: dict) -> Tuple:
     """
     Builds dataframe with response data and gets next_token_id
@@ -122,7 +131,30 @@ def convert_data_into_df(data: dict) -> Tuple:
     else:
         next_token_id = None
 
-    df_tweets = pd.DataFrame(data=data["data"])
+    list_dict_tweets = []
+    for tweet in data["data"]:
+        dict_tweet = {
+            'id': tweet["id"], "url": "https://twitter.com/twitter/status/{0}".format(tweet["id"]),
+            'created_at': tweet["created_at"], 'author_id': tweet["author_id"],
+            'conversation_id': tweet["conversation_id"],
+            'reply_count': tweet["public_metrics"]["reply_count"],
+            'like_count': tweet["public_metrics"]["like_count"],
+            'retweet_count': tweet["public_metrics"]["retweet_count"],
+            'quote_count': tweet["public_metrics"]["quote_count"],
+            'raw_text': tweet["text"], 'type': "relevant"
+        }
+
+        if 'context_annotations' in tweet.keys():
+            dict_tweet['context_annotations'] = tweet["context_annotations"],
+
+        if "entities" in tweet.keys():
+            dict_tweet["entities"] = tweet["entities"]
+
+        dict_tweet['text'] = clean_tweet(dict_tweet['raw_text'])
+
+        list_dict_tweets.append(dict_tweet)
+
+    df_tweets = pd.DataFrame(list_dict_tweets)
 
     return df_tweets, next_token_id
 
@@ -149,7 +181,8 @@ if __name__ == "__main__":
     next_token = "first_run"
 
     rate_limit = 0
-    while next_token and rate_limit < 5:
+    while next_token:
+        # Based on  https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-all
         constructed_url = build_url(request_type=query_type, access_level=access_type, start_date=start, end_date=end,
                                     search_term=query_text, next_token_id=next_token)
 
@@ -159,11 +192,8 @@ if __name__ == "__main__":
         df_tweets_window, next_token = convert_data_into_df(response_data)
         all_df_tweets.append(df_tweets_window)
 
-        rate_limit += 1
-
     df = pd.concat(all_df_tweets)
     df.set_index("created_at", inplace=True)
     df.sort_index(inplace=True)
-
-    print("Placeholder")
-    # df = df.tweet_count
+    df.to_csv("../dashboard/data/tweets_{0}_{1}.csv".format(token, today.strftime(date_format_short)),
+              sep=";", decimal=",")

@@ -163,7 +163,7 @@ class TwitterPremium(Twitter):
                     # fetch main information of tweet
                     # tweet fields https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
                     dict_tweet = {
-                        'id': tweet.id, "url": "https://twitter.com/twitter/statuses/{0}".format(tweet.id),
+                        'id': tweet.id, "url": "https://twitter.com/twitter/status/{0}".format(tweet.id),
                         'created_at': tweet.created_at, 'author_id': tweet.author_id,
                         'conversation_id': tweet.conversation_id,
                         'in_reply_to_user_id': tweet.in_reply_to_user_id,

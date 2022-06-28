@@ -174,6 +174,5 @@ if __name__ == "__main__":
     df.sort_index(inplace=True)
     df = df.tweet_count
 
-    df.to_csv("../dashboard/data/{0}_{1}.csv".format(query_text, today.strftime(date_format_short)),
+    df.to_csv("../dashboard/data/counts_{0}_{1}.csv".format(query_text, today.strftime(date_format_short)),
               decimal=',', sep=';')
-    print("Run")
