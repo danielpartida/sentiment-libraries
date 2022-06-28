@@ -81,8 +81,7 @@ class Twitter:
 
         else:
 
-            paths = ["../data/results/{0}/discord".format(self.search_term),
-                     "../data/results/{0}/twitter".format(self.search_term),
+            paths = ["../data/results/{0}/twitter".format(self.search_term),
                      "../img/{0}/discord".format(self.search_term),
                      "../img/{0}/twitter/bert".format(self.search_term),
                      "../img/{0}/twitter/roberta".format(self.search_term)]
@@ -244,18 +243,18 @@ class TwitterAcademic(Twitter):
             # Rolling window scrapper
             delta = self.end_time - self.start_time
             delta_days = delta.days
-            for i in range(delta_days * 24 - 1):
-                self.start_time += timedelta(hours=1)
+            for i in range(delta_days - 1): # range(delta_days * 24 - 1) for hours
+                self.start_time += timedelta(days=1)
                 start_time_str = self.start_time.strftime('%Y-%m-%dT%H:%M:%SZ')
-                temp_end_time = self.start_time + timedelta(hours=1)
+                temp_end_time = self.start_time + timedelta(days=1)
                 temp_end_time_str = temp_end_time.strftime('%Y-%m-%dT%H:%M:%SZ')
                 print("from_time:", start_time_str, "to_time:", temp_end_time_str)
                 for tweet in tweepy.Paginator(
                         self.client.search_all_tweets, query=self.text_query,
-                        start_time=start_time_str, end_time=temp_end_time_str, max_results=50,
+                        start_time=start_time_str, end_time=temp_end_time_str, max_results=100,
                         tweet_fields=['context_annotations', 'created_at', 'author_id', 'conversation_id',
                                       'in_reply_to_user_id', 'entities', 'public_metrics']
-                ).flatten(limit=50):
+                ).flatten(limit=100):
                     # fetch main information of tweet fields
                     # https://developer.twitter.com/en/docs/twitter-api/data-dictionary/object-model/tweet
                     dict_tweet = {

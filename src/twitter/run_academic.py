@@ -12,7 +12,9 @@ if __name__ == "__main__":
 
     df_tweets = twitter_scraper.get_scraped_tweets_academic()
 
-    model = "bert"
-    # twitter_analysis = TwitterSentiment(search_term=search_term, model=model, df_tweet=df_tweets)
-    # twitter_analysis.run_sentiment_analysis()
-    # twitter_analysis.run_quantile_analysis()
+    # FIXME: Check error of bert IndexError: index out of range in self,
+    #  self.df_tweets['sentiment_dict'] = self.df_tweets["text"].apply(lambda x: self.sentiment_analysis(x))
+    model = "roberta"
+    twitter_analysis = TwitterSentiment(search_term=search_term, model=model, df_tweet=df_tweets)
+    twitter_analysis.run_sentiment_analysis()
+    twitter_analysis.run_quantile_analysis()
