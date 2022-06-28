@@ -27,7 +27,8 @@ def calculate_sentiment_analysis(df: pd.DataFrame, token: str) -> pd.DataFrame:
 
 
 def calculate_timeseries_analysis(df: pd.DataFrame, token: str) -> None:
-    df["date"] = df.created_at.apply(lambda x: date(x.year, x.month, x.day))
+    df["date"] = pd.to_datetime(df.created_at)
+    df["date"] = df.date.apply(lambda x: date(x.year, x.month, x.day))
 
     # group-by
     df.sort_values(by=["date"], ascending=True, inplace=True)
@@ -49,3 +50,4 @@ if __name__ == "__main__":
     data = pd.read_csv("../dashboard/data/tweets_{0}_{1}.csv".format(asset, today.strftime(date_format_short)),
                        sep=';', decimal=',')
     df_sentiment = calculate_sentiment_analysis(df=data, token=asset)
+    calculate_timeseries_analysis(df=df_sentiment, token=asset)
