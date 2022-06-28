@@ -1,13 +1,40 @@
 import os
+from datetime import date, datetime
+
 import openai
 import pandas as pd
-from datetime import date, datetime
+from dotenv import load_dotenv
 from tqdm import tqdm
 
-from dotenv import load_dotenv
 load_dotenv()
 
 openai.api_key = os.getenv("gpt")
+
+
+def calculate_timeseries_analysis(df: pd.DataFrame, token: str) -> None:
+    """
+    Calculates timeseries of gpt3 scores
+    :param df:
+    :type df:
+    :param token:
+    :type token:
+    :return:
+    :rtype:
+    """
+    df["date"] = df.date.apply(lambda x: date(x.year, x.month, x.day))
+
+    # group-by
+    df.sort_values(by=["date"], ascending=True, inplace=True)
+
+    # group-by and pivot
+    model_group_by = df.groupby(by=['date', 'sentiment'])['sentiment'].count()
+    model_unstack = model_group_by.unstack()
+
+    model_unstack.to_csv(
+        "../dashboard/data/gpt3_sentiment_timeseries_{0}_sentiment_{1}.csv".format(token,
+                                                                                   today.strftime(date_format_short)),
+        sep=';', decimal=',')
+
 
 if __name__ == "__main__":
 
@@ -21,24 +48,18 @@ if __name__ == "__main__":
     data["date"] = data.date.apply(lambda x: date(x.year, x.month, x.day))
     tweets = data[["date", "text"]]
 
-    begin = "Classify the sentiment in these tweets:\n"
+    begin = "Classify the sentiment in this tweet:\n"
     end = "\n\nTweet sentiment ratings:"
 
-    long_tweet = begin
-    counter = 1
     positive = 0
     negative = 0
 
     list_df = []
-    for i in tqdm(range(0, len(tweets)-2, 2)):
-        df_tweets = tweets.text[i:i + 2]
-        df_tweets.reset_index(drop=True, inplace=True)
-        for tweet in df_tweets:
-            long_tweet += "\n{0}{1}".format(str(counter), ". ") + "\"{0}\"".format(tweet, counter)
-            counter += 1
+    list_results = []
+    for tweet in tqdm(tweets.text):
+        long_tweet = begin + "\n{0}{1}".format(1, ". ") + "\"{0}\"".format(tweet) + end
 
-        long_tweet += end
-
+        # Source https://beta.openai.com/examples/default-adv-tweet-classifier
         response = openai.Completion.create(
           model="text-davinci-002",
           prompt=long_tweet,
@@ -50,17 +71,19 @@ if __name__ == "__main__":
         )
 
         result = response["choices"][0]["text"]
-        results = result.split("\n")
-        results = list(map(lambda x: x.split(" ")[1], results[2:]))
+        results = result.split("\n\n")
+        results = list(map(lambda x: x.split(" ")[1], results[1:]))
 
         positive += sum('Positive' in s for s in results)
         negative += sum('Negative' in s for s in results)
 
-        results = pd.Series(results)
-        df = pd.DataFrame(dict(s1=df_tweets, s2=results)).reset_index()[["s1", "s2"]]
-        list_df.append(df)
+        list_results.append(results[0])
 
-    df_final = pd.concat(list_df)
+    series_results = pd.Series(list_results)
+    df_final = pd.concat([tweets, pd.DataFrame(series_results)], axis=1)
+
+    df_final.rename(columns={0: "sentiment"}, inplace=True)
     df_final.to_csv("../dashboard/data/gpt3_tweets_{0}_{1}.csv".format(asset, today.strftime(date_format_short)),
-                    sep=";", decimal=",")
+                    sep=";", decimal=",", index=False)
 
+    calculate_timeseries_analysis(df=df_final, token=asset)
