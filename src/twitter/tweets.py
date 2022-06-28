@@ -28,6 +28,13 @@ def get_authentication_headers(academic_access: bool) -> dict:
     return headers
 
 
+def build_query(search_term: str) -> str:
+    filter_term = " -is:retweet lang:en"
+    search_term += filter_term
+
+    return search_term
+
+
 def build_url(request_type: str = "search", access_level: str = "all", start_date: str = "2022-01-01T00:00:00Z",
               end_date: str = "2022-06-15T00:00:00Z", search_term: str = "bitcoin", next_token_id: str = "") -> str:
     """
@@ -49,23 +56,22 @@ def build_url(request_type: str = "search", access_level: str = "all", start_dat
     """
 
     basic_url = "https://api.twitter.com/2/tweets"
+    tweet_fields = "created_at,context_annotations,public_metrics,author_id,conversation_id,in_reply_to_user_id," \
+                   "entities"
+    user_fields = "created_at,entities,name,public_metrics,verified"
+    end_url = "max_results=100&tweet.fields={0}&user.fields={1}&sort_order=relevancy".format(tweet_fields, user_fields)
 
-    # last run
-    if not next_token_id:
-        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&max_results=500&sort_order=relevancy".format(
-            basic_url, request_type, access_level, search_term, start_date, end_date
-        )
-
-    # first run
-    elif next_token_id == "first_run":
-        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&max_results=500&sort_order=relevancy".format(
-            basic_url, request_type, access_level, search_term, start_date, end_date
+    # first and last run
+    if not next_token_id or next_token_id == "first_run":
+        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&{6}".format(
+            basic_url, request_type, access_level, search_term, start_date, end_date, end_url
         )
 
     # all runs besides first and last run
     else:
-        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&next_token={6}&max_results=500&sort_order=relevancy".format(
-            basic_url, request_type, access_level, search_term, start_date, end_date, next_token_id
+        url = "{0}/{1}/{2}?query={3}&start_time={4}&end_time={5}&next_token={6}&{7}".format(
+            basic_url, request_type, access_level, search_term, start_date, end_date, next_token_id,
+            end_url
         )
 
     return url
@@ -87,6 +93,11 @@ def get_data_with_control_flow(request_response: requests.models.Response, reque
     elif request_response.status_code == 400:
         raise PermissionError("Bad request {0}, check if the url {1} is correct".format(
             request_response.status_code, request_url)
+        )
+
+    elif request_response.status_code == 404:
+        raise ValueError("Error {0}. The URI requested is invalid or the resource requested.".format(
+            request_response.status_code)
         )
 
     else:
@@ -122,6 +133,7 @@ if __name__ == "__main__":
     authentication_header = get_authentication_headers(academic_access=True)
 
     query_type = "search"
+    access_type = "all"
 
     start = "2022-01-01T00:00:00Z"
     today = datetime.today()
@@ -129,14 +141,14 @@ if __name__ == "__main__":
     date_format_short = '%d_%m'
     end = today.strftime(date_format_long)
 
-    access_type = "all"  # "all" for academic access, "recent" for premium access
-    query_text = "solana -is:retweet"
+    token = "solana"  # "all" for academic access, "recent" for premium access
+    query_text = build_query(search_term=token)
 
     all_df_tweets = []
     total_tweets = 0
     next_token = "first_run"
 
-    rate_limit = 00
+    rate_limit = 0
     while next_token and rate_limit < 5:
         constructed_url = build_url(request_type=query_type, access_level=access_type, start_date=start, end_date=end,
                                     search_term=query_text, next_token_id=next_token)
@@ -150,5 +162,8 @@ if __name__ == "__main__":
         rate_limit += 1
 
     df = pd.concat(all_df_tweets)
+    df.set_index("created_at", inplace=True)
     df.sort_index(inplace=True)
-    df = df.tweet_count
+
+    print("Placeholder")
+    # df = df.tweet_count
