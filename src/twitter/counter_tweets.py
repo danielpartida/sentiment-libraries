@@ -54,22 +54,25 @@ def build_url(request_type: str = "counts", access_level: str = "all", granulari
 
     basic_url = "https://api.twitter.com/2/tweets"
 
+    query = '{0} -is:retweet -RT -"public sale" -"mint" -airdrop -giveaway -giveaways -is:nullcast ' \
+            '-tag -tagg lang:en'.format(search_term)
+
     # last run
     if not next_token_id:
         url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}".format(
-            basic_url, request_type, access_level, search_term, granularity_level, start_date, end_date
+            basic_url, request_type, access_level, query, granularity_level, start_date, end_date
         )
 
     # first run
     elif next_token_id == "first_run":
         url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}".format(
-            basic_url, request_type, access_level, search_term, granularity_level, start_date, end_date
+            basic_url, request_type, access_level, query, granularity_level, start_date, end_date
         )
 
     # all runs besides first and last run
     else:
         url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}&next_token={7}".format(
-            basic_url, request_type, access_level, search_term, granularity_level, start_date, end_date, next_token_id
+            basic_url, request_type, access_level, query, granularity_level, start_date, end_date, next_token_id
         )
 
     return url
