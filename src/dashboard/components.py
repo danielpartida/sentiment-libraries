@@ -149,6 +149,7 @@ fig_sentiment.update_layout(
     )
 )
 
+
 # Style
 style_arrows = {"marginRight": "5px"}
 twitter_symbol = html.I(className="fab fa-twitter", style=style_arrows)
@@ -379,6 +380,47 @@ price_row = dbc.Row(
                 ),
             ], style={"display": "inline-block"}, width=4
         ),
+    ]
+)
+
+# https://plotly.com/python/indicator/
+indicators_section = dbc.Row(
+    [
+        dbc.Col(
+            dbc.Card([
+                dbc.CardBody([
+                    html.H4("Community growth", className="card-title"),
+                    html.P(
+                        "poor 😔",
+                        className="card-subtitle", style={"text-align": "center"}
+                    )
+                ])
+            ])
+        ),
+
+        dbc.Col(
+            dbc.Card([
+                dbc.CardBody([
+                    html.H4("Community sentiment", className="card-title"),
+                    html.P(
+                        "average 🤷",
+                        className="card-subtitle", style={"text-align": "center"}
+                    )
+                ])
+            ])
+        ),
+
+        dbc.Col(
+            dbc.Card([
+                dbc.CardBody([
+                    html.H4("Expert voices", className="card-title"),
+                    html.P(
+                        "worried 😕",
+                        className="card-subtitle", style={"text-align": "center"}
+                    )
+                ])
+            ])
+        )
     ]
 )
 
@@ -621,6 +663,10 @@ project_page_children = html.Div([
     ),
 
     price_row,
+
+    indicators_section,
+
+    vertical_space,
 
     twitter_share_button,
 
