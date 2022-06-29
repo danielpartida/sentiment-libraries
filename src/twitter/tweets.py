@@ -30,7 +30,15 @@ def get_authentication_headers(academic_access: bool) -> dict:
 
 
 def build_query(search_term: str) -> str:
-    filter_term = " -is:retweet lang:en"
+    """
+    Filters tweets that were retweeted, and with specific keywords
+    :param search_term: token name
+    :type search_term: str
+    :return: query
+    :rtype: str
+    """
+    filter_term = ' -is:retweet -RT -"public sale" -"mint" -airdrop -giveaway -giveaways -is:nullcast ' \
+                  '-tag -tagg lang:en'
     search_term += filter_term
 
     return search_term
@@ -132,6 +140,7 @@ def convert_data_into_df(data: dict) -> Tuple:
         next_token_id = None
 
     list_dict_tweets = []
+    # FIXME: Fetch tweet_id correctly
     for tweet in data["data"]:
         dict_tweet = {
             'id': tweet["id"], "url": "https://twitter.com/twitter/status/{0}".format(tweet["id"]),
