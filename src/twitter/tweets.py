@@ -68,7 +68,9 @@ def build_url(request_type: str = "search", access_level: str = "all", start_dat
     tweet_fields = "created_at,context_annotations,public_metrics,author_id,conversation_id,in_reply_to_user_id," \
                    "entities"
     user_fields = "created_at,entities,name,public_metrics,verified"
-    end_url = "max_results=100&tweet.fields={0}&user.fields={1}&sort_order=relevancy".format(tweet_fields, user_fields)
+    end_url = "max_results=100&tweet.fields={0}&user.fields={1}&sort_order=relevancy&&expansions=author_id".format(
+        tweet_fields, user_fields
+    )
 
     # first and last run
     if not next_token_id or next_token_id == "first_run":
@@ -140,7 +142,6 @@ def convert_data_into_df(data: dict) -> Tuple:
         next_token_id = None
 
     list_dict_tweets = []
-    # FIXME: Fetch tweet_id correctly
     for tweet in data["data"]:
         dict_tweet = {
             'id': tweet["id"], "url": "https://twitter.com/twitter/status/{0}".format(tweet["id"]),
@@ -168,6 +169,41 @@ def convert_data_into_df(data: dict) -> Tuple:
     return df_tweets, next_token_id
 
 
+def convert_users_into_df(data: dict) -> pd.DataFrame:
+    """
+    Converts users into dataframe
+    :param data: response data
+    :type data: dict
+    :return: dataframe of users with follower metrics, etc
+    :rtype: pd.DataFrame
+    """
+    list_of_users = []
+    for user in data["includes"]["users"]:
+        dict_users = {
+            "user_id": user["id"], "user_name": user["name"], "user_handle": user["username"],
+            "verified": user["verified"], "created_at": user["created_at"],
+        }
+
+        if "public_metrics" in user.keys():
+            dict_users["followers"] = user["public_metrics"]["followers_count"]
+            dict_users["following"] = user["public_metrics"]["following_count"]
+            dict_users["tweet_count"] = user["public_metrics"]["tweet_count"]
+
+        list_of_users.append(dict_users)
+
+    df_users = pd.DataFrame(list_of_users)
+
+    return df_users
+
+
+def save_df_to_csv(list_all_data: list, index_col: str, name_csv: str) -> None:
+    df = pd.concat(list_all_data)
+    df.set_index(index_col, inplace=True)
+    df.sort_index(inplace=True)
+    df.to_csv("../dashboard/data/{0}_{1}_{2}.csv".format(name_csv, token, today.strftime(date_format_short)),
+              sep=";", decimal=",")
+
+
 if __name__ == "__main__":
 
     # Build header to authenticate using bearer token
@@ -185,7 +221,7 @@ if __name__ == "__main__":
     token = "solana"  # "all" for academic access, "recent" for premium access
     query_text = build_query(search_term=token)
 
-    all_df_tweets = []
+    list_all_tweets, list_all_users = [], []
     total_tweets = 0
     next_token = "first_run"
 
@@ -198,11 +234,12 @@ if __name__ == "__main__":
         response = requests.get(url=constructed_url, headers=authentication_header)
         response_data = get_data_with_control_flow(request_response=response, request_url=constructed_url)
 
-        df_tweets_window, next_token = convert_data_into_df(response_data)
-        all_df_tweets.append(df_tweets_window)
+        df_tweets_window, next_token = convert_data_into_df(data=response_data)
+        list_all_tweets.append(df_tweets_window)
 
-    df = pd.concat(all_df_tweets)
-    df.set_index("created_at", inplace=True)
-    df.sort_index(inplace=True)
-    df.to_csv("../dashboard/data/tweets_{0}_{1}.csv".format(token, today.strftime(date_format_short)),
-              sep=";", decimal=",")
+        df_users_window = convert_users_into_df(data=response_data)
+        list_all_users.append(df_users_window)
+
+    save_df_to_csv(list_all_data=list_all_tweets, index_col="created_at", name_csv="tweets")
+    save_df_to_csv(list_all_data=list_all_users, index_col="id", name_csv="users")
+
