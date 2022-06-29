@@ -14,8 +14,10 @@ token = "solana"
 
 custom_div = html.Div(id="custom_div_id", **{'data-url': "https://www.moonpass.ai/"})
 
+date = "28_06"
+
 # Community Data
-df_community = pd.read_csv("data/{0}_27_06.csv".format(token), sep=';', decimal=',',
+df_community = pd.read_csv("data/counts_{0}_{1}.csv".format(token, date), sep=';', decimal=',',
                            index_col="dates", parse_dates=True)
 total_tweets = sum(df_community.tweet_count)
 total_tweets /= 1000000
@@ -23,10 +25,42 @@ last_tweet_change = (df_community.tweet_count.iloc[-1] - df_community.tweet_coun
                     df_community.tweet_count.iloc[-2]
 last_tweet_return = '{:.1%}'.format(last_tweet_change)
 
-# FIXME: Change sentiment data
-# TODO: Add tweets with positive and negative sentiment
-df = px.data.gapminder().query("continent == 'Oceania'")
-fig_sentiment = px.area(df, x="year", y="pop", color="country", line_group="country")
+df_sentiment = pd.read_csv("data/timeseries_{0}_sentiment_{1}.csv".format(token, date), sep=";", decimal=',')
+fig_sentiment = fig = go.Figure()
+fig_sentiment.add_trace(go.Scatter(
+    x=df_sentiment.date, y=df_sentiment.Negative,
+    mode='lines',
+    line=dict(width=0.5, color='rgb(169, 92, 104)'),  # Puce
+    stackgroup='one',
+    groupnorm='percent',
+    name='negative'
+))
+
+fig_sentiment.add_trace(go.Scatter(
+    x=df_sentiment.date, y=df_sentiment.Neutral,
+    mode='lines',
+    line=dict(width=0.5, color='rgb(255, 250, 160)'),  # Pastel Yellow
+    stackgroup='one',
+    groupnorm='percent',
+    name='neutral'
+))
+
+fig_sentiment.add_trace(go.Scatter(
+    x=df_sentiment.date, y=df_sentiment.Positive,
+    mode='lines',
+    line=dict(width=0.5, color='rgb(175, 225, 175)'),  # Celadon
+    stackgroup='one',
+    groupnorm='percent',
+    name='positive'
+))
+
+fig_sentiment.update_layout(
+    showlegend=True,
+    yaxis=dict(
+        type='linear',
+        range=[1, 100],
+        ticksuffix='%')
+)
 
 # Price data
 current_price_data = get_current_price_from_coingecko(token=token)

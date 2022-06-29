@@ -38,7 +38,7 @@ def calculate_timeseries_analysis(df: pd.DataFrame, token: str) -> None:
     model_unstack = model_group_by.unstack()
 
     model_unstack.to_csv(
-        "../dashboard/data/sentiment_timeseries_{0}_sentiment_{1}.csv".format(token, today.strftime(date_format_short)),
+        "../dashboard/data/timeseries_{0}_sentiment_{1}.csv".format(token, today.strftime(date_format_short)),
         sep=';', decimal=',')
 
 
