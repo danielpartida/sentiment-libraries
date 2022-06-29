@@ -31,11 +31,19 @@ if __name__ == "__main__":
                     if 'description' in annotation['entity'].keys():
                         dict_annotation['entity_description'] = annotation['entity']['description']
 
-                    list_annotations.append(list_annotations)
+                    list_annotations.append(dict_annotation)
 
         df = pd.DataFrame(list_annotations)
 
     except BaseException as err:
         print("Ups, we encountered an error: ", err)
 
-    print(data)
+    df_domain = df.groupby(by=["domain_name"])["domain_name"].count()
+    df_domain.sort_values(ascending=False, inplace=True)
+    df_domain.to_csv("../dashboard/data/domain_tweets_{0}_{1}.csv".format(asset, today.strftime(date_format_short)),
+                     sep=";", decimal=",", index=True)
+
+    df_entity = df.groupby(by=["entity_name"])["entity_name"].count()
+    df_entity.sort_values(ascending=False, inplace=True)
+    df_entity.to_csv("../dashboard/data/entity_tweets_{0}_{1}.csv".format(asset, today.strftime(date_format_short)),
+                     sep=";", decimal=",", index=True)
