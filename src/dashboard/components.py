@@ -142,9 +142,9 @@ fig_sentiment.update_layout(
 style_arrows = {"marginRight": "5px"}
 twitter_symbol = html.I(className="fab fa-twitter", style=style_arrows)
 
+# FIXME: Add return button
 sidebar_header = dbc.Row(
     [
-        # FIXME: Add return button
         dbc.Col(
             html.Label(
                 dbc.CardImg(src='assets/logo_moonpass_white.png',
@@ -186,6 +186,7 @@ sidebar_header = dbc.Row(
 )
 
 # FIXME: Add button to return home
+# TODO: Add hovering for project selection
 sidebar = html.Div(
     [
         sidebar_header,
@@ -205,8 +206,6 @@ sidebar = html.Div(
         dbc.Collapse(
             dbc.Nav(
                 [
-                    # TODO: Add hovering for project selection
-                    #  Add dynamically many buttons
                     dbc.NavLink([html.I(className=""), "Solana"],
                                 href="/solana",  # active="exact",
                                 style={'paddingTop': "0px",
@@ -239,6 +238,7 @@ sidebar = html.Div(
     id="sidebar",
 )
 
+# FIXME: Add functionality to "Top web3 projects" button
 landing_page_children = html.Div([
     dbc.Row(
         dbc.Col(
@@ -270,7 +270,6 @@ landing_page_children = html.Div([
                         ),
                         dbc.CardImg(src="assets/projects.png", top=True, style={"width": "60%", "height": "60%"},
                                     className='align-self-center'),
-                        # TODO: Add functionality to button
                         dbc.Button("Top web3 projects 🚀", color="primary", outline=True,
                                    className="card-footer text-center", id="button_web3_projects")
                     ]
@@ -372,10 +371,10 @@ price_row = dbc.Row(
     ]
 )
 
+# FIXME: Change order of Twitter button in dashboard layout
 twitter_share_button = dbc.Row(
     # Source: https://publish.twitter.com/?buttonType=TweetButton&widget=Button &
     # https://github.com/plotly/dash/pull/237
-    # FIXME: Change order of button
     dbc.Col(html.A("Tweet", **{'data-url': "www.moonpass.ai", "data-via": "moonpass_ai",
                                "data-related": "moonpass_ai", "data-show-count": "false"},
                    href="https://twitter.com/share?ref_src=twsrc%5Etfw", target="_blank", style={"float": "right"},
@@ -448,6 +447,7 @@ community_section = dbc.Row(
     ]
 )
 
+# TODO: Add tooltip with number of tweets for topics being discussed
 sentiment_section = dbc.Row(
     [
         dbc.Col(
@@ -457,7 +457,6 @@ sentiment_section = dbc.Row(
             ], width=10
         ),
 
-        # TODO: Add tooltip with number of tweets
         dbc.Col(
             [
                 html.H5("Topics discussed", style={"color": moonpass_colors["pink"]}),
@@ -476,43 +475,44 @@ sentiment_section = dbc.Row(
     ]
 )
 
+# TODO: Create dynamically this section
+# https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/overview
 experts_section = dbc.Row(
     [
-        dbc.Col(
-            dbc.CardBody(
-                [
-                    html.H4("What the bulls are saying 🐂", className="card-title"),
-                    html.H6("Twitter Profile", className="card-subtitle"),
-                    html.P(
-                        "Solana is a great blockchain because they solve a real issue in the ecosystem, they"
-                        "lower the transaction fees",
-                        className="card-text",
-                    ),
-                    dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
-                ]
-            ),
-        ),
+        # dbc.Col(
+        #     dbc.CardBody(
+        #         [
+        #             html.H4("What the bulls are saying 🐂", className="card-title"),
+        #             html.H6("Twitter Profile", className="card-subtitle"),
+        #             html.P(
+        #                 "Solana is a great blockchain because they solve a real issue in the ecosystem, they"
+        #                 "lower the transaction fees",
+        #                 className="card-text",
+        #             ),
+        #             dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
+        #         ]
+        #     ),
+        # ),
 
         dbc.Col(
-            html.Iframe(
-                srcDoc='''
-                <a class="twitter-timeline" data-theme="dark" href="https://twitter.com/elonmusk?ref_src=twsrc%5Etfw">
-                    Tweets by Elon Musk
-                </a> 
-                <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-                ''',
-            )
-            # dbc.CardBody(
-            #     [
-            #         html.H4("What the bears are saying 🐻", className="card-title"),
-            #         html.H6("Twitter Profile", className="card-subtitle"),
-            #         html.P(
-            #             "Tweet content, this project is very bad. Solana is congested the whole time making it not "
-            #             "decentralized",
-            #             className="card-text"),
-            #         dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
-            #     ]
-            # ),
+            [
+                html.H4("What the bears are saying 🐻", className="card-title"),
+                dbc.Card(
+                    html.Span(html.Iframe(
+                        srcDoc='''
+                       <blockquote class="twitter-tweet" data-lang="en" data-theme="light"><p lang="en" dir="ltr">It feels to me like <a href="https://twitter.com/search?q=%24SOL&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$SOL</a> is going thru a similar trough of disillusionment as <a href="https://twitter.com/search?q=%24ETH&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$ETH</a> did back in 2018. In bear markets prices aren&#39;t just reflexive—sentiment is too. <a href="https://twitter.com/solana?ref_src=twsrc%5Etfw">@solana</a> has a vibrant developer ecosystem and its downtime issues are solvable. This will be obvious in retrospect.</p>&mdash; spencernoon.eth (@spencernoon) <a href="https://twitter.com/spencernoon/status/1541497867373772802?ref_src=twsrc%5Etfw">June 27, 2022</a></blockquote> 
+                       <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                        ''',
+                        ), className="cart-text"
+                    ),
+                ),
+                html.Iframe(
+                    srcDoc='''
+                   <blockquote class="twitter-tweet" data-lang="en" data-theme="light"><p lang="en" dir="ltr">It feels to me like <a href="https://twitter.com/search?q=%24SOL&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$SOL</a> is going thru a similar trough of disillusionment as <a href="https://twitter.com/search?q=%24ETH&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$ETH</a> did back in 2018. In bear markets prices aren&#39;t just reflexive—sentiment is too. <a href="https://twitter.com/solana?ref_src=twsrc%5Etfw">@solana</a> has a vibrant developer ecosystem and its downtime issues are solvable. This will be obvious in retrospect.</p>&mdash; spencernoon.eth (@spencernoon) <a href="https://twitter.com/spencernoon/status/1541497867373772802?ref_src=twsrc%5Etfw">June 27, 2022</a></blockquote> 
+                   <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                    ''',
+                )
+            ]
         ),
     ]
 )
