@@ -305,6 +305,17 @@ vertical_space = dbc.Row(
   dbc.Col(html.Br())
 )
 
+title_row = dbc.Row(
+    dbc.Col(
+        html.H2(children='Moonpass - {0} off-chain analysis'.format(token),
+                style={
+                    'textAlign': 'left',
+                    'color': moonpass_colors["purple"]
+                }
+                ), width="auto"
+    )
+)
+
 price_row = dbc.Row(
     [
         dbc.Col(
@@ -376,7 +387,7 @@ community_section = dbc.Row(
     [
         dbc.Col(
             [
-                html.H4("Community Growth", style={"color": moonpass_colors["pink"]}),
+                html.H4("Community growth", style={"color": moonpass_colors["pink"]}),
                 dcc.Graph(figure=fig_price_community),
             ], width=10
         ),
@@ -446,6 +457,7 @@ sentiment_section = dbc.Row(
             ], width=10
         ),
 
+        # TODO: Add tooltip with number of tweets
         dbc.Col(
             [
                 html.H5("Topics discussed", style={"color": moonpass_colors["pink"]}),
@@ -482,32 +494,31 @@ experts_section = dbc.Row(
         ),
 
         dbc.Col(
-            dbc.CardBody(
-                [
-                    html.H4("What the bears are saying 🐻", className="card-title"),
-                    html.H6("Twitter Profile", className="card-subtitle"),
-                    html.P(
-                        "Tweet content, this project is very bad. Solana is congested the whole time making it not "
-                        "decentralized",
-                        className="card-text"),
-                    dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
-                ]
-            ),
+            html.Iframe(
+                srcDoc='''
+                <a class="twitter-timeline" data-theme="dark" href="https://twitter.com/elonmusk?ref_src=twsrc%5Etfw">
+                    Tweets by Elon Musk
+                </a> 
+                <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                ''',
+            )
+            # dbc.CardBody(
+            #     [
+            #         html.H4("What the bears are saying 🐻", className="card-title"),
+            #         html.H6("Twitter Profile", className="card-subtitle"),
+            #         html.P(
+            #             "Tweet content, this project is very bad. Solana is congested the whole time making it not "
+            #             "decentralized",
+            #             className="card-text"),
+            #         dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
+            #     ]
+            # ),
         ),
     ]
 )
 
 project_page_children = html.Div([
-    dbc.Row(
-        dbc.Col(
-            html.H2(children='Moonpass - Solana Project Overview',
-                    style={
-                        'textAlign': 'left',
-                        'color': moonpass_colors["purple"]
-                    }
-                    ), width="auto"
-        )
-    ),
+    title_row,
 
     dbc.Row(
         dbc.Col(html.Hr())

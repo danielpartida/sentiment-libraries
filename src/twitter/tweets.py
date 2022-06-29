@@ -165,6 +165,7 @@ def convert_data_into_df(data: dict) -> Tuple:
         list_dict_tweets.append(dict_tweet)
 
     df_tweets = pd.DataFrame(list_dict_tweets)
+    df_tweets["created_at"] = pd.to_datetime(df_tweets.created_at)
 
     return df_tweets, next_token_id
 
