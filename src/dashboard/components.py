@@ -48,7 +48,7 @@ fig_sentiment.add_trace(go.Scatter(
 fig_sentiment.add_trace(go.Scatter(
     x=df_sentiment.date, y=df_sentiment.Positive,
     mode='lines',
-    line=dict(width=0.5, color='rgb(175, 225, 175)'),  # Celadon
+    line=dict(width=0.5, color='rgb(175, 225, 175)'),  # Pistachio
     stackgroup='one',
     groupnorm='percent',
     name='positive'
@@ -465,7 +465,7 @@ project_page_children = html.Div([
 
             dbc.Col(
                 [
-                    html.H5("Topics being discussed", style={"color": moonpass_colors["pink"]}),
+                    html.H5("Topics discussed", style={"color": moonpass_colors["pink"]}),
                     dbc.ListGroup(
                         [
                             dbc.ListGroupItem("StepN"),
