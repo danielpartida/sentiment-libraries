@@ -120,11 +120,11 @@ def get_data_with_control_flow(request_response: requests.models.Response, reque
 
 
 def clean_tweet(tweet: str):
-        """
-        Utility function to clean tweet text by removing links, special characters using simple regex statements.
-        Example taken from https://www.geeksforgeeks.org/twitter-sentiment-analysis-using-python/?ref=lbp
-        """
-        return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) | (\w+:\ / \ / \S+)", " ", tweet).split())
+    """
+    Utility function to clean tweet text by removing links, special characters using simple regex statements.
+    Example taken from https://www.geeksforgeeks.org/twitter-sentiment-analysis-using-python/?ref=lbp
+    """
+    return ' '.join(re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t]) | (\w+:\ / \ / \S+)", " ", tweet).split())
 
 
 def convert_data_into_df(data: dict) -> Tuple:
@@ -225,7 +225,6 @@ if __name__ == "__main__":
     total_tweets = 0
     next_token = "first_run"
 
-    rate_limit = 0
     while next_token:
         # Based on  https://developer.twitter.com/en/docs/twitter-api/tweets/search/api-reference/get-tweets-search-all
         constructed_url = build_url(request_type=query_type, access_level=access_type, start_date=start, end_date=end,
@@ -241,5 +240,5 @@ if __name__ == "__main__":
         list_all_users.append(df_users_window)
 
     save_df_to_csv(list_all_data=list_all_tweets, index_col="created_at", name_csv="tweets")
-    save_df_to_csv(list_all_data=list_all_users, index_col="id", name_csv="users")
+    save_df_to_csv(list_all_data=list_all_users, index_col="user_id", name_csv="users")
 
