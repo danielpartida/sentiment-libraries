@@ -1,6 +1,5 @@
 import dash_bootstrap_components as dbc
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 from dash import dcc
 from dash import html
@@ -14,7 +13,7 @@ token = "solana"
 
 custom_div = html.Div(id="custom_div_id", **{'data-url': "https://www.moonpass.ai/"})
 
-date = "28_06"
+date = "29_06"
 
 # Community Data
 df_community = pd.read_csv("data/counts_{0}_{1}.csv".format(token, date), sep=';', decimal=',',
@@ -298,6 +297,200 @@ landing_page_children = html.Div([
     )
 ])
 
+vertical_space = dbc.Row(
+  dbc.Col(html.Br())
+)
+
+price_row = dbc.Row(
+    [
+        dbc.Col(
+            html.Div(
+                [
+                    html.H5(children=[html.Span("Price: ${0}".format(last_price), id="price_id"), html.Span(
+                        children=[html.I(className=price_symbol, style=style_arrows), last_price_return],
+                        style={"color": price_color_return, "marginLeft": "10px"}, id="return_id")],
+                            style={"color": moonpass_colors["purple"]}),
+
+                    dbc.Tooltip(
+                        "Fetched at {0}".format(last_price_update),
+                        placement="bottom",
+                        target="price_id",
+                    ),
+
+                    dbc.Tooltip(
+                        "24h price change",
+                        placement="bottom",
+                        target="return_id",
+                    ),
+                ]
+            ), width=4
+        ),
+
+        dbc.Col(
+            [
+                html.Div(
+                    [
+                        twitter_symbol,
+                        html.A(html.H5("Followers: 1.9M"), href="https://twitter.com/solana", target="_blank",
+                               style={"color": moonpass_colors["purple"]}),
+                    ],
+                    style={"display": "flex"}
+                )
+            ], width=4
+        ),
+
+        dbc.Col(
+            [
+                dbc.ButtonGroup(
+                    [
+                        dbc.Button(children=["Website ", html.I(className="fas fa-globe")], outline=True,
+                                   color="primary", href="https://solana.com/", target="_blank"),
+                        dbc.Button(children=["Whitepaper ", html.I(className="fa fa-book")], outline=True,
+                                   color="primary", href="https://solana.com/solana-whitepaper.pdf",
+                                   target="_blank"),
+                        dbc.Button(children=["GitHub ", html.I(className="fab fa-github")], outline=True,
+                                   color="primary", href="https://github.com/solana-labs/solana", target="_blank"),
+                    ], size="sm",
+                ),
+            ], style={"display": "inline-block"}, width=4
+        ),
+    ]
+)
+
+twitter_share_button = dbc.Row(
+    # Source: https://publish.twitter.com/?buttonType=TweetButton&widget=Button &
+    # https://github.com/plotly/dash/pull/237
+    # FIXME: Change order of button
+    dbc.Col(html.A("Tweet", **{'data-url': "www.moonpass.ai", "data-via": "moonpass_ai",
+                               "data-related": "moonpass_ai", "data-show-count": "false"},
+                   href="https://twitter.com/share?ref_src=twsrc%5Etfw", target="_blank", style={"float": "right"},
+                   className="twitter-share-button")
+            )
+)
+
+community_section = dbc.Row(
+    [
+        dbc.Col(
+            [
+                html.H4("Community Growth", style={"color": moonpass_colors["pink"]}),
+                dcc.Graph(figure=fig_price_community),
+            ], width=10
+        ),
+
+        dbc.Col(
+            [
+                html.H5("Key metrics", style={"color": moonpass_colors["pink"]}),
+                dbc.ListGroup(
+                    [
+                        dbc.ListGroupItem(children=[
+                            html.Div([
+                                twitter_symbol, "2022", html.Span("{0}M".format(str(round(total_tweets, 1))),
+                                                                  style={"color": "#36454F", "float": "right"})
+                            ], id="tweets_2022_id"),
+
+                            dbc.Tooltip("Total amount of tweets retrieved in 2022",
+                                        target="tweets_2022_id", placement="left")
+                        ]),
+
+                        dbc.ListGroupItem(children=[
+                            html.Div(
+                                [
+                                    twitter_symbol, html.Span(children=[
+                                    html.I(className=tweet_arrow, style=style_arrows), last_tweet_return],
+                                    style={"color": tweet_color_return,
+                                           "marginLeft": "10px", "float": "right"})
+                                ], id="tweet_change_id"
+                            ),
+                            dbc.Tooltip("24h daily tweets change", target="tweet_change_id", placement="left")
+                        ]),
+
+                        dbc.ListGroupItem(children=[
+                            html.Div(
+                                [
+                                    html.I(className="fas fa-dollar-sign", style=style_arrows), html.Span(children=[
+                                    html.I(className=price_symbol, style=style_arrows), last_price_return],
+                                    style={"color": price_color_return, "marginLeft": "10px", "float": "right"})
+                                ], id="price_change_id"
+                            ),
+                            dbc.Tooltip("24h price change", target="price_change_id", placement="left")
+                        ]),
+
+                        dbc.ListGroupItem(children=[
+                            html.Div(
+                                [
+                                    "Corr.", html.Span(children=[correlation_price_community],
+                                                       style={"color": "#36454F", "marginLeft": "10px",
+                                                              "float": "right"})
+                                ], id="correlation_id"
+                            ),
+                            dbc.Tooltip("Correlation between price and tweets", target="correlation_id",
+                                        placement="left")
+                        ]),
+                    ], style={"marginTop": "80px"}
+                )
+            ], width=2
+        )
+    ]
+)
+
+sentiment_section = dbc.Row(
+    [
+        dbc.Col(
+            [
+                html.H4("Sentiment development", style={"color": moonpass_colors["pink"]}),
+                dcc.Graph(figure=fig_sentiment),
+            ], width=10
+        ),
+
+        dbc.Col(
+            [
+                html.H5("Topics discussed", style={"color": moonpass_colors["pink"]}),
+                dbc.ListGroup(
+                    [
+                        dbc.ListGroupItem("StepN"),
+                        dbc.ListGroupItem("Not Okay Bear"),
+                        dbc.ListGroupItem("Solana congested"),
+                    ], style={"marginTop": "80px"}
+                )
+            ],
+            width=2
+        )
+    ]
+)
+
+experts_section = dbc.Row(
+    [
+        dbc.Col(
+            dbc.CardBody(
+                [
+                    html.H4("What the bulls are saying 🐂", className="card-title"),
+                    html.H6("Twitter Profile", className="card-subtitle"),
+                    html.P(
+                        "Solana is a great blockchain because they solve a real issue in the ecosystem, they"
+                        "lower the transaction fees",
+                        className="card-text",
+                    ),
+                    dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
+                ]
+            ),
+        ),
+
+        dbc.Col(
+            dbc.CardBody(
+                [
+                    html.H4("What the bears are saying 🐻", className="card-title"),
+                    html.H6("Twitter Profile", className="card-subtitle"),
+                    html.P(
+                        "Tweet content, this project is very bad. Solana is congested the whole time making it not "
+                        "decentralized",
+                        className="card-text"),
+                    dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
+                ]
+            ),
+        ),
+    ]
+)
+
 project_page_children = html.Div([
     dbc.Row(
         dbc.Col(
@@ -314,203 +507,19 @@ project_page_children = html.Div([
         dbc.Col(html.Hr())
     ),
 
-    dbc.Row(
-        [
-            dbc.Col(
-                html.Div(
-                    [
-                        html.H5(children=[html.Span("Price: ${0}".format(last_price), id="price_id"), html.Span(
-                            children=[html.I(className=price_symbol, style=style_arrows), last_price_return],
-                            style={"color": price_color_return, "marginLeft": "10px"}, id="return_id")],
-                                style={"color": moonpass_colors["purple"]}),
+    price_row,
 
-                        dbc.Tooltip(
-                            "Fetched at {0}".format(last_price_update),
-                            placement="bottom",
-                            target="price_id",
-                        ),
+    twitter_share_button,
 
-                        dbc.Tooltip(
-                            "24h price change",
-                            placement="bottom",
-                            target="return_id",
-                        ),
-                    ]
-                ), width=4
-            ),
+    vertical_space,
 
-            dbc.Col(
-                [
-                    html.Div(
-                        [
-                            twitter_symbol,
-                            html.A(html.H5("Followers: 1.9M"), href="https://twitter.com/solana", target="_blank",
-                                   style={"color": moonpass_colors["purple"]}),
-                        ],
-                        style={"display": "flex"}
-                    )
-                ], width=4
-            ),
+    community_section,
 
-            dbc.Col(
-                [
-                    dbc.ButtonGroup(
-                        [
-                            dbc.Button(children=["Website ", html.I(className="fas fa-globe")], outline=True,
-                                       color="primary", href="https://solana.com/", target="_blank"),
-                            dbc.Button(children=["Whitepaper ", html.I(className="fa fa-book")], outline=True,
-                                       color="primary", href="https://solana.com/solana-whitepaper.pdf",
-                                       target="_blank"),
-                            dbc.Button(children=["GitHub ", html.I(className="fab fa-github")], outline=True,
-                                       color="primary", href="https://github.com/solana-labs/solana", target="_blank"),
-                        ], size="sm",
-                    ),
-                ], style={"display": "inline-block"}, width=4
-            ),
-        ]
-    ),
+    vertical_space,
 
-    dbc.Row(
-        # Source: https://publish.twitter.com/?buttonType=TweetButton&widget=Button &
-        # https://github.com/plotly/dash/pull/237
-        # FIXME: Change order of button
-        dbc.Col(html.A("Tweet", **{'data-url': "www.moonpass.ai", "data-via": "moonpass_ai",
-                                   "data-related": "moonpass_ai", "data-show-count": "false"},
-                       href="https://twitter.com/share?ref_src=twsrc%5Etfw", target="_blank", style={"float": "right"},
-                       className="twitter-share-button")
-                )
-    ),
+    sentiment_section,
 
-    dbc.Row(
-      dbc.Col(html.Br())
-    ),
-
-    dbc.Row(
-        [
-            dbc.Col(
-                [
-                    html.H4("Community Growth", style={"color": moonpass_colors["pink"]}),
-                    dcc.Graph(figure=fig_price_community),
-                ], width=10
-            ),
-
-            dbc.Col(
-                [
-                    html.H5("Key metrics", style={"color": moonpass_colors["pink"]}),
-                    dbc.ListGroup(
-                        [
-                            dbc.ListGroupItem(children=[
-                                html.Div([
-                                    twitter_symbol, "2022", html.Span("{0}M".format(str(round(total_tweets, 1))),
-                                                                      style={"color": "#36454F", "float": "right"})
-                                ], id="tweets_2022_id"),
-
-                                dbc.Tooltip("Total amount of tweets retrieved in 2022",
-                                            target="tweets_2022_id", placement="left")
-                            ]),
-
-                            dbc.ListGroupItem(children=[
-                                html.Div(
-                                    [
-                                        twitter_symbol, html.Span(children=[
-                                        html.I(className=tweet_arrow, style=style_arrows), last_tweet_return],
-                                        style={"color": tweet_color_return,
-                                               "marginLeft": "10px", "float": "right"})
-                                    ], id="tweet_change_id"
-                                ),
-                                dbc.Tooltip("24h daily tweets change", target="tweet_change_id", placement="left")
-                            ]),
-
-                            dbc.ListGroupItem(children=[
-                                html.Div(
-                                    [
-                                        html.I(className="fas fa-dollar-sign", style=style_arrows), html.Span(children=[
-                                        html.I(className=price_symbol, style=style_arrows), last_price_return],
-                                        style={"color": price_color_return, "marginLeft": "10px", "float": "right"})
-                                    ], id="price_change_id"
-                                ),
-                                dbc.Tooltip("24h price change", target="price_change_id", placement="left")
-                            ]),
-
-                            dbc.ListGroupItem(children=[
-                                html.Div(
-                                    [
-                                        "Corr.", html.Span(children=[correlation_price_community],
-                                                           style={"color": "#36454F", "marginLeft": "10px",
-                                                                  "float": "right"})
-                                    ], id="correlation_id"
-                                ),
-                                dbc.Tooltip("Correlation between price and tweets", target="correlation_id",
-                                            placement="left")
-                            ]),
-                        ], style={"marginTop": "80px"}
-                    )
-                ], width=2
-            )
-        ]
-    ),
-
-    dbc.Row(
-        dbc.Col(html.Br())
-    ),
-
-    dbc.Row(
-        [
-            dbc.Col(
-                [
-                    html.H4("Sentiment development", style={"color": moonpass_colors["pink"]}),
-                    dcc.Graph(figure=fig_sentiment),
-                ], width=10
-            ),
-
-            dbc.Col(
-                [
-                    html.H5("Topics discussed", style={"color": moonpass_colors["pink"]}),
-                    dbc.ListGroup(
-                        [
-                            dbc.ListGroupItem("StepN"),
-                            dbc.ListGroupItem("Not Okay Bear"),
-                            dbc.ListGroupItem("Solana congested"),
-                        ], style={"marginTop": "80px"}
-                    )
-                ],
-                width=2
-            )
-        ]
-    ),
-
-    dbc.Row(
-        [
-            dbc.Col(
-                dbc.CardBody(
-                    [
-                        html.H4("What the bulls are saying 🐂", className="card-title"),
-                        html.H6("Twitter Profile", className="card-subtitle"),
-                        html.P(
-                            "Solana is a great blockchain because they solve a real issue in the ecosystem, they"
-                            "lower the transaction fees",
-                            className="card-text",
-                        ),
-                        dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
-                    ]
-                ),
-            ),
-
-            dbc.Col(
-                dbc.CardBody(
-                    [
-                        html.H4("What the bears are saying 🐻", className="card-title"),
-                        html.H6("Twitter Profile", className="card-subtitle"),
-                        html.P(
-                            "Tweet content, this project is very bad. Solana is congested the whole time making it not "
-                            "decentralized",
-                            className="card-text"),
-                        dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
-                    ]
-                ),
-            ),
-        ]
-    ),
+    experts_section
 ])
 
 # Content Page
