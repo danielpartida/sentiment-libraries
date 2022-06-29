@@ -389,7 +389,7 @@ indicators_section = dbc.Row(
         dbc.Col(
             dbc.Card([
                 dbc.CardBody([
-                    html.H4("Community growth", className="card-title"),
+                    html.H4("Community growth", className="card-title", style={"text-align": "center"}),
                     html.P(
                         "poor 😔",
                         className="card-subtitle", style={"text-align": "center"}
@@ -401,7 +401,7 @@ indicators_section = dbc.Row(
         dbc.Col(
             dbc.Card([
                 dbc.CardBody([
-                    html.H4("Community sentiment", className="card-title"),
+                    html.H4("Community sentiment", className="card-title", style={"text-align": "center"}),
                     html.P(
                         "average 🤷",
                         className="card-subtitle", style={"text-align": "center"}
@@ -413,7 +413,7 @@ indicators_section = dbc.Row(
         dbc.Col(
             dbc.Card([
                 dbc.CardBody([
-                    html.H4("Expert voices", className="card-title"),
+                    html.H4("Expert voices", className="card-title", style={"text-align": "center"}),
                     html.P(
                         "worried 😕",
                         className="card-subtitle", style={"text-align": "center"}
