@@ -476,45 +476,116 @@ sentiment_section = dbc.Row(
 )
 
 # TODO: Create dynamically this section
+# TODO: Change size of tweets
 # https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/overview
-experts_section = dbc.Row(
-    [
-        # dbc.Col(
-        #     dbc.CardBody(
-        #         [
-        #             html.H4("What the bulls are saying 🐂", className="card-title"),
-        #             html.H6("Twitter Profile", className="card-subtitle"),
-        #             html.P(
-        #                 "Solana is a great blockchain because they solve a real issue in the ecosystem, they"
-        #                 "lower the transaction fees",
-        #                 className="card-text",
-        #             ),
-        #             dbc.CardLink("Tweet link", href="https://google.com", target="_blank"),
-        #         ]
-        #     ),
-        # ),
+bulls_section = dbc.Row(
+    dbc.Col(
+        [
+            html.H4("What the bulls are saying 🐂", className="card-title"),
+            dbc.ListGroup(
+                        [
+                            dbc.ListGroupItem(
+                                html.Iframe(
+                                    srcDoc='''
+                                    <blockquote class="twitter-tweet" data-lang="en" data-theme="light"><p lang="en" dir="ltr">It feels to me like <a href="https://twitter.com/search?q=%24SOL&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$SOL</a> is going thru a similar trough of disillusionment as <a href="https://twitter.com/search?q=%24ETH&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$ETH</a> did back in 2018. In bear markets prices aren&#39;t just reflexive—sentiment is too. <a href="https://twitter.com/solana?ref_src=twsrc%5Etfw">@solana</a> has a vibrant developer ecosystem and its downtime issues are solvable. This will be obvious in retrospect.</p>&mdash; spencernoon.eth (@spencernoon) <a href="https://twitter.com/spencernoon/status/1541497867373772802?ref_src=twsrc%5Etfw">June 27, 2022</a></blockquote> 
+                                    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                                    ''',
+                                )
+                            ),
+                            dbc.ListGroupItem(
+                                html.Iframe(
+                                    srcDoc='''
+                                    <blockquote class="twitter-tweet"><p lang="en" dir="ltr">1/<br><br>solana poses a large and growing threat to ethereum.<br><br>you’re wrong if you believe otherwise bc “haha VC chain offline”.<br><br>i can explain why - after following both ecosystems closely for years and talking to 100s of devs &amp; users.<br><br>i want the EVM to win. but i’m also not blind.</p>&mdash; nathan.eth (@nathanweb3) <a href="https://twitter.com/nathanweb3/status/1540122390079934464?ref_src=twsrc%5Etfw">June 23, 2022</a></blockquote> 
+                                    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                                    ''',
+                                )
+                            ),
+                            dbc.ListGroupItem(
+                                html.Iframe(
+                                    srcDoc='''
+                                    <blockquote class="twitter-tweet"><p lang="en" dir="ltr">Solana is doing 5,200 TPS with $.00002 fees and you are still on 30 TPS anon? 🥹 Feel bad for you son <a href="https://t.co/JbmbaWwlum">https://t.co/JbmbaWwlum</a></p>&mdash; S◎L Legend {6666} (@SolanaLegend) <a href="https://twitter.com/SolanaLegend/status/1538839311973552133?ref_src=twsrc%5Etfw">June 20, 2022</a></blockquote> 
+                                    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                                    ''',
+                                )
+                            )
+                        ],
+                        horizontal="lg",
+            ),
+        ]
+    )
+)
 
-        dbc.Col(
+bears_section_1 = dbc.Row(
+    dbc.Col(
+        [
+            html.H4("What the bears are saying 🐻", className="card-title"),
+            dbc.ListGroup(
             [
-                html.H4("What the bears are saying 🐻", className="card-title"),
-                dbc.Card(
-                    html.Span(html.Iframe(
+
+                dbc.ListGroupItem(
+                    html.Iframe(
                         srcDoc='''
-                       <blockquote class="twitter-tweet" data-lang="en" data-theme="light"><p lang="en" dir="ltr">It feels to me like <a href="https://twitter.com/search?q=%24SOL&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$SOL</a> is going thru a similar trough of disillusionment as <a href="https://twitter.com/search?q=%24ETH&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$ETH</a> did back in 2018. In bear markets prices aren&#39;t just reflexive—sentiment is too. <a href="https://twitter.com/solana?ref_src=twsrc%5Etfw">@solana</a> has a vibrant developer ecosystem and its downtime issues are solvable. This will be obvious in retrospect.</p>&mdash; spencernoon.eth (@spencernoon) <a href="https://twitter.com/spencernoon/status/1541497867373772802?ref_src=twsrc%5Etfw">June 27, 2022</a></blockquote> 
-                       <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                        <blockquote class="twitter-tweet"><p lang="en" dir="ltr">/1 <br><br>The latest Solana update has in-fact made the network too fast and caused MAJOR problems.<br><br>I&#39;ll explain why in this🧵thread...</p>&mdash; Cel◎n 🚧 (@0xCelon) <a href="https://twitter.com/0xCelon/status/1538921568893542401?ref_src=twsrc%5Etfw">June 20, 2022</a></blockquote> 
+                        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
                         ''',
-                        ), className="cart-text"
-                    ),
+                    )
                 ),
-                html.Iframe(
-                    srcDoc='''
-                   <blockquote class="twitter-tweet" data-lang="en" data-theme="light"><p lang="en" dir="ltr">It feels to me like <a href="https://twitter.com/search?q=%24SOL&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$SOL</a> is going thru a similar trough of disillusionment as <a href="https://twitter.com/search?q=%24ETH&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$ETH</a> did back in 2018. In bear markets prices aren&#39;t just reflexive—sentiment is too. <a href="https://twitter.com/solana?ref_src=twsrc%5Etfw">@solana</a> has a vibrant developer ecosystem and its downtime issues are solvable. This will be obvious in retrospect.</p>&mdash; spencernoon.eth (@spencernoon) <a href="https://twitter.com/spencernoon/status/1541497867373772802?ref_src=twsrc%5Etfw">June 27, 2022</a></blockquote> 
-                   <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+                dbc.ListGroupItem(
+                    html.Iframe(
+                        srcDoc='''
+                        <blockquote class="twitter-tweet"><p lang="en" dir="ltr">A “decentralized” protocol built on Solana votes to take over someone’s funds<br><br>Celsius “designed to help you reach your financial goals” denies users access to their funds<br><br>UST algorithmic “stablecoin” failing, destroying lives<br><br>The current state of crypto. We gotta do better.</p>&mdash; Aleksandra Huk (@HukAleksandra) <a href="https://twitter.com/HukAleksandra/status/1538856271100641280?ref_src=twsrc%5Etfw">June 20, 2022</a></blockquote> 
+                        <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                        ''',
+                    )
+                ),
+
+                dbc.ListGroupItem(
+                    html.Iframe(
+                        srcDoc='''
+                        <blockquote class="twitter-tweet"><p lang="en" dir="ltr">Of all the things That happened this cycle, Solana’s vote to confiscate a users funds is BY FAR the most egregious.<br><br>It’s worse even then the ETH DAO confiscation.<br><br>It’s the clearest demonstration yet that PoS is not a consensus mechanism.</p>&mdash; Yago (@EdanYago) <a href="https://twitter.com/EdanYago/status/1538725149838647297?ref_src=twsrc%5Etfw">June 20, 2022</a></blockquote>
+                         <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                        ''',
+                    )
+                ),
+            ], horizontal="md",
+            ),
+        ]
+    )
+)
+
+bears_section_2 = dbc.Row(
+    dbc.Col(
+        dbc.ListGroup(
+            [
+                dbc.ListGroupItem(
+                    html.Iframe(
+                        srcDoc='''
+                <blockquote class="twitter-tweet"><p lang="en" dir="ltr">If the Solana devs aren&#39;t afraid to liquidate a whale then they aren&#39;t afraid to do it to you either.</p>&mdash; Lucid (@LucidCiC) <a href="https://twitter.com/LucidCiC/status/1538868905535410176?ref_src=twsrc%5Etfw">June 20, 2022</a></blockquote> 
+                <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                ''',
+                    )
+                ),
+
+                dbc.ListGroupItem(
+                    html.Iframe(
+                        srcDoc='''
+                    <blockquote class="twitter-tweet"><p lang="en" dir="ltr">How <a href="https://twitter.com/_Urkann?ref_src=twsrc%5Etfw">@_Urkann</a> has prepared to sweep tens of thousands of <a href="https://twitter.com/search?q=%24SOL&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$SOL</a> whilst enslaving the entirety of <a href="https://twitter.com/hashtag/Solana?src=hash&amp;ref_src=twsrc%5Etfw">#Solana</a> with his project, <a href="https://twitter.com/DegenSweepers?ref_src=twsrc%5Etfw">@DegenSweepers</a>:<br><br>🧵 1/20</p>&mdash; Batman (@BatmanOfCT) <a href="https://twitter.com/BatmanOfCT/status/1541851160512024579?ref_src=twsrc%5Etfw">June 28, 2022</a></blockquote>
+                    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
                     ''',
-                )
-            ]
-        ),
-    ]
+                    )
+                ),
+                dbc.ListGroupItem(
+                    html.Iframe(
+                        srcDoc='''
+                    <blockquote class="twitter-tweet"><p lang="en" dir="ltr">I will fight the Botted projects, WE will fight them <a href="https://twitter.com/hashtag/UrkannArmy?src=hash&amp;ref_src=twsrc%5Etfw">#UrkannArmy</a> <br>I&#39;m tired of seeing these usurpers taking the solana community for fools. A lot of newbies will be fooled and this will only tarnish the image of NFTs.<br>I won&#39;t allow it. <br>who is with me?</p>&mdash; Urkann 🧹 (33.3%) {C̶U̶L̶T̶} aka The Sweepooor 💀 (@_Urkann) <a href="https://twitter.com/_Urkann/status/1540058572704317442?ref_src=twsrc%5Etfw">June 23, 2022</a></blockquote>
+                    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+                    ''',
+                    )
+                ),
+            ], horizontal="md",
+        )
+    )
 )
 
 project_page_children = html.Div([
@@ -536,7 +607,14 @@ project_page_children = html.Div([
 
     sentiment_section,
 
-    experts_section
+    bulls_section,
+
+    vertical_space,
+
+    bears_section_1,
+
+    bears_section_2
+
 ])
 
 # Content Page
