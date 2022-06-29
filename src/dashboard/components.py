@@ -15,7 +15,7 @@ custom_div = html.Div(id="custom_div_id", **{'data-url': "https://www.moonpass.a
 
 date = "29_06"
 
-# Community Data
+# Community data
 df_community = pd.read_csv("data/counts_{0}_{1}.csv".format(token, date), sep=';', decimal=',',
                            index_col="dates", parse_dates=True)
 total_tweets = sum(df_community.tweet_count)
@@ -24,6 +24,7 @@ last_tweet_change = (df_community.tweet_count.iloc[-1] - df_community.tweet_coun
                     df_community.tweet_count.iloc[-2]
 last_tweet_return = '{:.1%}'.format(last_tweet_change)
 
+# Sentiment data
 df_sentiment = pd.read_csv("data/timeseries_{0}_sentiment_{1}.csv".format(token, date), sep=";", decimal=',')
 fig_sentiment = fig = go.Figure()
 fig_sentiment.add_trace(go.Scatter(
@@ -69,6 +70,9 @@ last_price_update = current_price_data["last_updated_at"]
 price_color_return, price_symbol = get_color_and_symbol(number=current_price_data["daily_return"])
 tweet_color_return, tweet_arrow = get_color_and_symbol(number=last_tweet_change)
 df_price = get_historical_price_from_coingecko(token=token)
+
+# Topics data
+df_topics = pd.read_csv("data/entity_tweets_{0}_{1}.csv".format(token, date), sep=";", decimal=',')
 
 # TODO: Check if the join is necessary or working with two separate dfs is fine
 df_price_community = join_two_dfs(df_price, df_community)
@@ -418,9 +422,9 @@ community_section = dbc.Row(
                         dbc.ListGroupItem(children=[
                             html.Div(
                                 [
-                                    "Corr.", html.Span(children=[correlation_price_community],
-                                                       style={"color": "#36454F", "marginLeft": "10px",
-                                                              "float": "right"})
+                                    html.Small("Correlation"), html.Span(children=[correlation_price_community],
+                                                                         style={"color": "#36454F",
+                                                                                "marginLeft": "10px", "float": "right"})
                                 ], id="correlation_id"
                             ),
                             dbc.Tooltip("Correlation between price and tweets", target="correlation_id",
@@ -447,9 +451,11 @@ sentiment_section = dbc.Row(
                 html.H5("Topics discussed", style={"color": moonpass_colors["pink"]}),
                 dbc.ListGroup(
                     [
-                        dbc.ListGroupItem("StepN"),
-                        dbc.ListGroupItem("Not Okay Bear"),
-                        dbc.ListGroupItem("Solana congested"),
+                        dbc.ListGroupItem(html.Small("1. {0}".format(df_topics.iloc[0].entity_name))),
+                        dbc.ListGroupItem(html.Small("2. {0}".format(df_topics.iloc[2].entity_name))),
+                        dbc.ListGroupItem(html.Small("3. {0}".format(df_topics.iloc[3].entity_name))),
+                        dbc.ListGroupItem(html.Small("4. {0}".format(df_topics.iloc[4].entity_name))),
+                        dbc.ListGroupItem(html.Small("5. {0}".format(df_topics.iloc[5].entity_name))),
                     ], style={"marginTop": "80px"}
                 )
             ],
