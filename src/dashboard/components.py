@@ -109,6 +109,32 @@ fig_price_community.update_layout(
     )
 )
 
+fig_sentiment.update_layout(
+    xaxis=dict(
+        rangeselector=dict(
+            buttons=list([
+                dict(count=1,
+                     label="1m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=6,
+                     label="6m",
+                     step="month",
+                     stepmode="backward"),
+                dict(count=1,
+                     label="YTD",
+                     step="year",
+                     stepmode="todate"),
+                dict(step="all")
+            ])
+        ),
+        rangeslider=dict(
+            visible=True
+        ),
+        type="date"
+    )
+)
+
 # Style
 style_arrows = {"marginRight": "5px"}
 twitter_symbol = html.I(className="fab fa-twitter", style=style_arrows)
@@ -347,6 +373,7 @@ project_page_children = html.Div([
     dbc.Row(
         # Source: https://publish.twitter.com/?buttonType=TweetButton&widget=Button &
         # https://github.com/plotly/dash/pull/237
+        # FIXME: Change order of button
         dbc.Col(html.A("Tweet", **{'data-url': "www.moonpass.ai", "data-via": "moonpass_ai",
                                    "data-related": "moonpass_ai", "data-show-count": "false"},
                        href="https://twitter.com/share?ref_src=twsrc%5Etfw", target="_blank", style={"float": "right"},
