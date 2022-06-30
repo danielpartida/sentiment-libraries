@@ -219,10 +219,9 @@ sidebar = html.Div(
             dbc.Nav(
                 [
                     dbc.NavLink([html.I(className=""), "Solana"],
-                                href="/solana",  # active="exact",
-                                style={'paddingTop': "0px",
-                                       "color": "white"
-                                       }),
+                                href="/", active="exact",
+                                style={'paddingTop': "0px", "color": "white"}
+                                ),
 
                     dbc.NavLink([html.I(className=""), "StepN"],
                                 href="/stepn", disabled=True,
@@ -691,7 +690,7 @@ project_page_children = html.Div([
 # Content Page
 content = html.Div(
     id="page-content", style=CONTENT_STYLE, children=[
-        html.Div(id='landing_page_id', children=landing_page_children),
+        # html.Div(id='landing_page_id', children=landing_page_children),
         html.Div(id='project_page_id', children=project_page_children),
         html.Footer([
             html.I(className="far fa-copyright"), "2022 moopass.ai"],
