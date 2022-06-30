@@ -1,5 +1,6 @@
 import os
 from typing import Tuple
+from datetime import datetime
 
 import pandas as pd
 import requests
@@ -53,22 +54,25 @@ def build_url(request_type: str = "counts", access_level: str = "all", granulari
 
     basic_url = "https://api.twitter.com/2/tweets"
 
+    query = '{0} -is:retweet -RT -"public sale" -"mint" -airdrop -giveaway -giveaways -is:nullcast ' \
+            '-tag -tagg lang:en'.format(search_term)
+
     # last run
     if not next_token_id:
         url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}".format(
-            basic_url, request_type, access_level, search_term, granularity_level, start_date, end_date
+            basic_url, request_type, access_level, query, granularity_level, start_date, end_date
         )
 
     # first run
     elif next_token_id == "first_run":
         url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}".format(
-            basic_url, request_type, access_level, search_term, granularity_level, start_date, end_date
+            basic_url, request_type, access_level, query, granularity_level, start_date, end_date
         )
 
     # all runs besides first and last run
     else:
         url = "{0}/{1}/{2}?query={3}&granularity={4}&start_time={5}&end_time={6}&next_token={7}".format(
-            basic_url, request_type, access_level, search_term, granularity_level, start_date, end_date, next_token_id
+            basic_url, request_type, access_level, query, granularity_level, start_date, end_date, next_token_id
         )
 
     return url
@@ -124,37 +128,34 @@ def convert_data_into_df(data: dict) -> Tuple:
 
 
 # TODO: Set dynamically entity_id and annotation_id
-def build_url_with_annotation():
-    # entity_id = 174  # digital asset
-    # annotation_id = 1007360414114435072  # Bitcoin
-    # query_annotation = "context:{0}.{1}".format(entity_id, annotation_id)
-    pass
-
-
-# TODO: Set title dynamically
-def plot(df_tweets: pd.DataFrame):
-    # df_tweets.plot(kind="scatter", x='dates', y='tweet_count', c='tweet_count', colormap='coolwarm',
-    #                title='Hourly count of Bitcoin Tweets')
-    pass
+# def build_url_with_annotation():
+#     # entity_id = 174  # digital asset
+#     # annotation_id = 1007360414114435072  # Bitcoin
+#     # query_annotation = "context:{0}.{1}".format(entity_id, annotation_id)
+#     pass
 
 
 if __name__ == "__main__":
 
-    df = pd.read_csv("../../look_up_tables/df_Digital Assets & Crypto.csv", sep=";", decimal=',')
-    df.rename(columns={"Unnamed: 0": "id"}, inplace=True)
-
-    entities = pd.read_csv("../../look_up_tables/entities.csv", sep=';', decimal=',')
-    entities.rename(columns={"Unnamed: 0": "id", "0": "name"}, inplace=True)
+    # df = pd.read_csv("../../look_up_tables/df_Digital Assets & Crypto.csv", sep=";", decimal=',')
+    # df.rename(columns={"Unnamed: 0": "id"}, inplace=True)
+    # entities = pd.read_csv("../../look_up_tables/entities.csv", sep=';', decimal=',')
+    # entities.rename(columns={"Unnamed: 0": "id", "0": "name"}, inplace=True)
 
     # Build header to authenticate using bearer token
     authentication_header = get_authentication_headers(academic_access=True)
 
     query_type = "counts"
-    granularity = "day"  # day, hour or minute
+    granularity = "day"  # day, hour or min
+
     start = "2022-01-01T00:00:00Z"
-    end = "2022-06-15T00:00:00Z"
+    today = datetime.today()
+    date_format_long = '%Y-%m-%dT00:00:00Z'
+    date_format_short = '%d_%m'
+    end = today.strftime(date_format_long)
+
     access_type = "all"  # "all" for academic access, "recent" for premium access
-    query_text = "bitcoin"
+    query_text = "solana"
 
     all_df_tweets = []
     total_tweets = 0
@@ -172,7 +173,8 @@ if __name__ == "__main__":
 
     df = pd.concat(all_df_tweets)
     df.set_index("dates", inplace=True)
+    df.sort_index(inplace=True)
+    df = df.tweet_count
 
-    # TODO: Add exporter to csv
-    # TODO: Add scatter plot
-    print("Run")
+    df.to_csv("../dashboard/data/counts_{0}_{1}.csv".format(query_text, today.strftime(date_format_short)),
+              decimal=',', sep=';')
