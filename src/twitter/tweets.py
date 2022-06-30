@@ -142,30 +142,35 @@ def convert_data_into_df(data: dict) -> Tuple:
         next_token_id = None
 
     list_dict_tweets = []
-    for tweet in data["data"]:
-        dict_tweet = {
-            'id': tweet["id"], "url": "https://twitter.com/twitter/status/{0}".format(tweet["id"]),
-            'created_at': tweet["created_at"], 'author_id': tweet["author_id"],
-            'conversation_id': tweet["conversation_id"],
-            'reply_count': tweet["public_metrics"]["reply_count"],
-            'like_count': tweet["public_metrics"]["like_count"],
-            'retweet_count': tweet["public_metrics"]["retweet_count"],
-            'quote_count': tweet["public_metrics"]["quote_count"],
-            'raw_text': tweet["text"], 'type': "relevant"
-        }
 
-        if 'context_annotations' in tweet.keys():
-            dict_tweet['context_annotations'] = tweet["context_annotations"],
+    if "data" in data.keys():
+        for tweet in data["data"]:
+            dict_tweet = {
+                'id': tweet["id"], "url": "https://twitter.com/twitter/status/{0}".format(tweet["id"]),
+                'created_at': tweet["created_at"], 'author_id': tweet["author_id"],
+                'conversation_id': tweet["conversation_id"],
+                'reply_count': tweet["public_metrics"]["reply_count"],
+                'like_count': tweet["public_metrics"]["like_count"],
+                'retweet_count': tweet["public_metrics"]["retweet_count"],
+                'quote_count': tweet["public_metrics"]["quote_count"],
+                'raw_text': tweet["text"], 'type': "relevant"
+            }
 
-        if "entities" in tweet.keys():
-            dict_tweet["entities"] = tweet["entities"]
+            if 'context_annotations' in tweet.keys():
+                dict_tweet['context_annotations'] = tweet["context_annotations"],
 
-        dict_tweet['text'] = clean_tweet(dict_tweet['raw_text'])
+            if "entities" in tweet.keys():
+                dict_tweet["entities"] = tweet["entities"]
 
-        list_dict_tweets.append(dict_tweet)
+            dict_tweet['text'] = clean_tweet(dict_tweet['raw_text'])
 
-    df_tweets = pd.DataFrame(list_dict_tweets)
-    df_tweets["created_at"] = pd.to_datetime(df_tweets.created_at)
+            list_dict_tweets.append(dict_tweet)
+
+        df_tweets = pd.DataFrame(list_dict_tweets)
+        df_tweets["created_at"] = pd.to_datetime(df_tweets.created_at)
+
+    else:
+        df_tweets = pd.DataFrame()
 
     return df_tweets, next_token_id
 
