@@ -22,8 +22,6 @@ app = dash.Dash(__name__,
 
 # Server
 server = app.server
-# app.css.config.serve_locally = True
-# app.scripts.config.serve_locally = True
 app.config.suppress_callback_exceptions = True
 app.title = 'Moonpass App'
 
