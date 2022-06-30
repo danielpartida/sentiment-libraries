@@ -591,6 +591,14 @@ sentiment_section = dbc.Row(
     ]
 )
 
+voices_section = dbc.Row(
+    dbc.Col(
+        [
+            html.H4("Most engaged tweets last week", style={"color": moonpass_colors["pink"]}),
+        ], width=10
+    ),
+)
+
 # TODO: Create dynamically this section
 # TODO: Change size of tweets
 # https://developer.twitter.com/en/docs/twitter-for-websites/embedded-tweets/overview
@@ -726,6 +734,10 @@ project_page_children = html.Div([
     vertical_space,
 
     sentiment_section,
+
+    voices_section,
+
+    vertical_space,
 
     bulls_section,
 
