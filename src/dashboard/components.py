@@ -317,7 +317,7 @@ vertical_space = dbc.Row(
 
 title_row = dbc.Row(
     dbc.Col(
-        html.H2(children='Moonpass - {0} off-chain analysis'.format(token),
+        html.H2(children='{0}'.format(token),
                 style={
                     'textAlign': 'left',
                     'color': moonpass_colors["purple"]
