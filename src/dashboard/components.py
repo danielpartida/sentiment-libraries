@@ -395,56 +395,80 @@ price_row = dbc.Row(
 indicators_section = dbc.Row(
     [
         dbc.Col(
-            dbc.Card([
-                dbc.CardBody([
-                    html.H5("Community growth", className="card-title"),
-                    html.H3(
-                        "27 😔", className="card-subtitle"
-                    ),
-                    html.Span(
-                        [
-                            html.I(className="fas fa-arrow-circle-down down", style=style_arrows),
-                            html.Span("2.3% vs last week", className="down")
-                        ], style={"color": tweet_color_return}
-                    )
-                ], style={"text-align": "center"})
-            ])
-        ),
+            [
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Community growth", className="card-title"),
+                        html.H3(
+                            "27 😔", className="card-subtitle"
+                        ),
+                        html.Span(
+                            [
+                                html.I(className="fas fa-arrow-circle-down down", style=style_arrows),
+                                html.Span("2.3% vs last week", className="down")
+                            ], style={"color": tweet_color_return}
+                        )
+                    ], style={"text-align": "center"})
+                ], id="card_growth_id"),
 
-        dbc.Col(
-            dbc.Card([
-                dbc.CardBody([
-                    html.H5("Community sentiment", className="card-title"),
-                    html.H3(
-                        "43 🤷", className="card-subtitle"
-                    ),
-                    html.Span(
-                        [
-                            html.Span("{:.1%} of tweets neutral or negative".format(
-                                neutral_percentage+negative_percentage
-                            ))
-                        ], style={"color": "orange"}
-                    )
-                ], style={"text-align": "center"}
+                dbc.Tooltip(
+                    "A value of 100 represents steady growth and engagement",
+                    target="card_growth_id",
+                    placement="bottom"
                 )
-            ])
+            ]
         ),
 
         dbc.Col(
-            dbc.Card([
-                dbc.CardBody([
-                    html.H5("Expert voices", className="card-title"),
-                    html.H3(
-                        "36 😕", className="card-subtitle"
-                    ),
-                    html.Span(
-                        [
-                            html.I(className="fas fa-arrow-circle-down down", style=style_arrows),
-                            html.Span("70% of experts expressed concerns")
-                        ], style={"color": "orange"}
+            [
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Community sentiment", className="card-title"),
+                        html.H3(
+                            "43 🤷", className="card-subtitle"
+                        ),
+                        html.Span(
+                            [
+                                html.Span("{:.1%} of tweets neutral or negative".format(
+                                    neutral_percentage+negative_percentage
+                                ))
+                            ], style={"color": "orange"}
+                        )
+                    ], style={"text-align": "center"}
                     )
-                ], style={"text-align": "center"})
-            ])
+                ], id="card_sentiment_id"),
+
+                dbc.Tooltip(
+                    "A value of 100 represents overwhelming amount of positive tweets",
+                    target="card_sentiment_id",
+                    placement="bottom"
+                )
+            ]
+        ),
+
+        dbc.Col(
+            [
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Expert voices", className="card-title"),
+                        html.H3(
+                            "36 😕", className="card-subtitle"
+                        ),
+                        html.Span(
+                            [
+                                html.I(className="fas fa-arrow-circle-down down", style=style_arrows),
+                                html.Span("70% of experts expressed concerns")
+                            ], style={"color": "orange"}
+                        )
+                    ], style={"text-align": "center"})
+                ], id="card_voices_id"),
+
+                dbc.Tooltip(
+                    "A value of 100 represents outstanding support of crypto experts",
+                    target="card_voices_id",
+                    placement="bottom"
+                )
+            ]
         )
     ], style={"marginTop": "20px"}
 )
