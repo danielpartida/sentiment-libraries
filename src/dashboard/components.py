@@ -92,8 +92,10 @@ fig_price_community_sentiment.add_bar(x=df_price_community.index,
                                       y=df_price_community["tweet_count"],
                                       name="tweet count")
 fig_price_community_sentiment.add_trace(
-    go.Scatter(x=df_price_community.index, y=df_price_community.price, mode='lines',
-               name="{0} price".format(token)),
+    go.Scatter(
+        x=df_price_community.index, y=df_price_community.price, mode='lines',
+        name="{0} price".format(token), visible='legendonly'
+    ),
     secondary_y=True
 )
 
