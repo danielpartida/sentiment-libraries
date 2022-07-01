@@ -7,7 +7,6 @@ from nltk.corpus import stopwords
 import re
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
-from nltk import ngrams
 
 
 def remove_links(tweet):
@@ -65,8 +64,9 @@ def get_top_n_gram(corpus, ngram_range, n=None):
 
 
 if __name__ == "__main__":
-    # Source https://ourcodingclub.github.io/tutorials/topic-modelling-python/
+    # TODO: Check topics extraction https://towardsdatascience.com/the-complete-guide-for-topics-extraction-in-python-a6aaa6cedbbc
 
+    # Source https://ourcodingclub.github.io/tutorials/topic-modelling-python/
     my_stopwords = nltk.corpus.stopwords.words('english')
     word_rooter = nltk.stem.snowball.PorterStemmer(ignore_stopwords=False).stem
     my_punctuation = '!"$%&\'()*+,-./:;<=>?[\\]^_`{|}~•@'
