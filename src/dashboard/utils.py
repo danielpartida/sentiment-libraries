@@ -1,7 +1,5 @@
 from typing import Tuple
 
-import pandas as pd
-
 
 def get_color_and_symbol(number: float) -> Tuple:
     """
