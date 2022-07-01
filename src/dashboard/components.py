@@ -29,12 +29,14 @@ df_sentiment = pd.read_csv("data/timeseries_{0}_sentiment_{1}.csv".format(token,
 
 last_week_sentiment = df_sentiment.iloc[-7:]
 last_week_sentiment = last_week_sentiment.sum()
-last_neutral = last_week_sentiment["Neutral"]
-last_negative = last_week_sentiment["Negative"]
-last_positive = last_week_sentiment["Positive"]
-neutral_percentage = round(last_neutral/(last_neutral + last_positive + last_negative), 2)
-positive_percentage = round(last_positive/(last_neutral + last_positive + last_negative), 2)
-negative_percentage = round(last_negative/(last_neutral + last_positive + last_negative), 2)
+last_week_neutral = last_week_sentiment["Neutral"]
+last_week_negative = last_week_sentiment["Negative"]
+last_week_positive = last_week_sentiment["Positive"]
+last_week_sum = last_week_neutral + last_week_negative + last_week_positive
+
+neutral_percentage = round(last_week_neutral / (last_week_neutral + last_week_positive + last_week_negative), 2)
+positive_percentage = round(last_week_positive / (last_week_neutral + last_week_positive + last_week_negative), 2)
+negative_percentage = round(last_week_negative / (last_week_neutral + last_week_positive + last_week_negative), 2)
 
 fig_sentiment = make_subplots(specs=[[{"secondary_y": True}]])
 fig_sentiment.add_trace(go.Scatter(
@@ -168,9 +170,9 @@ fig_sentiment.update_yaxes(title_text="price", secondary_y=True)
 
 # Style
 style_arrows = {"marginRight": "5px"}
+style_metrics = {"marginTop": "100px"}
 twitter_symbol = html.I(className="fab fa-twitter", style=style_arrows)
 
-# FIXME: Add return button
 sidebar_header = dbc.Row(
     [
         dbc.Col(
@@ -213,8 +215,6 @@ sidebar_header = dbc.Row(
     ]
 )
 
-# FIXME: Add button to return home
-# TODO: Add hovering for project selection
 sidebar = html.Div(
     [
         sidebar_header,
@@ -265,7 +265,7 @@ sidebar = html.Div(
     id="sidebar",
 )
 
-# FIXME: Add functionality to "Top web3 projects" button
+# TODO: Include landing page section
 landing_page_children = html.Div([
     dbc.Row(
         dbc.Col(
@@ -333,7 +333,7 @@ vertical_space = dbc.Row(
 
 title_row = dbc.Row(
     dbc.Col(
-        html.H2(children='{0}'.format(token),
+        html.H2(children='{0}'.format(token.title()),
                 style={
                     'textAlign': 'left',
                     'color': moonpass_colors["purple"]
@@ -540,14 +540,13 @@ community_section = dbc.Row(
                             dbc.Tooltip("24h price change", target="price_change_id", placement="left")
                         ]),
 
-                    ], style={"marginTop": "80px"}
+                    ], style=style_metrics
                 )
             ], width=2
         )
     ]
 )
 
-# TODO: Add tooltip with number of tweets for topics being discussed
 sentiment_section = dbc.Row(
     [
         dbc.Col(
@@ -559,16 +558,20 @@ sentiment_section = dbc.Row(
 
         dbc.Col(
             [
-                html.H5("Topics discussed", style={"color": moonpass_colors["pink"]}),
+                html.H5("Key metrics", style={"color": moonpass_colors["pink"]}),
                 dbc.ListGroup(
                     [
-                        dbc.ListGroupItem(html.Small("1. {0}".format(df_topics.iloc[0].entity_name))),
-                        dbc.ListGroupItem(html.Small("2. {0}".format(df_topics.iloc[2].entity_name))),
-                        dbc.ListGroupItem(html.Small("3. {0}".format(df_topics.iloc[3].entity_name))),
-                        dbc.ListGroupItem(html.Small("4. {0}".format(df_topics.iloc[4].entity_name))),
-                        dbc.ListGroupItem(html.Small("5. {0}".format(df_topics.iloc[5].entity_name))),
-                    ], style={"marginTop": "80px"}
-                )
+                        dbc.ListGroupItem('{:.1%}'.format((last_week_positive/last_week_sum), 2),
+                                          style={"color": "#50C878", "text-align": "center"}, id="positive_sentiment_id"),
+                        dbc.ListGroupItem('{:.1%}'.format((last_week_neutral/last_week_sum), 2)
+                                          , style={"color": "orange", "text-align": "center"}, id="neutral_sentiment_id"),
+                        dbc.ListGroupItem('{:.1%}'.format((last_week_negative/last_week_sum), 2),
+                                          style={"color": "#D22B2B", "text-align": "center"}, id="negative_sentiment_id"),
+                    ], style=style_metrics
+                ),
+                dbc.Tooltip("Positive sentiment in last week", target="positive_sentiment_id", placement="left"),
+                dbc.Tooltip("Neutral sentiment in last week", target="neutral_sentiment_id", placement="left"),
+                dbc.Tooltip("Negative sentiment in last week", target="negative_sentiment_id", placement="left"),
             ],
             width=2
         )
