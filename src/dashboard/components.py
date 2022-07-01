@@ -24,10 +24,13 @@ last_tweet_change = (df_community.tweet_count.iloc[-1] - df_community.tweet_coun
                     df_community.tweet_count.iloc[-2]
 last_tweet_return = '{:.1%}'.format(last_tweet_change)
 
-# growth
-
 # Sentiment data
 df_sentiment = pd.read_csv("data/timeseries_{0}_sentiment_{1}.csv".format(token, date), sep=";", decimal=',')
+total_sentiment = df_sentiment.sum(axis=1)
+df_sentiment_percentage = df_sentiment[["Positive", "Negative", "Neutral"]].div(total_sentiment, axis=0)
+df_sentiment_percentage.set_index(df_sentiment.date, inplace=True)
+df_sentiment_percentage.index = pd.to_datetime(df_sentiment_percentage.index)
+
 last_week_sentiment = df_sentiment.iloc[-7:]
 last_week_sentiment = last_week_sentiment.sum()
 last_neutral = last_week_sentiment["Neutral"]
@@ -85,21 +88,22 @@ df_price = get_historical_price_from_coingecko(token=token)
 # Topics data
 df_topics = pd.read_csv("data/entity_tweets_{0}_{1}.csv".format(token, date), sep=";", decimal=',')
 
-# TODO: Check if the join is necessary or working with two separate dfs is fine
-df_price_community = join_two_dfs(df_price, df_community)
+df_price_community = df_price.join(df_community, how="left").dropna()
+df_price_community.index.name = "date"
+df_price_community_sentiment = df_price_community.join(df_sentiment_percentage, how="left")
 
-fig_price_community = make_subplots(specs=[[{"secondary_y": True}]])
-fig_price_community.add_bar(x=df_price_community.dates, y=df_price_community.tweet_count, name="tweet count")
-fig_price_community.add_trace(
+fig_price_community_sentiment = make_subplots(specs=[[{"secondary_y": True}]])
+fig_price_community_sentiment.add_bar(x=df_price_community.dates, y=df_price_community.tweet_count, name="tweet count")
+fig_price_community_sentiment.add_trace(
     go.Scatter(x=df_price_community.dates, y=df_price_community.price, mode='lines', name="{0} price".format(token)),
     secondary_y=True
 )
 
 
-fig_price_community.update_yaxes(title_text="tweets", secondary_y=False)
-fig_price_community.update_yaxes(title_text="price", secondary_y=True)
+fig_price_community_sentiment.update_yaxes(title_text="tweets", secondary_y=False)
+fig_price_community_sentiment.update_yaxes(title_text="price", secondary_y=True)
 # Add ranges with sliders https://plotly.com/python/range-slider/
-fig_price_community.update_layout(
+fig_price_community_sentiment.update_layout(
     xaxis=dict(
         rangeselector=dict(
             buttons=list([
@@ -483,7 +487,7 @@ community_section = dbc.Row(
         dbc.Col(
             [
                 html.H4("Community growth", style={"color": moonpass_colors["pink"]}),
-                dcc.Graph(figure=fig_price_community),
+                dcc.Graph(figure=fig_price_community_sentiment),
             ], width=10
         ),
 
