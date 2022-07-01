@@ -25,7 +25,6 @@ last_tweet_change = (df_community.tweet_count.iloc[-1] - df_community.tweet_coun
 last_tweet_return = '{:.1%}'.format(last_tweet_change)
 
 # growth
-# series_growth = df_community.tweet_count.pct_change()
 
 # Sentiment data
 df_sentiment = pd.read_csv("data/timeseries_{0}_sentiment_{1}.csv".format(token, date), sep=";", decimal=',')
@@ -89,17 +88,12 @@ df_topics = pd.read_csv("data/entity_tweets_{0}_{1}.csv".format(token, date), se
 # TODO: Check if the join is necessary or working with two separate dfs is fine
 df_price_community = join_two_dfs(df_price, df_community)
 
-# correlation_price_community = round(df_price_community.corr().price[1], 2)
-# correlation_price_growth = round(series_growth.corr(df_price.price), 2)
 fig_price_community = make_subplots(specs=[[{"secondary_y": True}]])
 fig_price_community.add_bar(x=df_price_community.dates, y=df_price_community.tweet_count, name="tweet count")
 fig_price_community.add_trace(
     go.Scatter(x=df_price_community.dates, y=df_price_community.price, mode='lines', name="{0} price".format(token)),
     secondary_y=True
 )
-# fig_price_community.add_bar(
-#    x=series_growth.index, y=series_growth.values, name="{0} growth".format(token)
-# )
 
 
 fig_price_community.update_yaxes(title_text="tweets", secondary_y=False)
@@ -531,31 +525,6 @@ community_section = dbc.Row(
                             dbc.Tooltip("24h price change", target="price_change_id", placement="left")
                         ]),
 
-                        # dbc.ListGroupItem(children=[
-                        #     html.Div(
-                        #         [
-                        #            html.Small("Correlation tweets"), html.Span(
-                        #            children=[correlation_price_community], style={"color": "#36454F",
-                        #                                                           "marginLeft": "10px",
-                        #                                                           "float": "right"})
-                        #        ], id="correlation_community_id"
-                        #    ),
-                        #    dbc.Tooltip("Correlation between price and tweets", target="correlation_community_id",
-                        #                placement="left")
-                        # ]),
-
-                        # dbc.ListGroupItem(children=[
-                        #    html.Div(
-                        #         [
-                        #             html.Small("Correlation growth"),
-                        #             html.Span(children=[correlation_price_growth],style={"color": "#36454F",
-                        #                                                                  "marginLeft": "10px",
-                        #                                                                   "float": "right"})
-                        #         ], id="correlation_growth_id"
-                        #     ),
-                        #     dbc.Tooltip("Correlation between price and tweets growth", target="correlation_growth_id",
-                        #                 placement="left")
-                        # ]),
                     ], style={"marginTop": "80px"}
                 )
             ], width=2
