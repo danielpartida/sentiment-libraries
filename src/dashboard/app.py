@@ -22,8 +22,6 @@ app = dash.Dash(__name__,
 
 # Server
 server = app.server
-# app.css.config.serve_locally = True
-# app.scripts.config.serve_locally = True
 app.config.suppress_callback_exceptions = True
 app.title = 'Moonpass App'
 
@@ -73,17 +71,15 @@ def did_component_trigger_callback(component_name: str, component_property: str)
     return False
 
 
-@app.callback([Output('landing_page_id', 'style'),
-               Output('project_page_id', 'style'),
-               ],
+@app.callback(Output('project_page_id', 'style'),
               [Input("url", "pathname")])
 def render_page_content(pathname):
     print(f"pathname is {pathname}")
     if pathname == "/":
-        return {'display': 'block'}, {'display': 'none'}
+        return {'display': 'block'}
 
-    elif pathname == "{0}".format(pathname):
-        return {'display': 'none'}, {'display': 'block'}
+    # elif pathname == "{0}".format(pathname):
+    #     return {'display': 'none'}, {'display': 'block'}
 
     # If the user tries to reach a different page, return a 404 message
     return dbc.Jumbotron(

@@ -7,7 +7,7 @@ from plotly.subplots import make_subplots
 
 from layout import moonpass_colors, font_family, CONTENT_STYLE
 from price_data import get_current_price_from_coingecko, get_historical_price_from_coingecko
-from utils import get_color_and_symbol, join_two_dfs
+from utils import get_color_and_symbol
 
 token = "solana"
 
@@ -24,13 +24,21 @@ last_tweet_change = (df_community.tweet_count.iloc[-1] - df_community.tweet_coun
                     df_community.tweet_count.iloc[-2]
 last_tweet_return = '{:.1%}'.format(last_tweet_change)
 
-
-# growth
-series_growth = df_community.tweet_count.pct_change()
-
 # Sentiment data
 df_sentiment = pd.read_csv("data/timeseries_{0}_sentiment_{1}.csv".format(token, date), sep=";", decimal=',')
-fig_sentiment = fig = go.Figure()
+
+last_week_sentiment = df_sentiment.iloc[-7:]
+last_week_sentiment = last_week_sentiment.sum()
+last_week_neutral = last_week_sentiment["Neutral"]
+last_week_negative = last_week_sentiment["Negative"]
+last_week_positive = last_week_sentiment["Positive"]
+last_week_sum = last_week_neutral + last_week_negative + last_week_positive
+
+neutral_percentage = round(last_week_neutral / (last_week_neutral + last_week_positive + last_week_negative), 2)
+positive_percentage = round(last_week_positive / (last_week_neutral + last_week_positive + last_week_negative), 2)
+negative_percentage = round(last_week_negative / (last_week_neutral + last_week_positive + last_week_negative), 2)
+
+fig_sentiment = make_subplots(specs=[[{"secondary_y": True}]])
 fig_sentiment.add_trace(go.Scatter(
     x=df_sentiment.date, y=df_sentiment.Negative,
     mode='lines',
@@ -78,19 +86,18 @@ df_price = get_historical_price_from_coingecko(token=token)
 # Topics data
 df_topics = pd.read_csv("data/entity_tweets_{0}_{1}.csv".format(token, date), sep=";", decimal=',')
 
-# TODO: Check if the join is necessary or working with two separate dfs is fine
-df_price_community = join_two_dfs(df_price, df_community)
+df_price_community = df_price.join(df_community, how="left").dropna()
 
-correlation_price_community = round(df_price_community.corr().price[1], 2)
-correlation_price_growth = round(series_growth.corr(df_price.price), 2)
 fig_price_community = make_subplots(specs=[[{"secondary_y": True}]])
-fig_price_community.add_bar(x=df_price_community.dates, y=df_price_community.tweet_count, name="tweet count")
+fig_price_community.add_bar(x=df_price_community.index,
+                            y=df_price_community["tweet_count"],
+                            name="tweet count")
 fig_price_community.add_trace(
-    go.Scatter(x=df_price_community.dates, y=df_price_community.price, mode='lines', name="{0} price".format(token)),
+    go.Scatter(
+        x=df_price_community.index, y=df_price_community.price, mode='lines',
+        name="{0} price".format(token), visible='legendonly'
+    ),
     secondary_y=True
-)
-fig_price_community.add_bar(
-    x=series_growth.index, y=series_growth.values, name="{0} growth".format(token)
 )
 
 
@@ -149,12 +156,23 @@ fig_sentiment.update_layout(
     )
 )
 
+# Add price for sentiment graph
+fig_sentiment.add_trace(
+    go.Scatter(
+        x=df_price_community.index, y=df_price_community.price, mode='lines',
+        name="{0} price".format(token), visible='legendonly'
+    ),
+    secondary_y=True
+)
+
+fig_sentiment.update_yaxes(title_text="sentiment %", secondary_y=False)
+fig_sentiment.update_yaxes(title_text="price", secondary_y=True)
 
 # Style
 style_arrows = {"marginRight": "5px"}
+style_metrics = {"marginTop": "100px"}
 twitter_symbol = html.I(className="fab fa-twitter", style=style_arrows)
 
-# FIXME: Add return button
 sidebar_header = dbc.Row(
     [
         dbc.Col(
@@ -197,8 +215,6 @@ sidebar_header = dbc.Row(
     ]
 )
 
-# FIXME: Add button to return home
-# TODO: Add hovering for project selection
 sidebar = html.Div(
     [
         sidebar_header,
@@ -219,10 +235,9 @@ sidebar = html.Div(
             dbc.Nav(
                 [
                     dbc.NavLink([html.I(className=""), "Solana"],
-                                href="/solana",  # active="exact",
-                                style={'paddingTop': "0px",
-                                       "color": "white"
-                                       }),
+                                href="/", active="exact",
+                                style={'paddingTop': "0px", "color": "white"}
+                                ),
 
                     dbc.NavLink([html.I(className=""), "StepN"],
                                 href="/stepn", disabled=True,
@@ -250,7 +265,7 @@ sidebar = html.Div(
     id="sidebar",
 )
 
-# FIXME: Add functionality to "Top web3 projects" button
+# TODO: Include landing page section
 landing_page_children = html.Div([
     dbc.Row(
         dbc.Col(
@@ -313,12 +328,12 @@ landing_page_children = html.Div([
 ])
 
 vertical_space = dbc.Row(
-  dbc.Col(html.Br())
+    dbc.Col(html.Br())
 )
 
 title_row = dbc.Row(
     dbc.Col(
-        html.H2(children='Moonpass - {0} off-chain analysis'.format(token),
+        html.H2(children='{0}'.format(token.title()),
                 style={
                     'textAlign': 'left',
                     'color': moonpass_colors["purple"]
@@ -332,7 +347,7 @@ price_row = dbc.Row(
         dbc.Col(
             html.Div(
                 [
-                    html.H5(children=[html.Span("Price: ${0}".format(last_price), id="price_id"), html.Span(
+                    html.H6(children=[html.Span("Price: ${0}".format(last_price), id="price_id"), html.Span(
                         children=[html.I(className=price_symbol, style=style_arrows), last_price_return],
                         style={"color": price_color_return, "marginLeft": "10px"}, id="return_id")],
                             style={"color": moonpass_colors["purple"]}),
@@ -357,7 +372,7 @@ price_row = dbc.Row(
                 html.Div(
                     [
                         twitter_symbol,
-                        html.A(html.H5("Followers: 1.9M"), href="https://twitter.com/solana", target="_blank",
+                        html.A(html.H6("Followers: 1.9M"), href="https://twitter.com/solana", target="_blank",
                                style={"color": moonpass_colors["purple"]}),
                     ],
                     style={"display": "flex"}
@@ -384,44 +399,87 @@ price_row = dbc.Row(
 )
 
 # https://plotly.com/python/indicator/
+# FIXME: Change dynamically numerical value of community growth
+# FIXME: Update colors automatically
 indicators_section = dbc.Row(
     [
         dbc.Col(
-            dbc.Card([
-                dbc.CardBody([
-                    html.H4("Community growth", className="card-title", style={"text-align": "center"}),
-                    html.P(
-                        "poor 😔",
-                        className="card-subtitle", style={"text-align": "center"}
-                    )
-                ])
-            ])
+            [
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Community growth", className="card-title"),
+                        html.H3(
+                            "27 😔", className="card-subtitle"
+                        ),
+                        html.Span(
+                            [
+                                html.I(className="fas fa-arrow-circle-down down", style=style_arrows),
+                                html.Span("2.3% vs last week", className="down")
+                            ], style={"color": tweet_color_return}
+                        )
+                    ], style={"text-align": "center"})
+                ], id="card_growth_id"),
+
+                dbc.Tooltip(
+                    "A value of 100 represents steady growth and engagement",
+                    target="card_growth_id",
+                    placement="bottom"
+                )
+            ]
         ),
 
         dbc.Col(
-            dbc.Card([
-                dbc.CardBody([
-                    html.H4("Community sentiment", className="card-title", style={"text-align": "center"}),
-                    html.P(
-                        "average 🤷",
-                        className="card-subtitle", style={"text-align": "center"}
+            [
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Community sentiment", className="card-title"),
+                        html.H3(
+                            "43 🤷", className="card-subtitle"
+                        ),
+                        html.Span(
+                            [
+                                html.Span("{:.1%} of tweets neutral or negative".format(
+                                    neutral_percentage+negative_percentage
+                                ))
+                            ], style={"color": "orange"}
+                        )
+                    ], style={"text-align": "center"}
                     )
-                ])
-            ])
+                ], id="card_sentiment_id"),
+
+                dbc.Tooltip(
+                    "A value of 100 represents overwhelming amount of positive tweets",
+                    target="card_sentiment_id",
+                    placement="bottom"
+                )
+            ]
         ),
 
         dbc.Col(
-            dbc.Card([
-                dbc.CardBody([
-                    html.H4("Expert voices", className="card-title", style={"text-align": "center"}),
-                    html.P(
-                        "worried 😕",
-                        className="card-subtitle", style={"text-align": "center"}
-                    )
-                ])
-            ])
+            [
+                dbc.Card([
+                    dbc.CardBody([
+                        html.H5("Expert voices", className="card-title"),
+                        html.H3(
+                            "36 😕", className="card-subtitle"
+                        ),
+                        html.Span(
+                            [
+                                html.I(className="fas fa-arrow-circle-down down", style=style_arrows),
+                                html.Span("70% of experts expressed concerns")
+                            ], style={"color": "orange"}
+                        )
+                    ], style={"text-align": "center"})
+                ], id="card_voices_id"),
+
+                dbc.Tooltip(
+                    "A value of 100 represents outstanding support of crypto experts",
+                    target="card_voices_id",
+                    placement="bottom"
+                )
+            ]
         )
-    ]
+    ], style={"marginTop": "20px"}
 )
 
 # FIXME: Change order of Twitter button in dashboard layout
@@ -482,39 +540,13 @@ community_section = dbc.Row(
                             dbc.Tooltip("24h price change", target="price_change_id", placement="left")
                         ]),
 
-                        dbc.ListGroupItem(children=[
-                            html.Div(
-                                [
-                                    html.Small("Correlation tweets"), html.Span(
-                                    children=[correlation_price_community], style={"color": "#36454F",
-                                                                                   "marginLeft": "10px",
-                                                                                   "float": "right"})
-                                ], id="correlation_community_id"
-                            ),
-                            dbc.Tooltip("Correlation between price and tweets", target="correlation_community_id",
-                                        placement="left")
-                        ]),
-
-                        dbc.ListGroupItem(children=[
-                            html.Div(
-                                [
-                                    html.Small("Correlation growth"),
-                                    html.Span(children=[correlation_price_growth],style={"color": "#36454F",
-                                                                                         "marginLeft": "10px",
-                                                                                         "float": "right"})
-                                ], id="correlation_growth_id"
-                            ),
-                            dbc.Tooltip("Correlation between price and tweets growth", target="correlation_growth_id",
-                                        placement="left")
-                        ]),
-                    ], style={"marginTop": "80px"}
+                    ], style=style_metrics
                 )
             ], width=2
         )
     ]
 )
 
-# TODO: Add tooltip with number of tweets for topics being discussed
 sentiment_section = dbc.Row(
     [
         dbc.Col(
@@ -526,20 +558,32 @@ sentiment_section = dbc.Row(
 
         dbc.Col(
             [
-                html.H5("Topics discussed", style={"color": moonpass_colors["pink"]}),
+                html.H5("Key metrics", style={"color": moonpass_colors["pink"]}),
                 dbc.ListGroup(
                     [
-                        dbc.ListGroupItem(html.Small("1. {0}".format(df_topics.iloc[0].entity_name))),
-                        dbc.ListGroupItem(html.Small("2. {0}".format(df_topics.iloc[2].entity_name))),
-                        dbc.ListGroupItem(html.Small("3. {0}".format(df_topics.iloc[3].entity_name))),
-                        dbc.ListGroupItem(html.Small("4. {0}".format(df_topics.iloc[4].entity_name))),
-                        dbc.ListGroupItem(html.Small("5. {0}".format(df_topics.iloc[5].entity_name))),
-                    ], style={"marginTop": "80px"}
-                )
+                        dbc.ListGroupItem('{:.1%}'.format((last_week_positive/last_week_sum), 2),
+                                          style={"color": "#50C878", "text-align": "center"}, id="positive_sentiment_id"),
+                        dbc.ListGroupItem('{:.1%}'.format((last_week_neutral/last_week_sum), 2)
+                                          , style={"color": "orange", "text-align": "center"}, id="neutral_sentiment_id"),
+                        dbc.ListGroupItem('{:.1%}'.format((last_week_negative/last_week_sum), 2),
+                                          style={"color": "#D22B2B", "text-align": "center"}, id="negative_sentiment_id"),
+                    ], style=style_metrics
+                ),
+                dbc.Tooltip("Positive sentiment in last week", target="positive_sentiment_id", placement="left"),
+                dbc.Tooltip("Neutral sentiment in last week", target="neutral_sentiment_id", placement="left"),
+                dbc.Tooltip("Negative sentiment in last week", target="negative_sentiment_id", placement="left"),
             ],
             width=2
         )
     ]
+)
+
+voices_section = dbc.Row(
+    dbc.Col(
+        [
+            html.H4("Most engaged tweets last week", style={"color": moonpass_colors["pink"]}),
+        ], width=10
+    ),
 )
 
 # TODO: Create dynamically this section
@@ -548,35 +592,35 @@ sentiment_section = dbc.Row(
 bulls_section = dbc.Row(
     dbc.Col(
         [
-            html.H4("What the bulls are saying 🐂", className="card-title"),
+            html.H6("What the bulls are saying 🐂", className="card-title"),
             dbc.ListGroup(
-                        [
-                            dbc.ListGroupItem(
-                                html.Iframe(
-                                    srcDoc='''
+                [
+                    dbc.ListGroupItem(
+                        html.Iframe(
+                            srcDoc='''
                                     <blockquote class="twitter-tweet" data-lang="en" data-theme="light"><p lang="en" dir="ltr">It feels to me like <a href="https://twitter.com/search?q=%24SOL&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$SOL</a> is going thru a similar trough of disillusionment as <a href="https://twitter.com/search?q=%24ETH&amp;src=ctag&amp;ref_src=twsrc%5Etfw">$ETH</a> did back in 2018. In bear markets prices aren&#39;t just reflexive—sentiment is too. <a href="https://twitter.com/solana?ref_src=twsrc%5Etfw">@solana</a> has a vibrant developer ecosystem and its downtime issues are solvable. This will be obvious in retrospect.</p>&mdash; spencernoon.eth (@spencernoon) <a href="https://twitter.com/spencernoon/status/1541497867373772802?ref_src=twsrc%5Etfw">June 27, 2022</a></blockquote> 
                                     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
                                     ''',
-                                )
-                            ),
-                            dbc.ListGroupItem(
-                                html.Iframe(
-                                    srcDoc='''
+                        )
+                    ),
+                    dbc.ListGroupItem(
+                        html.Iframe(
+                            srcDoc='''
                                     <blockquote class="twitter-tweet"><p lang="en" dir="ltr">1/<br><br>solana poses a large and growing threat to ethereum.<br><br>you’re wrong if you believe otherwise bc “haha VC chain offline”.<br><br>i can explain why - after following both ecosystems closely for years and talking to 100s of devs &amp; users.<br><br>i want the EVM to win. but i’m also not blind.</p>&mdash; nathan.eth (@nathanweb3) <a href="https://twitter.com/nathanweb3/status/1540122390079934464?ref_src=twsrc%5Etfw">June 23, 2022</a></blockquote> 
                                     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
                                     ''',
-                                )
-                            ),
-                            dbc.ListGroupItem(
-                                html.Iframe(
-                                    srcDoc='''
+                        )
+                    ),
+                    dbc.ListGroupItem(
+                        html.Iframe(
+                            srcDoc='''
                                     <blockquote class="twitter-tweet"><p lang="en" dir="ltr">Solana is doing 5,200 TPS with $.00002 fees and you are still on 30 TPS anon? 🥹 Feel bad for you son <a href="https://t.co/JbmbaWwlum">https://t.co/JbmbaWwlum</a></p>&mdash; S◎L Legend {6666} (@SolanaLegend) <a href="https://twitter.com/SolanaLegend/status/1538839311973552133?ref_src=twsrc%5Etfw">June 20, 2022</a></blockquote> 
                                     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
                                     ''',
-                                )
-                            )
-                        ],
-                        horizontal="lg",
+                        )
+                    )
+                ],
+                horizontal="lg",
             ),
         ]
     )
@@ -585,37 +629,37 @@ bulls_section = dbc.Row(
 bears_section_1 = dbc.Row(
     dbc.Col(
         [
-            html.H4("What the bears are saying 🐻", className="card-title"),
+            html.H6("What the bears are saying 🐻", className="card-title"),
             dbc.ListGroup(
-            [
+                [
 
-                dbc.ListGroupItem(
-                    html.Iframe(
-                        srcDoc='''
+                    dbc.ListGroupItem(
+                        html.Iframe(
+                            srcDoc='''
                         <blockquote class="twitter-tweet"><p lang="en" dir="ltr">/1 <br><br>The latest Solana update has in-fact made the network too fast and caused MAJOR problems.<br><br>I&#39;ll explain why in this🧵thread...</p>&mdash; Cel◎n 🚧 (@0xCelon) <a href="https://twitter.com/0xCelon/status/1538921568893542401?ref_src=twsrc%5Etfw">June 20, 2022</a></blockquote> 
                         <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
                         ''',
-                    )
-                ),
+                        )
+                    ),
 
-                dbc.ListGroupItem(
-                    html.Iframe(
-                        srcDoc='''
+                    dbc.ListGroupItem(
+                        html.Iframe(
+                            srcDoc='''
                         <blockquote class="twitter-tweet"><p lang="en" dir="ltr">A “decentralized” protocol built on Solana votes to take over someone’s funds<br><br>Celsius “designed to help you reach your financial goals” denies users access to their funds<br><br>UST algorithmic “stablecoin” failing, destroying lives<br><br>The current state of crypto. We gotta do better.</p>&mdash; Aleksandra Huk (@HukAleksandra) <a href="https://twitter.com/HukAleksandra/status/1538856271100641280?ref_src=twsrc%5Etfw">June 20, 2022</a></blockquote> 
                         <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
                         ''',
-                    )
-                ),
+                        )
+                    ),
 
-                dbc.ListGroupItem(
-                    html.Iframe(
-                        srcDoc='''
+                    dbc.ListGroupItem(
+                        html.Iframe(
+                            srcDoc='''
                         <blockquote class="twitter-tweet"><p lang="en" dir="ltr">Of all the things That happened this cycle, Solana’s vote to confiscate a users funds is BY FAR the most egregious.<br><br>It’s worse even then the ETH DAO confiscation.<br><br>It’s the clearest demonstration yet that PoS is not a consensus mechanism.</p>&mdash; Yago (@EdanYago) <a href="https://twitter.com/EdanYago/status/1538725149838647297?ref_src=twsrc%5Etfw">June 20, 2022</a></blockquote>
                          <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
                         ''',
-                    )
-                ),
-            ], horizontal="md",
+                        )
+                    ),
+                ], horizontal="md",
             ),
         ]
     )
@@ -678,6 +722,10 @@ project_page_children = html.Div([
 
     sentiment_section,
 
+    voices_section,
+
+    vertical_space,
+
     bulls_section,
 
     vertical_space,
@@ -691,10 +739,10 @@ project_page_children = html.Div([
 # Content Page
 content = html.Div(
     id="page-content", style=CONTENT_STYLE, children=[
-        html.Div(id='landing_page_id', children=landing_page_children),
+        # html.Div(id='landing_page_id', children=landing_page_children),
         html.Div(id='project_page_id', children=project_page_children),
         html.Footer([
-            html.I(className="far fa-copyright"), "2022 moopass.ai"],
+            html.I(className="far fa-copyright"), "2022 moonpass.ai"],
             style={"position": "absolute", "bottom": "1", "right": "0", "marginRight": "15px", "marginTop": "15px",
                    "fontSize": "80%"})
     ]
