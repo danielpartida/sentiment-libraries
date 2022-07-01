@@ -4,10 +4,11 @@ import plotly.graph_objects as go
 from dash import dcc
 from dash import html
 from plotly.subplots import make_subplots
+import plotly.express as px
 
 from layout import moonpass_colors, font_family, CONTENT_STYLE
 from price_data import get_current_price_from_coingecko, get_historical_price_from_coingecko
-from utils import get_color_and_symbol, join_two_dfs
+from utils import get_color_and_symbol
 
 token = "solana"
 
@@ -91,43 +92,61 @@ df_topics = pd.read_csv("data/entity_tweets_{0}_{1}.csv".format(token, date), se
 df_price_community = df_price.join(df_community, how="left").dropna()
 df_price_community.index.name = "date"
 df_price_community_sentiment = df_price_community.join(df_sentiment_percentage, how="left")
+df_price_community_sentiment["positive_tweets"] = df_price_community_sentiment.tweet_count * \
+                                                  df_price_community_sentiment.Positive
+df_price_community_sentiment["neutral_tweets"] = df_price_community_sentiment.tweet_count * \
+                                                 df_price_community_sentiment.Neutral
+df_price_community_sentiment["negative_tweets"] = df_price_community_sentiment.tweet_count * \
+                                                  df_price_community_sentiment.Negative
+df_price_community_sentiment['dates'] = df_price_community_sentiment.index
 
-fig_price_community_sentiment = make_subplots(specs=[[{"secondary_y": True}]])
-fig_price_community_sentiment.add_bar(x=df_price_community.dates, y=df_price_community.tweet_count, name="tweet count")
-fig_price_community_sentiment.add_trace(
-    go.Scatter(x=df_price_community.dates, y=df_price_community.price, mode='lines', name="{0} price".format(token)),
-    secondary_y=True
-)
+# fig_price_community_sentiment = make_subplots(specs=[[{"secondary_y": True}]])
+# fig_price_community_sentiment.add_bar(x=df_price_community_sentiment["dates"],
+#                                       y=[df_price_community_sentiment["positive_tweets"],
+#                                          df_price_community_sentiment["neutral_tweets"],
+#                                          df_price_community_sentiment["negative_tweets"]],
+#                                       name="tweet count")
+# fig_price_community_sentiment.add_trace(
+#     go.Scatter(x=df_price_community_sentiment.index, y=df_price_community_sentiment.price, mode='lines',
+#                name="{0} price".format(token)),
+#     secondary_y=True
+# )
+fig_price_community_sentiment = px.bar(df_price_community_sentiment, x="dates",
+                                       y=[df_price_community_sentiment["neutral_tweets"],
+                                          df_price_community_sentiment["negative_tweets"],
+                                          df_price_community_sentiment["positive_tweets"],
+                                          ], barmode="stack",
+                                       title="Testing")
 
 
-fig_price_community_sentiment.update_yaxes(title_text="tweets", secondary_y=False)
-fig_price_community_sentiment.update_yaxes(title_text="price", secondary_y=True)
-# Add ranges with sliders https://plotly.com/python/range-slider/
-fig_price_community_sentiment.update_layout(
-    xaxis=dict(
-        rangeselector=dict(
-            buttons=list([
-                dict(count=1,
-                     label="1m",
-                     step="month",
-                     stepmode="backward"),
-                dict(count=6,
-                     label="6m",
-                     step="month",
-                     stepmode="backward"),
-                dict(count=1,
-                     label="YTD",
-                     step="year",
-                     stepmode="todate"),
-                dict(step="all")
-            ])
-        ),
-        rangeslider=dict(
-            visible=True
-        ),
-        type="date"
-    )
-)
+# fig_price_community_sentiment.update_yaxes(title_text="tweets", secondary_y=False)
+# fig_price_community_sentiment.update_yaxes(title_text="price", secondary_y=True)
+# # Add ranges with sliders https://plotly.com/python/range-slider/
+# fig_price_community_sentiment.update_layout(
+#     xaxis=dict(
+#         rangeselector=dict(
+#             buttons=list([
+#                 dict(count=1,
+#                      label="1m",
+#                      step="month",
+#                      stepmode="backward"),
+#                 dict(count=6,
+#                      label="6m",
+#                      step="month",
+#                      stepmode="backward"),
+#                 dict(count=1,
+#                      label="YTD",
+#                      step="year",
+#                      stepmode="todate"),
+#                 dict(step="all")
+#             ])
+#         ),
+#         rangeslider=dict(
+#             visible=True
+#         ),
+#         type="date"
+#     )
+# )
 
 fig_sentiment.update_layout(
     xaxis=dict(
