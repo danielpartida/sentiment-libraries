@@ -4,7 +4,6 @@ import plotly.graph_objects as go
 from dash import dcc
 from dash import html
 from plotly.subplots import make_subplots
-import plotly.express as px
 
 from layout import moonpass_colors, font_family, CONTENT_STYLE
 from price_data import get_current_price_from_coingecko, get_historical_price_from_coingecko
@@ -37,7 +36,7 @@ neutral_percentage = round(last_neutral/(last_neutral + last_positive + last_neg
 positive_percentage = round(last_positive/(last_neutral + last_positive + last_negative), 2)
 negative_percentage = round(last_negative/(last_neutral + last_positive + last_negative), 2)
 
-fig_sentiment = fig = go.Figure()
+fig_sentiment = make_subplots(specs=[[{"secondary_y": True}]])
 fig_sentiment.add_trace(go.Scatter(
     x=df_sentiment.date, y=df_sentiment.Negative,
     mode='lines',
@@ -87,11 +86,11 @@ df_topics = pd.read_csv("data/entity_tweets_{0}_{1}.csv".format(token, date), se
 
 df_price_community = df_price.join(df_community, how="left").dropna()
 
-fig_price_community_sentiment = make_subplots(specs=[[{"secondary_y": True}]])
-fig_price_community_sentiment.add_bar(x=df_price_community.index,
-                                      y=df_price_community["tweet_count"],
-                                      name="tweet count")
-fig_price_community_sentiment.add_trace(
+fig_price_community = make_subplots(specs=[[{"secondary_y": True}]])
+fig_price_community.add_bar(x=df_price_community.index,
+                            y=df_price_community["tweet_count"],
+                            name="tweet count")
+fig_price_community.add_trace(
     go.Scatter(
         x=df_price_community.index, y=df_price_community.price, mode='lines',
         name="{0} price".format(token), visible='legendonly'
@@ -100,10 +99,10 @@ fig_price_community_sentiment.add_trace(
 )
 
 
-fig_price_community_sentiment.update_yaxes(title_text="tweets", secondary_y=False)
-fig_price_community_sentiment.update_yaxes(title_text="price", secondary_y=True)
+fig_price_community.update_yaxes(title_text="tweets", secondary_y=False)
+fig_price_community.update_yaxes(title_text="price", secondary_y=True)
 # Add ranges with sliders https://plotly.com/python/range-slider/
-fig_price_community_sentiment.update_layout(
+fig_price_community.update_layout(
     xaxis=dict(
         rangeselector=dict(
             buttons=list([
@@ -154,6 +153,18 @@ fig_sentiment.update_layout(
         type="date"
     )
 )
+
+# Add price for sentiment graph
+fig_sentiment.add_trace(
+    go.Scatter(
+        x=df_price_community.index, y=df_price_community.price, mode='lines',
+        name="{0} price".format(token), visible='legendonly'
+    ),
+    secondary_y=True
+)
+
+fig_sentiment.update_yaxes(title_text="sentiment %", secondary_y=False)
+fig_sentiment.update_yaxes(title_text="price", secondary_y=True)
 
 # Style
 style_arrows = {"marginRight": "5px"}
@@ -487,7 +498,7 @@ community_section = dbc.Row(
         dbc.Col(
             [
                 html.H4("Community growth", style={"color": moonpass_colors["pink"]}),
-                dcc.Graph(figure=fig_price_community_sentiment),
+                dcc.Graph(figure=fig_price_community),
             ], width=10
         ),
 
