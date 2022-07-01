@@ -347,7 +347,7 @@ price_row = dbc.Row(
         dbc.Col(
             html.Div(
                 [
-                    html.H5(children=[html.Span("Price: ${0}".format(last_price), id="price_id"), html.Span(
+                    html.H6(children=[html.Span("Price: ${0}".format(last_price), id="price_id"), html.Span(
                         children=[html.I(className=price_symbol, style=style_arrows), last_price_return],
                         style={"color": price_color_return, "marginLeft": "10px"}, id="return_id")],
                             style={"color": moonpass_colors["purple"]}),
@@ -372,7 +372,7 @@ price_row = dbc.Row(
                 html.Div(
                     [
                         twitter_symbol,
-                        html.A(html.H5("Followers: 1.9M"), href="https://twitter.com/solana", target="_blank",
+                        html.A(html.H6("Followers: 1.9M"), href="https://twitter.com/solana", target="_blank",
                                style={"color": moonpass_colors["purple"]}),
                     ],
                     style={"display": "flex"}
@@ -589,7 +589,7 @@ voices_section = dbc.Row(
 bulls_section = dbc.Row(
     dbc.Col(
         [
-            html.H4("What the bulls are saying 🐂", className="card-title"),
+            html.H6("What the bulls are saying 🐂", className="card-title"),
             dbc.ListGroup(
                 [
                     dbc.ListGroupItem(
@@ -626,7 +626,7 @@ bulls_section = dbc.Row(
 bears_section_1 = dbc.Row(
     dbc.Col(
         [
-            html.H4("What the bears are saying 🐻", className="card-title"),
+            html.H6("What the bears are saying 🐻", className="card-title"),
             dbc.ListGroup(
                 [
 
